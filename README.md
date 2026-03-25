@@ -14,82 +14,89 @@ Axionvera Dashboard is a web application that allows users to interact with Axio
 
 ## Tech Stack
 
-- Next.js (Pages Router)
-- React + TypeScript
-- Tailwind CSS
-- Stellar wallet integration (Freighter API)
-- Soroban RPC configuration
-- Axionvera SDK integration via a small adapter layer (easy to swap for the real SDK)
+- **Framework**: Next.js (Pages Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Blockchain**: Stellar (Soroban)
+- **Integration**: `@stellar/freighter-api`, `stellar-sdk`
 
-## Getting Started
+## Prerequisites
 
-### Prerequisites
+To run this project locally, ensure you have the following installed:
 
-- Node.js 18+ (recommended)
-- npm (or pnpm/yarn)
+- **Node.js**: v18.0.0 or higher
+- **Package Manager**: npm (v9+) or yarn (v1.22+)
 
-### Install
+## Quick Start
 
-```bash
-npm install
-```
+Get the project up and running in 3 steps:
 
-### Development
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Axionvera/axionvera-dashboard.git
+   cd axionvera-dashboard
+   ```
 
-```bash
-npm run dev
-```
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-Open http://localhost:3000.
+3. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) to see the application.
 
-### Build / Start
+## Development
 
-```bash
-npm run build
-npm run start
-```
+### Available Scripts
 
-### Lint / Typecheck / Test
-
-```bash
-npm run lint
-npm run typecheck
-npm run test
-```
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run typecheck` - Run TypeScript compiler check
+- `npm run test` - Run unit tests with Jest
 
 ## Wallet Connection
 
 This dashboard supports Freighter-style wallet connection via `@stellar/freighter-api`.
 
-1. Install the Freighter browser extension
-2. Create or import a Stellar account
-3. Open `/dashboard`
-4. Click “Connect Wallet”
+1. Install the [Freighter browser extension](https://www.freighter.app/).
+2. Create or import a Stellar account.
+3. Open the dashboard and click “Connect Wallet”.
 
-If you’re integrating additional wallets later, start in [useWallet.ts](file:///Users/boufdaddy/Documents/trae_projects/axionvera-dashboard/src/hooks/useWallet.ts).
+If you’re integrating additional wallets, start in [src/hooks/useWallet.ts](src/hooks/useWallet.ts).
 
 ## Configuration
 
-Set environment variables in `.env.local`:
+Set environment variables in `.env.local` (copy from `.env.example` if available):
 
-- `NEXT_PUBLIC_STELLAR_NETWORK`: `testnet` | `futurenet` | `mainnet`
-- `NEXT_PUBLIC_SOROBAN_RPC_URL`: override RPC URL
-- `NEXT_PUBLIC_HORIZON_URL`: override Horizon URL
-- `NEXT_PUBLIC_AXIONVERA_VAULT_CONTRACT_ID`: vault contract ID
-- `NEXT_PUBLIC_AXIONVERA_TOKEN_CONTRACT_ID`: token contract ID
+| Variable | Description | Default (Testnet) |
+| :--- | :--- | :--- |
+| `NEXT_PUBLIC_STELLAR_NETWORK` | `testnet` \| `futurenet` \| `mainnet` | `testnet` |
+| `NEXT_PUBLIC_SOROBAN_RPC_URL` | Soroban RPC endpoint | https://soroban-testnet.stellar.org |
+| `NEXT_PUBLIC_HORIZON_URL` | Horizon API endpoint | https://horizon-testnet.stellar.org |
+| `NEXT_PUBLIC_AXIONVERA_VAULT_CONTRACT_ID` | Axionvera Vault Contract ID | |
+| `NEXT_PUBLIC_AXIONVERA_TOKEN_CONTRACT_ID` | Axionvera Token Contract ID | |
 
-Network defaults live in [networkConfig.ts](file:///Users/boufdaddy/Documents/trae_projects/axionvera-dashboard/src/utils/networkConfig.ts).
+Network defaults live in [src/utils/networkConfig.ts](src/utils/networkConfig.ts).
 
-## Axionvera SDK Integration
+## Troubleshooting
 
-The dashboard talks to the vault through an adapter interface defined in [contractHelpers.ts](file:///Users/boufdaddy/Documents/trae_projects/axionvera-dashboard/src/utils/contractHelpers.ts).
-
-By default, this repo ships with a mock implementation that persists balances and history in `localStorage` so contributors can run the UI immediately. Replace `createAxionveraVaultSdk()` with calls into the real Axionvera SDK to connect to Soroban contracts.
+| Issue | Potential Cause | Solution |
+| :--- | :--- | :--- |
+| `Module not found` | Dependency mismatch or missing installation | Run `rm -rf node_modules package-lock.json && npm install` |
+| `.env` variables not loading | Missing `.env.local` or incorrect naming | Ensure all variables are prefixed with `NEXT_PUBLIC_` and the file is named `.env.local` |
+| Wallet connection fails | Extension not installed or locked | Check if Freighter is installed and unlocked. Ensure you are on the correct network. |
+| Build errors (TypeScript) | Type mismatch in props or API | Run `npm run typecheck` to identify specific errors. |
 
 ## Contributing
 
-See [CONTRIBUTING.md](file:///Users/boufdaddy/Documents/trae_projects/axionvera-dashboard/CONTRIBUTING.md).
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for branch naming conventions and setup guides.
 
 ## License
 
-MIT — see [LICENSE](file:///Users/boufdaddy/Documents/trae_projects/axionvera-dashboard/LICENSE).
+MIT — see [LICENSE](LICENSE).
+
