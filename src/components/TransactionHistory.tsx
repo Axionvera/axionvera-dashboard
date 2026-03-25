@@ -34,7 +34,7 @@ export default function TransactionHistory({
     <section className="rounded-2xl border border-slate-800 bg-slate-950/30 p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <div className="text-sm font-semibold text-white">Transaction History</div>
+          <div className="text-sm font-semibold text-white">Transaction history</div>
           <div className="mt-1 text-xs text-slate-400">
             {isConnected && address ? `Recent vault activity for ${shortenAddress(address, 6)}` : "Connect a wallet to view history."}
           </div>
@@ -50,7 +50,7 @@ export default function TransactionHistory({
       </div>
 
       <div className="mt-5 overflow-hidden rounded-2xl border border-slate-800">
-        <div className="grid grid-cols-[1.2fr_1fr_1fr_0.9fr] gap-3 bg-slate-900/20 px-4 py-3 text-xs font-medium text-slate-300">
+        <div className="grid grid-cols-[1.2fr_1fr_1fr_0.9fr] gap-3 bg-slate-900/20 px-4 py-3 text-xs text-slate-300">
           <div>Type</div>
           <div>Amount</div>
           <div>Created</div>

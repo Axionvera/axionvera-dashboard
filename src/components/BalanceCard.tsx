@@ -23,7 +23,7 @@ export default function BalanceCard({
     <section className="rounded-2xl border border-slate-800 bg-slate-950/30 p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="text-sm font-semibold text-white">Vault Balance</div>
+          <div className="text-sm font-semibold text-white">Vault balance</div>
           <div className="mt-1 text-xs text-slate-400">
             {isConnected && address ? `Wallet: ${shortenAddress(address, 6)}` : "Connect a wallet to view balances."}
           </div>

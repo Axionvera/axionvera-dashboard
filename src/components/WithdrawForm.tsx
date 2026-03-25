@@ -15,7 +15,7 @@ export default function WithdrawForm({ isConnected, isSubmitting, onWithdraw }: 
       <div className="mt-1 text-xs text-slate-400">Withdraw tokens from the Axionvera vault.</div>
 
       <div className="mt-5 flex flex-col gap-3">
-        <label className="text-xs font-medium text-slate-300" htmlFor="withdraw-amount">
+        <label className="text-xs text-slate-300" htmlFor="withdraw-amount">
           Amount
         </label>
         <input
