@@ -47,6 +47,7 @@ export default function Navbar({ address, isConnecting, onConnect, onDisconnect 
               <button
                 type="button"
                 onClick={onDisconnect}
+                aria-label="Disconnect Stellar wallet"
                 className="rounded-xl border border-slate-800 bg-slate-900/30 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-900/60"
               >
                 Disconnect
@@ -57,6 +58,7 @@ export default function Navbar({ address, isConnecting, onConnect, onDisconnect 
               type="button"
               onClick={onConnect}
               disabled={isConnecting}
+              aria-label={isConnecting ? "Connecting to Stellar wallet" : "Connect Stellar wallet"}
               className="rounded-xl bg-axion-500 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-axion-500/20 transition hover:bg-axion-400 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isConnecting ? "Connecting..." : "Connect Wallet"}

@@ -32,6 +32,7 @@ export default function BalanceCard({
           type="button"
           onClick={onRefresh}
           disabled={!isConnected || isLoading}
+          aria-label={isLoading ? "Loading vault balances" : "Refresh vault balances"}
           className="rounded-xl border border-slate-800 bg-slate-900/30 px-3 py-2 text-xs font-medium text-slate-200 transition hover:bg-slate-900/60 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isLoading ? "Loading..." : "Refresh"}
