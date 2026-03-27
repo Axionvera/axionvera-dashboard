@@ -1,0 +1,22 @@
+/* Auto-generated from tokens.json */
+
+:root {
+  color-scheme: light dark;
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f8fafc;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-border-primary: #e2e8f0;
+  --color-border-focus: #3b82f6;
+  --color-accent: #3b82f6;
+}
+
+[data-theme="dark"] {
+  --color-bg-primary: #020617;
+  --color-bg-secondary: #0f172a;
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-border-primary: #1e293b;
+  --color-border-focus: #60a5fa;
+  --color-accent: #3b82f6;
+}

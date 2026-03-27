@@ -32,7 +32,7 @@ export default function ProfilePage() {
       <Head>
         <title>Profile · Axionvera</title>
       </Head>
-      <main className="min-h-screen bg-slate-950">
+      <main className="min-h-screen bg-background-primary">
         <Navbar
           address={wallet.address}
           isConnecting={wallet.isConnecting}
@@ -42,14 +42,14 @@ export default function ProfilePage() {
         <div className={`transition-all duration-300 ${isOpen ? 'lg:pl-64' : ''}`}>
           <div className="mx-auto max-w-4xl px-6 py-8">
             <div className="mb-8">
-              <h1 className="text-2xl font-bold text-white">Profile Settings</h1>
-              <p className="mt-2 text-slate-400">
+              <h1 className="text-2xl font-bold text-text-primary">Profile Settings</h1>
+              <p className="mt-2 text-text-muted">
                 Manage your account settings and preferences.
               </p>
             </div>
 
             {/* Tab Navigation */}
-            <div className="mb-8 border-b border-slate-800">
+            <div className="mb-8 border-b border-border-primary">
               <nav className="-mb-px flex space-x-8">
                 <button
                   onClick={() => setActiveTab('profile')}
@@ -57,7 +57,7 @@ export default function ProfilePage() {
                     py-2 px-1 border-b-2 text-sm font-medium transition-colors
                     ${activeTab === 'profile'
                       ? 'border-axion-500 text-axion-400'
-                      : 'border-transparent text-slate-400 hover:text-slate-300'
+                      : 'border-transparent text-text-muted hover:text-text-secondary'
                     }
                   `}
                 >
@@ -69,7 +69,7 @@ export default function ProfilePage() {
                     py-2 px-1 border-b-2 text-sm font-medium transition-colors
                     ${activeTab === 'security'
                       ? 'border-axion-500 text-axion-400'
-                      : 'border-transparent text-slate-400 hover:text-slate-300'
+                      : 'border-transparent text-text-muted hover:text-text-secondary'
                     }
                   `}
                 >

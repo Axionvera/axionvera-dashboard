@@ -1,9 +1,25 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/pages/**/*.{js,ts,jsx,tsx}", "./src/components/**/*.{js,ts,jsx,tsx}", "./src/**/*.{js,ts,jsx,tsx}"],
+  darkMode: ['class', '[data-theme="dark"]'],
   theme: {
     extend: {
       colors: {
+        theme: {
+          bg: {
+            primary: 'var(--color-bg-primary)',
+            secondary: 'var(--color-bg-secondary)',
+          },
+          text: {
+            primary: 'var(--color-text-primary)',
+            secondary: 'var(--color-text-secondary)',
+          },
+          border: {
+            primary: 'var(--color-border-primary)',
+            focus: 'var(--color-border-focus)',
+          },
+          accent: 'var(--color-accent)'
+        },
         axion: {
           50: "#eff6ff",
           100: "#dbeafe",

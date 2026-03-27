@@ -2,15 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+@import './theme.css';
+
 html,
 body {
   height: 100%;
 }
 
 body {
-  @apply bg-slate-950 text-slate-100 antialiased;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  @apply antialiased transition-colors duration-200;
 }
 
 * {
-  @apply border-slate-800;
+  border-color: var(--color-border-primary);
 }

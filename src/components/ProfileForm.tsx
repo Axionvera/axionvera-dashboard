@@ -36,10 +36,10 @@ export default function ProfileForm({ initialData, onSubmit }: ProfileFormProps)
   const locationProps = getFieldProps('location');
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950/30 p-6">
+    <div className="rounded-2xl border border-border-primary bg-background-primary/30 p-6">
       <div className="mb-6">
-        <h2 className="text-lg font-semibold text-white">Profile Information</h2>
-        <p className="mt-1 text-sm text-slate-400">
+        <h2 className="text-lg font-semibold text-text-primary">Profile Information</h2>
+        <p className="mt-1 text-sm text-text-muted">
           Update your personal information and profile details.
         </p>
       </div>
@@ -71,7 +71,7 @@ export default function ProfileForm({ initialData, onSubmit }: ProfileFormProps)
         />
 
         <div>
-          <label htmlFor="bio" className="block text-xs font-medium text-slate-300 mb-2">
+          <label htmlFor="bio" className="block text-xs font-medium text-text-secondary mb-2">
             Bio
           </label>
           <textarea
@@ -81,11 +81,11 @@ export default function ProfileForm({ initialData, onSubmit }: ProfileFormProps)
             onBlur={bioProps.onBlur}
             rows={4}
             className={`
-              w-full rounded-xl border px-4 py-3 text-sm text-white outline-none ring-0 
+              w-full rounded-xl border px-4 py-3 text-sm text-text-primary outline-none ring-0 
               placeholder:text-slate-500 transition-colors resize-none
               ${bioProps.error?.hasError && bioProps.touched
                 ? 'border-red-500/70 bg-red-500/5 focus:border-red-500' 
-                : 'border-slate-800 bg-slate-900/30 focus:border-axion-500/70'
+                : 'border-border-primary bg-background-secondary/30 focus:border-axion-500/70'
               }
             `}
             placeholder="Tell us about yourself..."
@@ -122,10 +122,10 @@ export default function ProfileForm({ initialData, onSubmit }: ProfileFormProps)
           />
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+        <div className="flex justify-end gap-3 pt-4 border-t border-border-primary">
           <button
             type="button"
-            className="px-4 py-2 text-sm font-medium text-slate-300 transition hover:text-white"
+            className="px-4 py-2 text-sm font-medium text-text-secondary transition hover:text-text-primary"
             onClick={() => window.history.back()}
           >
             Cancel

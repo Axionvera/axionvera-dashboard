@@ -30,9 +30,9 @@ export default function DepositForm({ isConnected, isSubmitting, onDeposit }: De
   const amountProps = getFieldProps('amount');
 
   return (
-    <section className="rounded-2xl border border-slate-800 bg-slate-950/30 p-6">
-      <div className="text-sm font-semibold text-white">Deposit</div>
-      <div className="mt-1 text-xs text-slate-400">Deposit tokens into the Axionvera vault.</div>
+    <section className="rounded-2xl border border-border-primary bg-background-primary/30 p-6">
+      <div className="text-sm font-semibold text-text-primary">Deposit</div>
+      <div className="mt-1 text-xs text-text-muted">Deposit tokens into the Axionvera vault.</div>
 
       <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="mt-5 space-y-4">
         <FormInput

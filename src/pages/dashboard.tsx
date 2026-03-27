@@ -24,7 +24,7 @@ export default function DashboardPage() {
       <Head>
         <title>Dashboard · Axionvera</title>
       </Head>
-      <main className="min-h-screen bg-slate-950">
+      <main className="min-h-screen bg-background-primary">
         <Sidebar />
         <div className="lg:pl-64">
           <Navbar

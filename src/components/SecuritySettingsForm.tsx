@@ -39,17 +39,17 @@ export default function SecuritySettingsForm({ onSubmit }: SecuritySettingsFormP
   const hasNewPassword = values.newPassword && values.newPassword.length > 0;
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950/30 p-6">
+    <div className="rounded-2xl border border-border-primary bg-background-primary/30 p-6">
       <div className="mb-6">
-        <h2 className="text-lg font-semibold text-white">Security Settings</h2>
-        <p className="mt-1 text-sm text-slate-400">
+        <h2 className="text-lg font-semibold text-text-primary">Security Settings</h2>
+        <p className="mt-1 text-sm text-text-muted">
           Update your password and security preferences.
         </p>
       </div>
 
       <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
         <div>
-          <h3 className="text-sm font-medium text-white mb-4">Change Password</h3>
+          <h3 className="text-sm font-medium text-text-primary mb-4">Change Password</h3>
           
           <FormInput
             {...currentPasswordProps}
@@ -62,7 +62,7 @@ export default function SecuritySettingsForm({ onSubmit }: SecuritySettingsFormP
               <button
                 type="button"
                 onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
-                className="text-slate-400 hover:text-slate-300 transition-colors"
+                className="text-text-muted hover:text-text-secondary transition-colors"
                 aria-label={showPasswords.current ? 'Hide password' : 'Show password'}
               >
                 {showPasswords.current ? (
@@ -91,7 +91,7 @@ export default function SecuritySettingsForm({ onSubmit }: SecuritySettingsFormP
               <button
                 type="button"
                 onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
-                className="text-slate-400 hover:text-slate-300 transition-colors"
+                className="text-text-muted hover:text-text-secondary transition-colors"
                 aria-label={showPasswords.new ? 'Hide password' : 'Show password'}
               >
                 {showPasswords.new ? (
@@ -120,7 +120,7 @@ export default function SecuritySettingsForm({ onSubmit }: SecuritySettingsFormP
               <button
                 type="button"
                 onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
-                className="text-slate-400 hover:text-slate-300 transition-colors"
+                className="text-text-muted hover:text-text-secondary transition-colors"
                 aria-label={showPasswords.confirm ? 'Hide password' : 'Show password'}
               >
                 {showPasswords.confirm ? (
@@ -141,7 +141,7 @@ export default function SecuritySettingsForm({ onSubmit }: SecuritySettingsFormP
         {/* Password Strength Indicator */}
         {hasNewPassword && (
           <div className="space-y-2">
-            <div className="text-xs font-medium text-slate-300">Password Strength</div>
+            <div className="text-xs font-medium text-text-secondary">Password Strength</div>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <div className={`h-1 flex-1 rounded-full ${
@@ -171,10 +171,10 @@ export default function SecuritySettingsForm({ onSubmit }: SecuritySettingsFormP
           </div>
         )}
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+        <div className="flex justify-end gap-3 pt-4 border-t border-border-primary">
           <button
             type="button"
-            className="px-4 py-2 text-sm font-medium text-slate-300 transition hover:text-white"
+            className="px-4 py-2 text-sm font-medium text-text-secondary transition hover:text-text-primary"
             onClick={() => window.history.back()}
           >
             Cancel
