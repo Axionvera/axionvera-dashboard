@@ -32,7 +32,7 @@ export default function ProfilePage() {
       <Head>
         <title>Profile · Axionvera</title>
       </Head>
-      <main className="min-h-screen bg-slate-950">
+      <main className="min-h-screen transition-colors duration-300">
         <Navbar
           address={wallet.address}
           isConnecting={wallet.isConnecting}
@@ -42,22 +42,22 @@ export default function ProfilePage() {
         <div className={`transition-all duration-300 ${isOpen ? 'lg:pl-64' : ''}`}>
           <div className="mx-auto max-w-4xl px-6 py-8">
             <div className="mb-8">
-              <h1 className="text-2xl font-bold text-white">Profile Settings</h1>
-              <p className="mt-2 text-slate-400">
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white transition-colors">Profile Settings</h1>
+              <p className="mt-2 text-slate-500 dark:text-slate-400 transition-colors">
                 Manage your account settings and preferences.
               </p>
             </div>
 
             {/* Tab Navigation */}
-            <div className="mb-8 border-b border-slate-800">
+            <div className="mb-8 border-b border-slate-200 dark:border-slate-800 transition-colors">
               <nav className="-mb-px flex space-x-8">
                 <button
                   onClick={() => setActiveTab('profile')}
                   className={`
                     py-2 px-1 border-b-2 text-sm font-medium transition-colors
                     ${activeTab === 'profile'
-                      ? 'border-axion-500 text-axion-400'
-                      : 'border-transparent text-slate-400 hover:text-slate-300'
+                      ? 'border-axion-500 text-axion-600 dark:text-axion-400'
+                      : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
                     }
                   `}
                 >
@@ -68,8 +68,8 @@ export default function ProfilePage() {
                   className={`
                     py-2 px-1 border-b-2 text-sm font-medium transition-colors
                     ${activeTab === 'security'
-                      ? 'border-axion-500 text-axion-400'
-                      : 'border-transparent text-slate-400 hover:text-slate-300'
+                      ? 'border-axion-500 text-axion-600 dark:text-axion-400'
+                      : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
                     }
                   `}
                 >

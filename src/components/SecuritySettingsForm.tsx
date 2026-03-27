@@ -39,17 +39,17 @@ export default function SecuritySettingsForm({ onSubmit }: SecuritySettingsFormP
   const hasNewPassword = values.newPassword && values.newPassword.length > 0;
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950/30 p-6">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/30 p-6 shadow-sm dark:shadow-none transition-colors duration-300">
       <div className="mb-6">
-        <h2 className="text-lg font-semibold text-white">Security Settings</h2>
-        <p className="mt-1 text-sm text-slate-400">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white transition-colors">Security Settings</h2>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 transition-colors">
           Update your password and security preferences.
         </p>
       </div>
 
       <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
         <div>
-          <h3 className="text-sm font-medium text-white mb-4">Change Password</h3>
+          <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-4 transition-colors">Change Password</h3>
           
           <FormInput
             {...currentPasswordProps}
@@ -62,7 +62,7 @@ export default function SecuritySettingsForm({ onSubmit }: SecuritySettingsFormP
               <button
                 type="button"
                 onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
-                className="text-slate-400 hover:text-slate-300 transition-colors"
+                className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 aria-label={showPasswords.current ? 'Hide password' : 'Show password'}
               >
                 {showPasswords.current ? (
@@ -91,7 +91,7 @@ export default function SecuritySettingsForm({ onSubmit }: SecuritySettingsFormP
               <button
                 type="button"
                 onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
-                className="text-slate-400 hover:text-slate-300 transition-colors"
+                className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 aria-label={showPasswords.new ? 'Hide password' : 'Show password'}
               >
                 {showPasswords.new ? (
@@ -120,7 +120,7 @@ export default function SecuritySettingsForm({ onSubmit }: SecuritySettingsFormP
               <button
                 type="button"
                 onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
-                className="text-slate-400 hover:text-slate-300 transition-colors"
+                className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 aria-label={showPasswords.confirm ? 'Hide password' : 'Show password'}
               >
                 {showPasswords.confirm ? (
@@ -141,26 +141,26 @@ export default function SecuritySettingsForm({ onSubmit }: SecuritySettingsFormP
         {/* Password Strength Indicator */}
         {hasNewPassword && (
           <div className="space-y-2">
-            <div className="text-xs font-medium text-slate-300">Password Strength</div>
+            <div className="text-xs font-medium text-slate-600 dark:text-slate-300 transition-colors">Password Strength</div>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <div className={`h-1 flex-1 rounded-full ${
-                  values.newPassword.length >= 8 ? 'bg-green-500' : 'bg-slate-700'
+                  values.newPassword.length >= 8 ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700'
                 }`} />
                 <div className={`h-1 flex-1 rounded-full ${
-                  /[A-Z]/.test(values.newPassword) ? 'bg-green-500' : 'bg-slate-700'
+                  /[A-Z]/.test(values.newPassword) ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700'
                 }`} />
                 <div className={`h-1 flex-1 rounded-full ${
-                  /[a-z]/.test(values.newPassword) ? 'bg-green-500' : 'bg-slate-700'
+                  /[a-z]/.test(values.newPassword) ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700'
                 }`} />
                 <div className={`h-1 flex-1 rounded-full ${
-                  /[0-9]/.test(values.newPassword) ? 'bg-green-500' : 'bg-slate-700'
+                  /[0-9]/.test(values.newPassword) ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700'
                 }`} />
                 <div className={`h-1 flex-1 rounded-full ${
-                  /[^A-Za-z0-9]/.test(values.newPassword) ? 'bg-green-500' : 'bg-slate-700'
+                  /[^A-Za-z0-9]/.test(values.newPassword) ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700'
                 }`} />
               </div>
-              <div className="grid grid-cols-5 gap-2 text-xs text-slate-500">
+              <div className="grid grid-cols-5 gap-2 text-xs text-slate-400 dark:text-slate-500 transition-colors">
                 <span>8+ chars</span>
                 <span>Upper</span>
                 <span>Lower</span>
@@ -171,10 +171,10 @@ export default function SecuritySettingsForm({ onSubmit }: SecuritySettingsFormP
           </div>
         )}
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+        <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800 transition-colors">
           <button
             type="button"
-            className="px-4 py-2 text-sm font-medium text-slate-300 transition hover:text-white"
+            className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 transition hover:text-slate-900 dark:hover:text-white"
             onClick={() => window.history.back()}
           >
             Cancel

@@ -6,9 +6,9 @@ export interface FormFieldError {
   hasError: boolean;
 }
 
-export interface FormErrors<T extends Record<string, any>> {
-  [K in keyof T]: FormFieldError;
-}
+export type FormErrors<T> = {
+  [K in keyof T]?: FormFieldError;
+};
 
 export interface UseFormValidationProps<T extends Record<string, any>> {
   schema: ZodSchema<T>;

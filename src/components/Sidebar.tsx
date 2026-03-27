@@ -35,7 +35,7 @@ export default function Sidebar({ className = "" }: SidebarProps) {
       {/* Mobile backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
           onClick={close}
           aria-hidden="true"
         />
@@ -44,7 +44,7 @@ export default function Sidebar({ className = "" }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={`
-          fixed left-0 top-0 z-50 h-screen w-64 bg-slate-950 border-r border-slate-800
+          fixed left-0 top-0 z-50 h-screen w-64 bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800
           transform transition-all duration-300 ease-in-out
           lg:translate-x-0 lg:static lg:z-auto
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
@@ -53,15 +53,15 @@ export default function Sidebar({ className = "" }: SidebarProps) {
       >
         <div className="flex h-full flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-slate-800">
+          <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
             <Link href="/" className="flex items-center gap-2">
               <div 
                 aria-hidden="true" 
                 className="h-9 w-9 rounded-xl bg-gradient-to-br from-axion-500 to-indigo-500 shadow-lg shadow-axion-500/20" 
               />
               <div className="leading-tight">
-                <div className="text-sm font-semibold text-white">Axionvera</div>
-                <div className="text-xs text-slate-400">Dashboard</div>
+                <div className="text-sm font-semibold text-slate-900 dark:text-white">Axionvera</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">Dashboard</div>
               </div>
             </Link>
             
@@ -70,7 +70,7 @@ export default function Sidebar({ className = "" }: SidebarProps) {
               type="button"
               onClick={close}
               aria-label="Close sidebar"
-              className="lg:hidden rounded-xl border border-slate-800 bg-slate-900/30 p-2 text-slate-300 transition hover:bg-slate-900/60"
+              className="lg:hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100/30 dark:bg-slate-900/30 p-2 text-slate-600 dark:text-slate-300 transition hover:bg-slate-200/50 dark:hover:bg-slate-900/60"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -88,18 +88,18 @@ export default function Sidebar({ className = "" }: SidebarProps) {
                       href={item.href}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-300 transition hover:bg-slate-900/60 hover:text-white"
+                      className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-600 dark:text-slate-300 transition hover:bg-slate-100 dark:hover:bg-slate-900/60 hover:text-slate-900 dark:hover:text-white group"
                     >
-                      {item.icon}
+                      <span className="text-slate-400 group-hover:text-axion-500 transition-colors">{item.icon}</span>
                       <span>{item.label}</span>
                     </a>
                   ) : (
                     <Link
                       href={item.href}
                       onClick={close}
-                      className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-300 transition hover:bg-slate-900/60 hover:text-white"
+                      className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-600 dark:text-slate-300 transition hover:bg-slate-100 dark:hover:bg-slate-900/60 hover:text-slate-900 dark:hover:text-white group"
                     >
-                      {item.icon}
+                      <span className="text-slate-400 group-hover:text-axion-500 transition-colors">{item.icon}</span>
                       <span>{item.label}</span>
                     </Link>
                   )}
