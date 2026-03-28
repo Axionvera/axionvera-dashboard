@@ -6,9 +6,9 @@ import userEvent from '@testing-library/user-event';
 // Mock matchMedia
 const mockMatchMedia = (matches: boolean) => {
   let changeListener: ((e: any) => void) | null = null;
-  return jest.fn().mockImplementation(query => ({
+  const mediaQueryList = {
     matches,
-    media: query,
+    media: '',
     onchange: null,
     addListener: jest.fn(), // Deprecated
     removeListener: jest.fn(), // Deprecated
@@ -20,11 +20,17 @@ const mockMatchMedia = (matches: boolean) => {
     }),
     dispatchEvent: jest.fn(),
     _triggerChange: (newMatches: boolean) => {
+      mediaQueryList.matches = newMatches;
       if (changeListener) {
         changeListener({ matches: newMatches } as any);
       }
     }
-  }));
+  };
+
+  return jest.fn().mockImplementation(query => {
+    mediaQueryList.media = query;
+    return mediaQueryList;
+  });
 };
 
 const TestComponent = () => {
@@ -120,7 +126,7 @@ describe('ThemeContext', () => {
     expect(screen.getByTestId('resolved').textContent).toBe('light');
 
     act(() => {
-      matchMediaMock()._triggerChange(true);
+      window.matchMedia('(prefers-color-scheme: dark)')._triggerChange(true);
       jest.advanceTimersByTime(100);
     });
 

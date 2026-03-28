@@ -1,8 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ReactNode } from "react";
+import type { ReactNode, ReactElement } from "react";
 
 import Navbar from "@/components/Navbar";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -14,21 +15,25 @@ jest.mock("next/link", () => ({
 }));
 
 describe("Navbar", () => {
+  function renderNavbar(ui: ReactElement) {
+    return render(<ThemeProvider>{ui}</ThemeProvider>);
+  }
+
   test("shows connect button when disconnected", async () => {
     const user = userEvent.setup();
     const onConnect = jest.fn(async () => undefined);
-    render(
+    renderNavbar(
       <Navbar address={null} isConnecting={false} onConnect={onConnect} onDisconnect={jest.fn()} />
     );
 
-    await user.click(screen.getByRole("button", { name: /connect wallet/i }));
+    await user.click(screen.getByRole("button", { name: /connect stellar wallet/i }));
     expect(onConnect).toHaveBeenCalledTimes(1);
   });
 
   test("shows disconnect button when connected", async () => {
     const user = userEvent.setup();
     const onDisconnect = jest.fn();
-    render(
+    renderNavbar(
       <Navbar
         address="GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
         isConnecting={false}
@@ -37,7 +42,7 @@ describe("Navbar", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: /disconnect/i }));
+    await user.click(screen.getByRole("button", { name: /disconnect stellar wallet/i }));
     expect(onDisconnect).toHaveBeenCalledTimes(1);
   });
 });
