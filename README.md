@@ -1,127 +1,147 @@
 # Axionvera Dashboard
 
-Web dashboard for interacting with **Axionvera Network** smart contracts on Stellar. Built with Next.js and powered by Soroban.
+Official frontend dashboard for interacting with Axionvera vault contracts on Stellar (Soroban), built with Next.js.
 
-## 🚀 Quick Start
+## Overview
 
-Get the project up and running in under 3 minutes:
+This project helps users:
 
-1. **Clone & Enter Repo**
-   ```bash
-   git clone https://github.com/JerryIdoko/axionvera-dashboard.git && cd axionvera-dashboard
-   ```
+- Connect a Freighter wallet
+- View vault balance and rewards
+- Deposit to and withdraw from the vault
+- Track transaction history
 
-2. **Install Dependencies**
-   ```bash
-   npm install
-   ```
+For contributors, the frontend follows a simple pattern:
 
-3. **Start Development**
-   ```bash
-   npm run dev
-   ```
-   Visit [http://localhost:3000](http://localhost:3000) to see it live.
+- `components/` contains presentational UI
+- `hooks/` contains wallet and vault side effects
+- `utils/` contains network and contract helpers
 
----
-
-## 🛠 Prerequisites
-
-Ensure your environment meets these mandatory specifications before setup:
-
-| Tool | Version Requirement | Purpose |
-| :--- | :--- | :--- |
-| **Node.js** | `v18.0.0` or higher | Core Runtime |
-| **npm** | `v9.0.0`+ (or Yarn `v1.22`+) | Package Management |
-| **Freighter** | Latest browser extension | Wallet Interaction |
-
----
-
-## 🏗 Features
-
-- **Wallet Connection**: Seamless Freighter integration
-- **Vault Management**: Deposit and withdraw from the Axionvera vault
-- **Rewards**: Track and claim rewards in real-time
-- **Transaction History**: Comprehensive ledger of all user operations
-
-## ⚙️ Configuration
-
-Copy the example environment file and fill in your contract IDs:
+## Quick Start
 
 ```bash
+git clone https://github.com/Axionvera/axionvera-dashboard.git
+cd axionvera-dashboard
+npm install
 cp .env.example .env.local
+npm run dev
 ```
 
-| Variable | Description | Default |
+Open `http://localhost:3000`.
+
+## Prerequisites
+
+- Node.js `>=18`
+- npm `>=9`
+- Freighter browser extension
+
+## Environment Setup
+
+Required variables are defined in `.env.example`:
+
+```bash
+NEXT_PUBLIC_STELLAR_NETWORK=testnet
+NEXT_PUBLIC_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
+NEXT_PUBLIC_HORIZON_URL=https://horizon-testnet.stellar.org
+NEXT_PUBLIC_AXIONVERA_VAULT_CONTRACT_ID=
+NEXT_PUBLIC_AXIONVERA_TOKEN_CONTRACT_ID=
+```
+
+The project validates environment variables automatically before `dev` and `build`.
+
+Useful commands:
+
+```bash
+npm run validate-env
+npm run dev
+npm run build
+npm run lint
+npm run typecheck
+npm test
+```
+
+## Project Structure
+
+```text
+axionvera-dashboard/
+├── src/
+│   ├── components/      # Reusable UI components
+│   ├── contexts/        # React providers (ThemeContext)
+│   ├── hooks/           # Custom hooks for wallet, vault, forms, errors
+│   ├── pages/           # Next.js routes (Pages Router)
+│   ├── styles/          # Global + generated theme styles
+│   ├── tokens.json      # Theme token source of truth
+│   └── utils/           # Network config and contract helper utilities
+├── docs/                # Architecture and contributor docs
+├── tests/               # Test suites
+├── scripts/             # Build-time helpers (theme/env validation)
+└── terraform/           # Infrastructure as code
+```
+
+## Routes
+
+| File | Route | Purpose |
 | :--- | :--- | :--- |
-| `NEXT_PUBLIC_STELLAR_NETWORK` | Target network | `testnet` |
-| `NEXT_PUBLIC_SOROBAN_RPC_URL` | Soroban RPC endpoint | https://soroban-testnet.stellar.org |
-| `NEXT_PUBLIC_AXIONVERA_VAULT_CONTRACT_ID` | Vault contract address | - |
+| `src/pages/index.tsx` | `/` | Landing and entry screen |
+| `src/pages/dashboard.tsx` | `/dashboard` | Main vault dashboard |
+| `src/pages/profile.tsx` | `/profile` | User profile/security settings |
+| `src/pages/_app.tsx` | N/A | Global app wrapper/providers |
+| `src/pages/_document.tsx` | N/A | Custom HTML document + theme bootstrap |
 
----
+## Components
 
-## 🩺 Troubleshooting
+Main UI components in `src/components/`:
 
-Common issues and their resolutions:
+| Component | Responsibility |
+| :--- | :--- |
+| `Navbar.tsx` | Wallet status and top navigation |
+| `Sidebar.tsx` | Primary navigation for dashboard pages |
+| `BalanceCard.tsx` | Displays balance/reward summary |
+| `DepositForm.tsx` | Deposit flow UI |
+| `WithdrawForm.tsx` | Withdraw flow UI |
+| `TransactionHistory.tsx` | Transaction list and rewards actions |
+| `ProfileForm.tsx` | Profile editing form |
+| `SecuritySettingsForm.tsx` | Security preferences form |
+| `FormInput.tsx` | Shared form input primitive |
+| `ThemeToggle.tsx` | Theme mode switcher |
+| `Skeleton.tsx` / `Skeletons.tsx` | Loading placeholders |
+| `ErrorBoundary.tsx` / `ErrorFallback.tsx` | Error containment and fallback UI |
 
-| Issue | Potential Cause | Solution |
-| :--- | :--- | :--- |
-| `node_modules` conflicts | Stale or corrupted packages | Run `rm -rf node_modules package-lock.json && npm install` |
-| `.env` variables missing | File not named `.env.local` | Rename `.env` or `.env.example` to `.env.local`. Ensure no trailing spaces in values. |
-| `Freighter not found` | Extension locked or missing | Ensure Freighter is installed, unlocked, and refreshed if just installed. |
-| ESLint/Type errors | Breaking changes in `src/` | Run `npm run lint` and `npm run typecheck` to debug specific violations. |
+## Hooks
 
----
+Custom hooks in `src/hooks/`:
 
-## 🤝 Contributing
+| Hook | Responsibility |
+| :--- | :--- |
+| `useWallet.ts` | Freighter connection lifecycle and wallet state |
+| `useVault.ts` | Vault reads/writes (deposit, withdraw, rewards, refresh) |
+| `useFormValidation.ts` | Form validation helpers |
+| `useApiError.ts` | Consistent API/contract error mapping |
+| `useSidebar.ts` | Sidebar open/close state |
+
+## Screenshots
+
+Illustrative UI snapshots for quick contributor orientation:
+
+### Dashboard
+
+![Dashboard overview](docs/screenshots/dashboard-overview.png)
+
+### Profile
+
+![Profile page](docs/screenshots/profile-page.png)
+
+## Documentation
+
+- [Frontend guide](docs/frontend-guide.md)
+- [Architecture](docs/architecture.md)
+- [Environment validation](docs/ENVIRONMENT_VALIDATION.md)
+- [Terraform setup](terraform/README.md)
+
+## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## 🎨 Theming Architecture
+## License
 
-The Axionvera Dashboard uses a production-grade Dark Mode engine that reacts to the user's OS-level preference in real-time, guarantees WCAG 2.1 AA contrast ratios, and prevents Flash of Incorrect Theme (FOIT/FOUC).
-
-### Architecture
-- **Tokens**: Design tokens are stored in `src/tokens.json` as the single source of truth.
-- **Global Styles**: The `scripts/generate-theme.js` script generates CSS custom properties (variables) in `src/styles/theme.css` based on the tokens.
-- **Context**: `ThemeContext` manages the state (`light`, `dark`, `system`) and persists user preference to `localStorage`.
-- **FOUC Prevention**: An inline script generated by `themeBootstrap.ts` is injected in the document `<head>` to apply the correct theme before React hydrates.
-
-### Token Contribution Workflow
-1. Modify `src/tokens.json` to update colors for light or dark modes.
-2. Run `npm run generate-theme` to regenerate the CSS custom properties.
-3. Use the new tokens in Tailwind classes via the `theme-*` prefix (e.g., `bg-theme-bg-primary`, `text-theme-text-primary`).
-4. Ensure contrast ratios pass WCAG 2.1 AA (≥ 4.5:1 for normal text, ≥ 3:1 for large text).
-5. All component PRs must include Storybook visual regression tests and pass axe-core automated a11y scans to ensure zero violations.
-
-## Infrastructure as Code (Terraform)
-
-This project includes Terraform configurations for provisioning AWS infrastructure. See [terraform/README.md](terraform/README.md) for detailed instructions.
-
-### Quick Terraform Commands
-
-```bash
-# Navigate to terraform directory
-cd terraform
-
-# Initialize Terraform
-terraform init
-
-# Plan the deployment
-terraform plan
-
-# Apply the configuration
-terraform apply
-
-# Destroy resources when done
-terraform destroy
-```
-
-### Prerequisites for Terraform
-
-- Terraform 1.0+
-- AWS CLI configured with credentials
-- SSH key pair in AWS EC2 console
-
-## 📜 License
-
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
