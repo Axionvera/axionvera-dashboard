@@ -213,6 +213,7 @@ export function useVault({ walletAddress, sdk: providedSdk }: UseVaultArgs) {
             lastAmount: amount
           })
         );
+        notify.success(`${type === "deposit" ? "Deposit" : "Withdrawal"} Confirmed`, `Transaction hash: ${transaction.hash}`);
       } catch (error) {
         const message = getErrorMessage(error, `${type === "deposit" ? "Deposit" : "Withdraw"} failed.`);
         notify.error(getFailureTitle(type), message);
@@ -272,6 +273,7 @@ export function useVault({ walletAddress, sdk: providedSdk }: UseVaultArgs) {
     try {
       await sdk.claimRewards({ walletAddress, network: NETWORK });
       await refresh();
+      notify.success("Rewards Claimed", "Successfully claimed your vault rewards.");
     } catch (error) {
       const message = getErrorMessage(error, "Claim failed.");
       notify.error("Claim Failed", message);

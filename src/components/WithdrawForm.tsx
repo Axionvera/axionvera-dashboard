@@ -1,6 +1,7 @@
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { FormInput } from './FormInput';
-import { useFormValidation } from '@/hooks/useFormValidation';
-import { withdrawSchema, WithdrawFormData } from '@/utils/validation';
+import { createWithdrawSchema, WithdrawFormData } from '@/utils/validation';
 import { notify } from '@/utils/notifications';
 import { formatAmount, shortenAddress } from '@/utils/contractHelpers';
 
@@ -23,26 +24,30 @@ export default function WithdrawForm({
   statusMessage,
   transactionHash
 }: WithdrawFormProps) {
-  const initialValues: WithdrawFormData = {
-    amount: '',
-  };
-
   const {
-    getFieldProps,
-    shouldDisableSubmit,
+    register,
     handleSubmit,
     reset,
-  } = useFormValidation({
-    schema: withdrawSchema,
-    initialValues,
-    onSubmit: async (data) => {
-      await onWithdraw(data.amount);
-      notify.success("Withdrawal Successful", `You have withdrawn ${data.amount} tokens.`);
-      reset();
-    },
+    formState: { errors, isValid, isDirty }
+  } = useForm<WithdrawFormData>({
+    resolver: zodResolver(createWithdrawSchema(parseFloat(balance))),
+    mode: 'onChange',
+    defaultValues: {
+      amount: '' as any,
+    }
   });
 
-  const amountProps = getFieldProps('amount');
+  const onSubmit = async (data: WithdrawFormData) => {
+    try {
+      await onWithdraw(data.amount.toString());
+      notify.success("Withdrawal Successful", `You have withdrawn ${data.amount} tokens.`);
+      reset();
+    } catch (error) {
+      console.error('Withdrawal error:', error);
+    }
+  };
+
+  const shouldDisableSubmit = !isConnected || !isValid || !isDirty || isSubmitting;
 
   return (
     <section className="rounded-2xl border border-border-primary bg-background-primary/30 p-6">
@@ -52,15 +57,16 @@ export default function WithdrawForm({
         Available balance: <span className="font-medium text-text-primary">{formatAmount(balance)}</span>
       </div>
 
-      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="mt-5 space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-5 space-y-4">
         <FormInput
-          {...amountProps}
+          {...register('amount')}
           id="withdraw-amount"
           inputMode="decimal"
           placeholder="0.0"
           label="Amount"
           required
-          helperText="Enter amount between 0.0001 and 10,000"
+          error={errors.amount}
+          helperText={`Enter amount between 0.0001 and ${formatAmount(balance)}`}
         />
 
         {status !== 'idle' ? (
@@ -87,7 +93,7 @@ export default function WithdrawForm({
 
         <button
           type="submit"
-          disabled={!isConnected || shouldDisableSubmit() || isSubmitting}
+          disabled={shouldDisableSubmit}
           aria-label={isSubmitting ? "Submitting withdrawal" : "Withdraw tokens"}
           className="w-full rounded-xl border border-border-primary bg-background-secondary/30 px-4 py-3 text-sm font-medium text-text-primary transition hover:bg-background-secondary/60 disabled:cursor-not-allowed disabled:opacity-60"
         >

@@ -23,7 +23,7 @@ describe("Navbar", () => {
     const user = userEvent.setup();
     const onConnect = jest.fn(async () => undefined);
     renderNavbar(
-      <Navbar address={null} isConnecting={false} onConnect={onConnect} onDisconnect={jest.fn()} />
+      <Navbar publicKey={null} isConnecting={false} onConnect={onConnect} onDisconnect={jest.fn()} />
     );
 
     await user.click(screen.getByRole("button", { name: /connect stellar wallet/i }));
@@ -35,14 +35,18 @@ describe("Navbar", () => {
     const onDisconnect = jest.fn();
     renderNavbar(
       <Navbar
-        address="GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        publicKey="GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
         isConnecting={false}
         onConnect={jest.fn(async () => undefined)}
         onDisconnect={onDisconnect}
       />
     );
 
-    await user.click(screen.getByRole("button", { name: /disconnect stellar wallet/i }));
+    // Open the wallet menu first
+    await user.click(screen.getByRole("button", { name: /wallet options/i }));
+    
+    // Then click disconnect
+    await user.click(screen.getByRole("menuitem", { name: /disconnect stellar wallet/i }));
     expect(onDisconnect).toHaveBeenCalledTimes(1);
   });
 });

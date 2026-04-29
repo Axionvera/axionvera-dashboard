@@ -1,1 +1,1 @@
-export { useWallet, WalletProvider } from '@/contexts/WalletContext';
+export { useWalletContext, useWallet, WalletProvider } from '@/contexts/WalletContext';

@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import Head from "next/head";
 
 import BalanceCard from "@/components/BalanceCard";
@@ -6,16 +7,25 @@ import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
 import TransactionHistory from "@/components/TransactionHistory";
 import WithdrawForm from "@/components/WithdrawForm";
+import { useEffect } from "react";
 import { useVault } from "@/hooks/useVault";
-import { useWallet } from "@/hooks/useWallet";
+import { useWalletContext } from "@/hooks/useWallet";
 
 export default function DashboardPage() {
   // TODO: add analytics dashboard
   // TODO: add wallet options
   // TODO: add governance interface
 
-  const wallet = useWallet();
-  const vault = useVault({ walletAddress: wallet.address });
+  const wallet = useWalletContext();
+  const router = useRouter();
+  const vault = useVault({ walletAddress: wallet.publicKey });
+
+  // Redirect to landing page if the wallet is disconnected while on a protected route
+  useEffect(() => {
+    if (!wallet.isConnected && !wallet.isConnecting) {
+      router.replace('/');
+    }
+  }, [wallet.isConnected, wallet.isConnecting, router]);
 
   return (
     <>
@@ -26,7 +36,7 @@ export default function DashboardPage() {
         <Sidebar />
         <div className="flex-1 lg:pl-64 w-full transition-all">
           <Navbar
-            address={wallet.address}
+            publicKey={wallet.publicKey}
             isConnecting={wallet.isConnecting}
             onConnect={wallet.connect}
             onDisconnect={wallet.disconnect}
@@ -36,7 +46,7 @@ export default function DashboardPage() {
               <div className="col-span-1 lg:col-span-1 w-full">
                 <BalanceCard
                   isConnected={wallet.isConnected}
-                  address={wallet.address}
+                  publicKey={wallet.publicKey}
                   balance={vault.balance}
                   rewards={vault.rewards}
                   isLoading={vault.isLoading}
@@ -51,6 +61,8 @@ export default function DashboardPage() {
                     isSubmitting={vault.isSubmitting}
                     onDeposit={vault.deposit}
                     status={vault.depositStatus}
+                    walletBalance={wallet.balance ? parseFloat(wallet.balance) : null}
+
                     statusMessage={
                       vault.depositStatus === "pending"
                         ? `Depositing ${vault.lastDepositAmount ?? "0"} tokens into the vault.`
@@ -83,7 +95,7 @@ export default function DashboardPage() {
                 <div className="mt-6 w-full overflow-x-auto">
                   <TransactionHistory
                     isConnected={wallet.isConnected}
-                    address={wallet.address}
+                    publicKey={wallet.publicKey}
                     isLoading={vault.isLoading}
                     transactions={vault.transactions}
                     onClaimRewards={vault.claimRewards}

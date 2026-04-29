@@ -96,22 +96,27 @@ export const settingsSchema = z.object({
 
 // Deposit/Withdraw form schemas
 export const depositSchema = z.object({
-  amount: z
-    .string()
-    .min(1, 'Amount is required')
-    .regex(/^\d*\.?\d+$/, 'Invalid amount format')
-    .refine((val) => parseFloat(val) > 0, 'Amount must be greater than 0')
-    .refine((val) => parseFloat(val) <= 10000, 'Amount cannot exceed 10,000'),
+  amount: z.coerce
+    .number({
+      required_error: 'Amount is required',
+      invalid_type_error: 'Amount must be a valid number',
+    })
+    .positive('Amount must be greater than 0')
+    .max(10000, 'Amount cannot exceed 10,000'),
 });
 
-export const withdrawSchema = z.object({
-  amount: z
-    .string()
-    .min(1, 'Amount is required')
-    .regex(/^\d*\.?\d+$/, 'Invalid amount format')
-    .refine((val) => parseFloat(val) > 0, 'Amount must be greater than 0')
-    .refine((val) => parseFloat(val) <= 10000, 'Amount cannot exceed 10,000'),
-});
+export const createWithdrawSchema = (maxBalance: number) => 
+  z.object({
+    amount: z.coerce
+      .number({
+        required_error: 'Amount is required',
+        invalid_type_error: 'Amount must be a valid number',
+      })
+      .positive('Amount must be greater than 0')
+      .max(maxBalance, `Amount cannot exceed your balance of ${maxBalance}`),
+  });
+
+export const withdrawSchema = createWithdrawSchema(10000); // Default for types
 
 // Type exports
 export type ProfileFormData = z.infer<typeof profileSchema>;

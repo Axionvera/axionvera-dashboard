@@ -13,3 +13,8 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: jest.fn()
   }))
 });
+
+// Mock AppTooltip to avoid Radix UI dependency issues in tests
+jest.mock("@/components/AppTooltip", () => ({
+  AppTooltip: ({ children }: { children: React.ReactNode }) => children,
+}), { virtual: true });

@@ -23,7 +23,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+
     this.setState({
       error,
       errorInfo
@@ -36,7 +36,7 @@ export class ErrorBoundary extends Component<Props, State> {
   handleReload = () => {
     // Clear any potentially corrupted state
     this.setState({ hasError: false, error: undefined, errorInfo: undefined });
-    
+
     // Reload the page to reset the application state
     window.location.reload();
   };
@@ -68,10 +68,11 @@ export class ErrorBoundary extends Component<Props, State> {
                 </svg>
               </div>
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 transition-colors">
-                Something went wrong
+                Oops! Something went wrong in the Vault.
               </h1>
+
               <p className="text-gray-600 mb-6">
-                We&apos;re sorry, but something unexpected happened. The application has encountered an error and needs to reload.
+                An unexpected error occurred while processing your data. Please try again.
               </p>
             </div>
 
@@ -82,7 +83,7 @@ export class ErrorBoundary extends Component<Props, State> {
               >
                 Reload Application
               </button>
-              
+
               <button
                 onClick={() => window.history.back()}
                 className="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium py-3 px-4 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 active:scale-95"

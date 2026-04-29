@@ -1,9 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 const SIDEBAR_STATE_KEY = 'sidebar-open';
 
 export function useSidebar() {
+  // We default to true (open) to match expected dashboard behavior and unit tests.
+  // We use a mount ref to prevent hydration mismatches and unnecessary localStorage writes on first load.
   const [isOpen, setIsOpen] = useState<boolean>(true);
+  const hasMounted = useRef(false);
 
   // Initialize from localStorage after mounting to avoid hydration mismatch
   useEffect(() => {
@@ -15,12 +18,15 @@ export function useSidebar() {
     } catch (error) {
       console.warn('Failed to parse sidebar state from localStorage:', error);
     }
+    // Set mounted flag AFTER we've attempted to load from storage
+    hasMounted.current = true;
   }, []);
 
-  // Save state to localStorage whenever it changes (after mount)
+  // Persist state changes after mount
   useEffect(() => {
-    // Skip saving on first render if we just loaded from localStorage
-    // This effect runs after the first one because they are in order
+    // Only save if we have finished mounting (to avoid overriding saved state with default during hydration)
+    if (!hasMounted.current) return;
+
     try {
       localStorage.setItem(SIDEBAR_STATE_KEY, JSON.stringify(isOpen));
     } catch (error) {
@@ -32,10 +38,5 @@ export function useSidebar() {
   const open = () => setIsOpen(true);
   const close = () => setIsOpen(false);
 
-  return {
-    isOpen,
-    toggle,
-    open,
-    close,
-  };
+  return { isOpen, toggle, open, close };
 }

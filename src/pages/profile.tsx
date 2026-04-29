@@ -1,4 +1,5 @@
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { useState } from "react";
 
 import Navbar from "@/components/Navbar";
@@ -6,7 +7,7 @@ import ProfileForm from "@/components/ProfileForm";
 import SecuritySettingsForm from "@/components/SecuritySettingsForm";
 import { UserProfileSkeleton } from "@/components/Skeletons";
 import { useSidebar } from "@/hooks/useSidebar";
-import { useWallet } from "@/hooks/useWallet";
+import { useWalletContext } from "@/hooks/useWallet";
 import { ProfileFormData, SecuritySettingsFormData } from "@/utils/validation";
 import { useEffect } from "react";
 
@@ -14,7 +15,15 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<'profile' | 'security'>('profile');
   const [isLoading, setIsLoading] = useState(true);
   const { isOpen } = useSidebar();
-  const wallet = useWallet();
+  const wallet = useWalletContext();
+  const router = useRouter();
+
+  // Redirect to landing page if wallet is disconnected while on a protected route
+  useEffect(() => {
+    if (!wallet.isConnected && !wallet.isConnecting) {
+      router.replace('/');
+    }
+  }, [wallet.isConnected, wallet.isConnecting, router]);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1500);
@@ -25,14 +34,12 @@ export default function ProfilePage() {
     console.log('Profile data:', data);
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
-    alert('Profile updated successfully!');
   };
 
   const handleSecuritySubmit = async (data: SecuritySettingsFormData) => {
     console.log('Security data:', data);
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
-    alert('Security settings updated successfully!');
   };
 
   return (
@@ -42,7 +49,7 @@ export default function ProfilePage() {
       </Head>
       <main className="min-h-screen bg-background-primary">
         <Navbar
-          address={wallet.address}
+          publicKey={wallet.publicKey}
           isConnecting={wallet.isConnecting}
           onConnect={wallet.connect}
           onDisconnect={wallet.disconnect}

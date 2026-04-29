@@ -1,11 +1,11 @@
 import Head from "next/head";
 import Link from "next/link";
 
-import { useWallet } from "@/hooks/useWallet";
+import { useWalletContext } from "@/hooks/useWallet";
 import { shortenAddress } from "@/utils/contractHelpers";
 
 export default function HomePage() {
-  const { address, isConnected, isConnecting, connect, disconnect } = useWallet();
+  const { publicKey, isConnected, isConnecting, connect, disconnect } = useWalletContext();
 
   return (
     <>
@@ -36,7 +36,7 @@ export default function HomePage() {
                   <div className="inline-flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/30 px-5 py-3">
                     <span className="h-2 w-2 rounded-full bg-green-500" />
                     <span className="text-sm font-medium text-slate-200">
-                      {shortenAddress(address!, 6)}
+                      {shortenAddress(publicKey!, 6)}
                     </span>
                   </div>
                   <Link
@@ -59,7 +59,7 @@ export default function HomePage() {
                 <>
                   <button
                     type="button"
-                    onClick={connect}
+                    onClick={() => connect('freighter')}
                     disabled={isConnecting}
                     aria-label={isConnecting ? "Connecting to Stellar wallet" : "Connect Stellar wallet"}
                     className="inline-flex items-center justify-center rounded-xl bg-axion-500 px-5 py-3 text-sm font-medium text-white shadow-lg shadow-axion-500/20 transition hover:bg-axion-400 disabled:cursor-not-allowed disabled:opacity-70"

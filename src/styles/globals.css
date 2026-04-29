@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import './theme.css';
+@import "./theme.css";
 
 html,
 body {
@@ -12,7 +12,7 @@ body {
 body {
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
-  @apply antialiased transition-colors duration-200;
+  @apply font-sans antialiased transition-colors duration-200;
 }
 
 * {

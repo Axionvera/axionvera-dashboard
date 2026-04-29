@@ -1,12 +1,57 @@
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { useSidebar } from "@/hooks/useSidebar";
 
 interface SidebarProps {
   className?: string;
 }
 
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export default function Sidebar({ className = "" }: SidebarProps) {
   const { isOpen, toggle, close } = useSidebar();
+  const sidebarRef = useRef<HTMLElement>(null);
+
+  // Trap focus inside sidebar when open on mobile
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const sidebar = sidebarRef.current;
+    if (!sidebar) return;
+
+    const focusable = Array.from(sidebar.querySelectorAll<HTMLElement>(FOCUSABLE));
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        close();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      if (focusable.length === 0) {
+        e.preventDefault();
+        return;
+      }
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }
+    }
+
+    // Move focus into sidebar
+    first?.focus();
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, close]);
 
   const menuItems = [
     {
@@ -43,6 +88,10 @@ export default function Sidebar({ className = "" }: SidebarProps) {
 
       {/* Sidebar */}
       <aside
+        ref={sidebarRef}
+        role="navigation"
+        aria-label="Main navigation"
+        aria-hidden={!isOpen}
         className={`
           fixed left-0 top-0 z-50 h-screen w-64 bg-background-primary border-r border-border-primary
           transform transition-all duration-300 ease-in-out
@@ -55,16 +104,16 @@ export default function Sidebar({ className = "" }: SidebarProps) {
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-border-primary">
             <Link href="/" className="flex items-center gap-2">
-              <div 
-                aria-hidden="true" 
-                className="h-9 w-9 rounded-xl bg-gradient-to-br from-axion-500 to-indigo-500 shadow-lg shadow-axion-500/20" 
+              <div
+                aria-hidden="true"
+                className="h-9 w-9 rounded-xl bg-gradient-to-br from-axion-500 to-indigo-500 shadow-lg shadow-axion-500/20"
               />
               <div className="leading-tight">
                 <div className="text-sm font-semibold text-text-primary">Axionvera</div>
                 <div className="text-xs text-text-muted">Dashboard</div>
               </div>
             </Link>
-            
+
             {/* Mobile close button */}
             <button
               type="button"
@@ -90,7 +139,7 @@ export default function Sidebar({ className = "" }: SidebarProps) {
                       rel="noreferrer"
                       className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-text-secondary transition hover:bg-background-secondary/60 hover:text-text-primary"
                     >
-                      <span className="text-slate-400 group-hover:text-axion-500 transition-colors">{item.icon}</span>
+                      <span className="text-slate-400 transition-colors">{item.icon}</span>
                       <span>{item.label}</span>
                     </a>
                   ) : (
@@ -99,7 +148,7 @@ export default function Sidebar({ className = "" }: SidebarProps) {
                       onClick={close}
                       className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-text-secondary transition hover:bg-background-secondary/60 hover:text-text-primary"
                     >
-                      <span className="text-slate-400 group-hover:text-axion-500 transition-colors">{item.icon}</span>
+                      <span className="text-slate-400 transition-colors">{item.icon}</span>
                       <span>{item.label}</span>
                     </Link>
                   )}
@@ -109,23 +158,6 @@ export default function Sidebar({ className = "" }: SidebarProps) {
           </nav>
         </div>
       </aside>
-
-      {/* Mobile menu toggle button */}
-      <button
-        type="button"
-        onClick={toggle}
-        aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
-        aria-expanded={isOpen}
-        className="lg:hidden fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-xl bg-axion-500 text-white shadow-lg shadow-axion-500/20 transition hover:bg-axion-400"
-      >
-        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-          {isOpen ? (
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          ) : (
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          )}
-        </svg>
-      </button>
     </>
   );
 }

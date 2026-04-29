@@ -1,3 +1,5 @@
+import { getFriendlyErrorMessage } from "./errorFormatting";
+
 export interface ApiCallOptions {
   timeout?: number;
   retries?: number;
@@ -61,7 +63,8 @@ export function withApiResilience<T extends (...args: any[]) => Promise<any>>(
 
         // Wait before retrying
         if (attempt < retries) {
-          await new Promise(resolve => setTimeout(resolve, retryDelay * (attempt + 1)));
+          const delay = retryDelay * Math.pow(2, attempt);
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
     }
@@ -73,12 +76,16 @@ export function withApiResilience<T extends (...args: any[]) => Promise<any>>(
     }
 
     // Enhance the error with additional context
-    const enhancedError: ApiError = new Error(
-      `API call failed after ${retries + 1} attempts: ${lastError.message}`
-    );
+    const isTimeout = !!(lastError as ApiError).isTimeout;
+    const isNetworkError = !!(lastError as ApiError).isNetworkError;
+    const status = isTimeout ? 408 : (lastError as any).status;
+
+    const friendlyMessage = getFriendlyErrorMessage(status, isNetworkError);
+
+    const enhancedError: ApiError = new Error(friendlyMessage);
     enhancedError.originalError = lastError as Error;
-    enhancedError.isNetworkError = !!(lastError as ApiError).isNetworkError;
-    enhancedError.isTimeout = !!(lastError as ApiError).isTimeout;
+    enhancedError.isNetworkError = isNetworkError;
+    enhancedError.isTimeout = isTimeout;
 
     throw enhancedError;
   }) as T;
