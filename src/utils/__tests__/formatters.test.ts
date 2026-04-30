@@ -2,39 +2,35 @@ import { truncateAddress, formatBalance } from '../formatters';
 
 describe('formatters utility', () => {
   describe('truncateAddress', () => {
-    it('should truncate a long address correctly', () => {
+    it('should truncate a long address correctly with defaults (4, 4)', () => {
       const address = 'GBRP4S7X3Y3B3S3X3Y3B3S3X3Y3B3S3X3Y3B3S3X3Y3B3S3X3Y3B3S3X';
-      expect(truncateAddress(address)).toBe('GBRP4S...3B3S3X');
+      expect(truncateAddress(address)).toBe('GBRP...3S3X');
     });
 
     it('should return an empty string for undefined/null input', () => {
       expect(truncateAddress(undefined)).toBe('');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(truncateAddress(null as any)).toBe('');
       expect(truncateAddress('')).toBe('');
     });
 
     it('should not truncate if the address is short enough', () => {
       const shortAddr = 'GABC123';
-      expect(truncateAddress(shortAddr, 4)).toBe(shortAddr);
+      expect(truncateAddress(shortAddr)).toBe(shortAddr);
     });
 
-    it('should use default chars=6 if not provided', () => {
+    it('should respect custom startChars and endChars', () => {
       const address = 'GDQP2KPQGKI76Z67S73YV7R66M2X7G4Y6NVYV7R66M2X7G4Y6NVY';
-      expect(truncateAddress(address)).toBe('GDQP2K...4Y6NVY');
-    });
-
-    it('should respect custom chars parameter', () => {
-      const address = 'GDQP2KPQGKI76Z67S73YV7R66M2X7G4Y6NVYV7R66M2X7G4Y6NVY';
-      expect(truncateAddress(address, 4)).toBe('GDQP...6NVY');
+      expect(truncateAddress(address, 6, 2)).toBe('GDQP2K...VY');
     });
 
     it('should handle addresses exactly at the threshold', () => {
-      // chars = 6, threshold = 15
-      const exact = '123456789012345';
-      expect(truncateAddress(exact, 6)).toBe(exact);
-      
-      const oneMore = '1234567890123456';
-      expect(truncateAddress(oneMore, 6)).toBe('123456...123456');
+      // start=4, end=4, threshold = 4 + 4 + 3 = 11
+      const exact = '12345678901';
+      expect(truncateAddress(exact)).toBe(exact);
+
+      const oneMore = '123456789012';
+      expect(truncateAddress(oneMore)).toBe('1234...9012');
     });
   });
 
@@ -61,7 +57,7 @@ describe('formatters utility', () => {
       // 100,000,000,000.1234567 XLM
       const massiveStroops = '1000000000001234567';
       expect(formatBalance(massiveStroops)).toBe('100,000,000,000.1234567');
-      
+
       const evenLarger = 1000000000000000000000000n; // 10^23 Stroops = 10^16 XLM
       expect(formatBalance(evenLarger)).toBe('100,000,000,000,000,000');
     });

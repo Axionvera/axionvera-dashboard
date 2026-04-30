@@ -1,53 +1,54 @@
-# Global Error Boundaries & API Resilience Implementation
+# URL-based Deposit/Withdraw Pre-filling
 
 ## Summary
-This PR implements a comprehensive error handling and API resilience layer for the Axionvera Dashboard to prevent crashes and provide graceful recovery paths when unexpected errors occur.
+
+Implemented support for pre-filling deposit and withdraw forms via URL query parameters, allowing partners or marketing links to send users directly to a pre-filled deposit screen.
 
 ## Problem Solved
-Previously, unhandled JavaScript exceptions or failed API calls could cause the entire dashboard to crash to a blank white screen, leaving users with no recovery options.
+
+Partners or marketing links wanted to send users directly to a pre-filled deposit screen (e.g., `dashboard?action=deposit&amount=100`) but the dashboard lacked support for URL query parameters to trigger this behavior.
 
 ## Solution Overview
-Implemented a robust resilience layer with the following components:
-
-### 🛡️ Error Boundary System
-- **ErrorBoundary Component**: Higher-order React component based on official React documentation
-- **Friendly Fallback UI**: User-friendly error screen with recovery options
-- **Root Application Wrapping**: Error boundary wraps the entire application router
-- **Development Debug Info**: Enhanced error details in development mode
-
-### 🔧 API Resilience Framework
-- **Timeout Protection**: Configurable timeout limits for all API calls (default: 10s)
-- **Automatic Retry Logic**: Intelligent retry mechanism with exponential backoff
-- **Global Error Handling**: Centralized error logging and context
-- **Safe API Wrapper**: Non-throwing API calls with `{ data, error }` return pattern
-- **Debouncing**: Prevents rapid successive API calls
-
-### 🎯 Enhanced SDK Integration
-- **Refactored contractHelpers**: All SDK methods now use resilience patterns
-- **Configurable Options**: Each API call accepts custom timeout and retry settings
-- **Fallback Values**: Optional fallback data when API calls fail
-- **Error Context**: Enhanced error messages with operation context
-
-### 🎨 User Experience Improvements
-- **Secure Reload Action**: Safe application reload that clears corrupted state
-- **Go Back Option**: Navigation fallback for error recovery
-- **Loading States**: Proper loading indicators during API operations
-- **Error Feedback**: Clear error messaging without technical jargon
-
-## Technical Implementation
-
-### Files Added
-- `src/components/ErrorBoundary.tsx` - Main error boundary component
-- `src/components/ErrorFallback.tsx` - Reusable fallback UI component  
-- `src/utils/apiResilience.ts` - API resilience utilities and helpers
-- `src/hooks/useApiError.ts` - React hook for component-level error handling
 
 ### Files Modified
-- `src/pages/_app.tsx` - Wrapped application with ErrorBoundary
-- `src/utils/contractHelpers.ts` - Enhanced SDK with resilience patterns
 
-### Key Features
-1. **Automatic Error Catching**: Catches all React render errors and unhandled exceptions
+| File | Changes |
+|------|---------|
+| `src/pages/dashboard.tsx` | Added URL query parameter parsing with `useSearchParams`, auto-trigger wallet connection |
+| `src/components/DepositForm.tsx` | Added `defaultAmount` prop with form pre-fill via `setValue` |
+| `src/components/WithdrawForm.tsx` | Added `defaultAmount` prop with form pre-fill via `setValue` |
+
+## Usage Examples
+
+```
+# Pre-filled deposit with amount
+/dashboard?action=deposit&amount=100
+
+# Pre-filled withdraw with amount
+/dashboard?action=withdraw&amount=50
+```
+
+## Acceptance Criteria
+
+- [x] `/dashboard` route checks for URL query parameters: `action` and `amount`
+- [x] If `action=deposit` is present, automatically opens the Deposit form
+- [x] If `amount` is present, pre-fills the input field in the respective form
+- [x] "Connect Wallet" flow is triggered first if the user is not authenticated
+- [x] Uses Next.js `useSearchParams` hook to read data without triggering full page re-render
+
+## Technical Notes
+
+- Uses React's `useEffect` to handle URL parameter parsing to avoid hydration mismatches
+- Form pre-filling only activates when wallet is connected
+- Auto-connect only triggers when an `action` parameter is present
+- No full page re-render occurs because `useSearchParams` is used
+
+## Testing Steps
+
+1. **Test deposit pre-fill:** Navigate to `/dashboard?action=deposit&amount=100` → verify amount field shows "100"
+2. **Test withdraw pre-fill:** Navigate to `/dashboard?action=withdraw&amount=50` → verify amount field shows "50"
+3. **Test auto-connect:** Disconnect wallet, navigate to `/dashboard?action=deposit&amount=100` → verify connection prompt appears
+4. **Test no parameters:** Navigate to `/dashboard` → verify both forms are empty
 2. **API Timeouts**: Prevents hanging requests with configurable timeouts
 3. **Retry Logic**: Automatic retries for transient failures
 4. **Graceful Degradation**: Fallback values when APIs are unavailable

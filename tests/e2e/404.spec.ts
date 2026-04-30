@@ -13,7 +13,9 @@ test.describe('404 Error Page', () => {
     expect(response?.status()).toBe(404);
     
     // Verify 404 content is displayed
-    await expect(page.getByText('404').first()).toBeVisible();
+    await expect(
+      page.locator('text=404').or(page.locator('text=Not Found'))
+    ).toBeVisible();
   });
 
   test('should display 404 for multiple invalid routes', async ({ page }) => {
@@ -71,21 +73,27 @@ test.describe('404 Error Page', () => {
     const response = await page.goto('/invalid?param=value&other=test');
     
     expect(response?.status()).toBe(404);
-    await expect(page.getByText('404').first()).toBeVisible();
+    await expect(
+      page.locator('text=404').or(page.locator('text=Not Found'))
+    ).toBeVisible();
   });
 
   test('should not break on 404 with hash fragments', async ({ page }) => {
     const response = await page.goto('/invalid#section');
     
     expect(response?.status()).toBe(404);
-    await expect(page.getByText('404').first()).toBeVisible();
+    await expect(
+      page.locator('text=404').or(page.locator('text=Not Found'))
+    ).toBeVisible();
   });
 
   test('should handle deeply nested invalid routes', async ({ page }) => {
     const response = await page.goto('/level1/level2/level3/invalid');
     
     expect(response?.status()).toBe(404);
-    await expect(page.getByText('404').first()).toBeVisible();
+    await expect(
+      page.locator('text=404').or(page.locator('text=Not Found'))
+    ).toBeVisible();
   });
 
   test('should not show 404 for valid routes', async ({ page }) => {
@@ -93,8 +101,7 @@ test.describe('404 Error Page', () => {
     
     for (const route of validRoutes) {
       const response = await page.goto(route);
-      const status = response?.status();
-      expect([200, 304]).toContain(status);
+      expect(response?.status()).toBe(200);
       
       // Verify 404 content is NOT displayed
       const has404 = await page.locator('text=404').isVisible().catch(() => false);

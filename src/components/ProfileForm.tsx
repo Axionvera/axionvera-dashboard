@@ -23,7 +23,7 @@ export default function ProfileForm({ initialData, onSubmit }: ProfileFormProps)
     register,
     handleSubmit,
     watch,
-    formState: { errors, isDirty, isValid, isSubmitting }
+    formState: { errors, isDirty, isValid, isSubmitting },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     mode: 'onChange',
@@ -34,16 +34,12 @@ export default function ProfileForm({ initialData, onSubmit }: ProfileFormProps)
 
   const handleFormSubmit = async (data: ProfileFormData) => {
     if (onSubmit) {
-      try {
-        await onSubmit(data);
-        notify.success("Profile Updated", "Your profile information has been saved successfully.");
-      } catch (error) {
-        notify.error("Update Failed", "Could not update profile information.");
-      }
+      await onSubmit(data);
+      notify.success('Profile Updated', 'Your profile information has been saved successfully.');
     }
   };
 
-  const shouldDisableSubmit = !isDirty || !isValid || isSubmitting;
+  const shouldDisableSubmit = !isValid || !isDirty || isSubmitting;
 
   return (
     <div className="rounded-2xl border border-border-primary bg-background-primary/30 p-6">
@@ -63,7 +59,7 @@ export default function ProfileForm({ initialData, onSubmit }: ProfileFormProps)
             required
             error={errors.firstName}
           />
-          
+
           <FormInput
             {...register('lastName')}
             id="lastName"
@@ -84,10 +80,11 @@ export default function ProfileForm({ initialData, onSubmit }: ProfileFormProps)
         />
 
         <div>
-          <label 
-            htmlFor="bio" 
+          <label
+            htmlFor="bio"
             className={`block text-xs font-medium mb-2 ${errors.bio ? 'text-red-500 dark:text-red-400' : 'text-text-secondary'}`}
           >
+          <label htmlFor="bio" className={`block text-xs font-medium mb-2 ${errors.bio ? 'text-red-500 dark:text-red-400' : 'text-text-secondary'}`}>
             Bio
           </label>
           <textarea
@@ -101,6 +98,10 @@ export default function ProfileForm({ initialData, onSubmit }: ProfileFormProps)
               transition-all duration-200 resize-none
               focus:outline-none focus:ring-2 focus:ring-axion-500/50 focus:border-axion-500
               placeholder:text-text-muted
+              ${
+                errors.bio
+                  ? 'border-red-500/70 bg-red-500/5 focus:border-red-500 focus:ring-red-500/20'
+                  : 'border-border-primary bg-background-secondary/30'
               ${errors.bio
                 ? 'border-red-500/70 bg-red-500/5 focus:border-red-500 focus:ring-red-500/20' 
                 : 'border-border-primary bg-background-secondary/30'
@@ -112,9 +113,14 @@ export default function ProfileForm({ initialData, onSubmit }: ProfileFormProps)
           <div className="mt-1 flex justify-between">
             <div id="bio-error">
               {errors.bio ? (
+                <p className="text-xs text-red-500 dark:text-red-400 font-medium">
+                  {errors.bio.message}
+                </p>
                 <p className="text-xs text-red-500 dark:text-red-400 font-medium">{errors.bio.message}</p>
               ) : (
-                <p id="bio-helper" className="text-xs text-text-muted">Optional: Brief description about yourself</p>
+                <p id="bio-helper" className="text-xs text-text-muted">
+                  Optional: Brief description about yourself
+                </p>
               )}
             </div>
             <p className="text-xs text-text-muted" aria-hidden="true">
@@ -133,7 +139,7 @@ export default function ProfileForm({ initialData, onSubmit }: ProfileFormProps)
             error={errors.website}
             helperText="Optional: Your personal or professional website"
           />
-          
+
           <FormInput
             {...register('location')}
             id="location"
@@ -155,7 +161,7 @@ export default function ProfileForm({ initialData, onSubmit }: ProfileFormProps)
           </button>
           <button
             type="submit"
-            disabled={shouldDisableSubmit}
+            disabled={!isDirty || !isValid || isSubmitting}
             aria-label={isSubmitting ? 'Saving profile changes' : 'Save profile changes'}
             className="rounded-xl bg-axion-500 px-6 py-2 text-sm font-medium text-white shadow-lg shadow-axion-500/20 transition hover:bg-axion-400 disabled:cursor-not-allowed disabled:opacity-70 focus:outline-none focus:ring-2 focus:ring-axion-500/50"
           >

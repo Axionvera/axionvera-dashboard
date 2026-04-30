@@ -1,0 +1,9 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://axionvera.com/sitemap.xml
+
+# Crawl delay (optional, for rate limiting)
+Crawl-delay: 1

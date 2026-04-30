@@ -78,3 +78,68 @@ export function TransactionSkeleton() {
     </div>
   );
 }
+
+export function ChartSkeleton() {
+  return (
+    <div className="h-[400px] w-full rounded-2xl border border-border-primary bg-background-primary/30 p-6">
+      <div className="flex items-center justify-between mb-8">
+        <div className="space-y-2">
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-8 w-16 rounded-lg" />
+          <Skeleton className="h-8 w-16 rounded-lg" />
+        </div>
+      </div>
+      <div className="relative h-[250px] w-full">
+        <div className="absolute inset-0 flex items-end justify-between px-2">
+          {[...Array(12)].map((_, i) => (
+            <Skeleton
+              key={i}
+              className="w-[6%] rounded-t-lg"
+              style={{ height: `${Math.random() * 60 + 20}%` }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function FormSkeleton() {
+  return (
+    <div className="rounded-2xl border border-border-primary bg-background-primary/30 p-6">
+      <div className="mb-6 space-y-2">
+        <Skeleton className="h-6 w-32" />
+        <Skeleton className="h-4 w-48" />
+      </div>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-12 w-full rounded-xl" />
+        </div>
+        <div className="flex justify-between">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+        <Skeleton className="h-12 w-full rounded-xl mt-4" />
+      </div>
+    </div>
+  );
+}
+
+export function CardSkeleton() {
+  return (
+    <div className="rounded-2xl border border-border-primary bg-background-primary/30 p-6 space-y-4">
+      <div className="flex justify-between items-center">
+        <Skeleton className="h-6 w-32" />
+        <Skeleton className="h-8 w-20 rounded-lg" />
+      </div>
+      <div className="space-y-2">
+        <Skeleton className="h-10 w-48" />
+        <Skeleton className="h-4 w-full" />
+      </div>
+    </div>
+  );
+}

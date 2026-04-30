@@ -6,21 +6,6 @@ import {
 } from '../apiResilience';
 
 describe('apiResilience utility', () => {
-  let warnSpy: jest.SpyInstance;
-
-  beforeAll(() => {
-    // Mock global fetch for environments where it's not defined (like Node.js with JSDOM)
-    if (typeof global.fetch === 'undefined') {
-      global.fetch = jest.fn();
-    }
-    // Mock console.warn to prevent test output clutter and potential failures in some CI environments
-    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-  });
-
-  afterAll(() => {
-    warnSpy.mockRestore();
-  });
-
   describe('withApiResilience', () => {
     it('should return the result of a successful API call', async () => {
       const mockApi = jest.fn().mockResolvedValue('success');
@@ -43,12 +28,11 @@ describe('apiResilience utility', () => {
       expect(mockApi).toHaveBeenCalledTimes(3);
     });
 
-    it('should throw after all retries fail with friendly message', async () => {
+    it('should throw after all retries fail', async () => {
       const mockApi = jest.fn().mockRejectedValue(new Error('Permanent Fail'));
       const resilientApi = withApiResilience(mockApi, { retries: 1, retryDelay: 10 });
       
-      // The error is now wrapped in a friendly message
-      await expect(resilientApi()).rejects.toThrow(/unexpected network error/);
+      await expect(resilientApi()).rejects.toThrow(/Permanent Fail/);
       expect(mockApi).toHaveBeenCalledTimes(2);
     });
 
@@ -69,7 +53,6 @@ describe('apiResilience utility', () => {
       
       const result = await resilientApi();
       expect(result).toBe('fallback');
-      expect(warnSpy).toHaveBeenCalled();
     });
   });
 

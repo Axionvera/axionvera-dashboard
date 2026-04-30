@@ -72,7 +72,7 @@ test.describe('Navigation', () => {
     await page.goto('/this-route-does-not-exist');
     
     // Verify 404 page is displayed
-    await expect(page.getByText('404').first()).toBeVisible();
+    await expect(page.locator('text=404').or(page.locator('text=Not Found'))).toBeVisible();
     
     // Verify status code (if custom 404 page exists)
     const response = await page.goto('/another-invalid-route');

@@ -8,6 +8,12 @@ jobs:
   lint:
     name: Lint Code
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_STELLAR_NETWORK: testnet
+      NEXT_PUBLIC_SOROBAN_RPC_URL: https://soroban-testnet.stellar.org
+      NEXT_PUBLIC_HORIZON_URL: https://horizon-testnet.stellar.org
+      NEXT_PUBLIC_AXIONVERA_VAULT_CONTRACT_ID: ci-placeholder-vault-contract
+      NEXT_PUBLIC_AXIONVERA_TOKEN_CONTRACT_ID: ci-placeholder-token-contract
     
     steps:
     - name: Checkout code
@@ -31,6 +37,12 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_STELLAR_NETWORK: testnet
+      NEXT_PUBLIC_SOROBAN_RPC_URL: https://soroban-testnet.stellar.org
+      NEXT_PUBLIC_HORIZON_URL: https://horizon-testnet.stellar.org
+      NEXT_PUBLIC_AXIONVERA_VAULT_CONTRACT_ID: ci-placeholder-vault-contract
+      NEXT_PUBLIC_AXIONVERA_TOKEN_CONTRACT_ID: ci-placeholder-token-contract
     
     steps:
     - name: Checkout code

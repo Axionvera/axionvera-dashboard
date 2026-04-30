@@ -1,69 +1,67 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { useTheme as useNextTheme } from 'next-themes';
 
 type Theme = 'light' | 'dark' | 'system';
 type ResolvedTheme = 'light' | 'dark';
 
 interface ThemeContextType {
-  theme: Theme;
+  theme: Theme | undefined;
   setTheme: (theme: Theme) => void;
-  resolvedTheme: ResolvedTheme;
+  resolvedTheme: ResolvedTheme | undefined;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+/**
+ * @deprecated Use ThemeProvider from next-themes directly in _app.tsx.
+ * This wrapper is kept for backward compatibility with the existing useTheme hook.
+ */
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('system');
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('light');
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme-preference') as Theme | null;
-    if (savedTheme) {
-      setThemeState(savedTheme);
-    }
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
-    const updateTheme = () => {
-      let resolved: ResolvedTheme;
-      if (theme === 'system') {
-        resolved = mediaQuery.matches ? 'dark' : 'light';
-      } else {
-        resolved = theme;
-      }
-      setResolvedTheme(resolved);
-      document.documentElement.setAttribute('data-theme', resolved);
-    };
-
-    updateTheme();
-
-    if (theme === 'system') {
-      mediaQuery.addEventListener('change', updateTheme);
-      return () => mediaQuery.removeEventListener('change', updateTheme);
-    }
-  }, [theme, mounted]);
-
-  const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
-    localStorage.setItem('theme-preference', newTheme);
-  };
+  const { theme, setTheme, resolvedTheme } = useNextTheme();
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
+    <ThemeContext.Provider
+      value={{
+        theme: theme as Theme,
+        setTheme: (t: Theme) => setTheme(t),
+        resolvedTheme: resolvedTheme as ResolvedTheme,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );
 }
 
+// Create a fallback hook that always calls useNextTheme at the top level
+function useNextThemeSafe() {
+  try {
+    return useNextTheme();
+  } catch {
+    return null;
+  }
+}
+
 export function useTheme() {
+  const nextTheme = useNextTheme();
   const context = useContext(ThemeContext);
+  
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');
+    return nextTheme;
+  // Always call hooks at the top level, never conditionally
+  const context = useContext(ThemeContext);
+  const nextTheme = useNextThemeSafe();
+  
+  // If we have context, use it
+  if (context !== undefined) {
+    return context;
   }
-  return context;
+  
+  // Fallback to next-themes directly if provider is missing
+  if (nextTheme) {
+    return nextTheme;
+  }
+  
+  // If all else fails, throw an error
+  throw new Error('useTheme must be used within a ThemeProvider');
 }

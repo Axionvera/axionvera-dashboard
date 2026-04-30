@@ -1,0 +1,66 @@
+  console.log
+    MOCKSTORAGE: {
+      'axionvera:vault:testnet:G_WIT': '{"balance":"100","rewards":"0","txs":[]}'
+    }
+
+      at Object.log (src/utils/__tests__/contractHelpers.test.ts:106:15)
+
+\nFAIL src/utils/__tests__/contractHelpers.test.ts (5.612 s)
+  contractHelpers utility
+    shortenAddress
+      √ should shorten address (7 ms)
+      √ should return empty string for no address (1 ms)
+      √ should return original if short enough (1 ms)
+    formatAmount
+      √ should format numbers (120 ms)
+      √ should return original if not a number (1 ms)
+    parsePositiveAmount
+      √ should parse valid positive amounts (12 ms)
+      √ should return null for invalid amounts (2 ms)
+    createAxionveraVaultSdk
+      √ should get balances (mocked) (172 ms)
+      √ should deposit (mocked) (618 ms)
+      × should withdraw (mocked) (671 ms)
+      × should claim rewards (mocked) (610 ms)
+      √ should get transactions (mocked) (620 ms)
+      √ should handle malformed storage gracefully (158 ms)
+
+  ● contractHelpers utility › createAxionveraVaultSdk › should withdraw (mocked)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "60"
+    Received: "0"
+
+    [0m [90m 104 |[39m       
+     [90m 105 |[39m       [36mconst[39m balances [33m=[39m [36mawait[39m sdk[33m.[39mgetBalances({ walletAddress[33m:[39m [32m'G_WIT'[39m[33m,[39m network[33m:[39m [32m'testnet'[39m })[33m;[39m
+    [31m[1m>[22m[39m[90m 106 |[39m       console[33m.[39mlog([32m'MOCKSTORAGE:'[39m[33m,[39m mockStorage)[33m;[39m expect(balances[33m.[39mbalance)[33m.[39mtoBe([32m'60'[39m)[33m;[39m
+     [90m     |[39m                                                                          [31m[1m^[22m[39m
+     [90m 107 |[39m     })[33m;[39m
+     [90m 108 |[39m
+     [90m 109 |[39m     it([32m'should claim rewards (mocked)'[39m[33m,[39m [36masync[39m () [33m=>[39m {[0m
+
+      at Object.toBe (src/utils/__tests__/contractHelpers.test.ts:106:74)
+
+  ● contractHelpers utility › createAxionveraVaultSdk › should claim rewards (mocked)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "110"
+    Received: "0"
+
+    [0m [90m 118 |[39m       
+     [90m 119 |[39m       [36mconst[39m balances [33m=[39m [36mawait[39m sdk[33m.[39mgetBalances({ walletAddress[33m:[39m [32m'G_CLA'[39m[33m,[39m network[33m:[39m [32m'testnet'[39m })[33m;[39m
+    [31m[1m>[22m[39m[90m 120 |[39m       expect(balances[33m.[39mbalance)[33m.[39mtoBe([32m'110'[39m)[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 121 |[39m       expect(balances[33m.[39mrewards)[33m.[39mtoBe([32m'0'[39m)[33m;[39m
+     [90m 122 |[39m     })[33m;[39m
+     [90m 123 |[39m[0m
+
+      at Object.toBe (src/utils/__tests__/contractHelpers.test.ts:120:32)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 11 passed, 13 total
+Snapshots:   0 total
+Time:        8.467 s
+Ran all test suites matching /src\\utils\\__tests__\\contractHelpers.test.ts/i.

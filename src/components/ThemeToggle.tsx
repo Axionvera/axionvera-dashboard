@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { useTheme } from "@/contexts/ThemeContext";
+import { useEffect, useState } from 'react';
+import { useTheme } from 'next-themes';
 
 export default function ThemeToggle() {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   // Avoid hydration mismatch by only rendering after mount
@@ -16,11 +16,11 @@ export default function ThemeToggle() {
     );
   }
 
-  const isDark = resolvedTheme === "dark";
+  const isDark = resolvedTheme === 'dark';
 
   return (
     <button
-      onClick={() => setTheme(isDark ? "light" : "dark")}
+      onClick={() => setTheme(isDark ? 'light' : 'dark')}
       className="fixed bottom-6 right-6 p-3 rounded-full bg-background-secondary border border-border-primary text-text-primary shadow-xl hover:shadow-axion-500/20 transition-all z-50 focus:outline-none focus:ring-2 focus:ring-axion-500 group overflow-hidden"
       aria-label="Toggle Dark Mode"
     >
@@ -28,7 +28,7 @@ export default function ThemeToggle() {
         {/* Sun Icon */}
         <svg
           className={`absolute inset-0 transform transition-transform duration-500 ease-in-out ${
-            isDark ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
+            isDark ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'
           }`}
           fill="none"
           viewBox="0 0 24 24"
@@ -44,7 +44,7 @@ export default function ThemeToggle() {
         {/* Moon Icon */}
         <svg
           className={`absolute inset-0 transform transition-transform duration-500 ease-in-out ${
-            isDark ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
+            isDark ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'
           }`}
           fill="none"
           viewBox="0 0 24 24"

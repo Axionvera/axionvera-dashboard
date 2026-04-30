@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { notify } from '@/utils/notifications';
+import { mapSorobanErrorToMessage } from '@/utils/errorDictionary';
 
 export interface ApiErrorState {
   error: Error | null;
@@ -46,7 +47,9 @@ export function useApiError(): UseApiErrorReturn {
     } catch (error) {
       const errorObj = error as Error;
       console.error('API Error in hook:', errorObj);
-      notify.error('API Error', errorObj.message);
+
+      const friendlyMessage = mapSorobanErrorToMessage(errorObj) ?? errorObj.message;
+      notify.error('API Error', friendlyMessage);
       setState({
         error: errorObj,
         isLoading: false,

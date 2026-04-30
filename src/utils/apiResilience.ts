@@ -1,10 +1,10 @@
-import { getFriendlyErrorMessage } from "./errorFormatting";
+import { getFriendlyErrorMessage } from './errorFormatting';
 
-export interface ApiCallOptions {
+export interface ApiCallOptions<T = unknown> {
   timeout?: number;
   retries?: number;
   retryDelay?: number;
-  fallbackValue?: any;
+  fallbackValue?: T;
 }
 
 export interface ApiError extends Error {
@@ -29,15 +29,16 @@ export function createTimeoutPromise(timeoutMs: number): Promise<never> {
 /**
  * Wraps an async function with timeout and retry logic
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function withApiResilience<T extends (...args: any[]) => Promise<any>>(
   apiFunction: T,
-  options: ApiCallOptions = {}
+  options: ApiCallOptions<Awaited<ReturnType<T>>> = {}
 ): T {
   const {
     timeout = 10000, // 10 seconds default timeout
     retries = 2,
     retryDelay = 1000, // 1 second default retry delay
-    fallbackValue
+    fallbackValue,
   } = options;
 
   return (async (...args: Parameters<T>): Promise<ReturnType<T>> => {
@@ -46,15 +47,12 @@ export function withApiResilience<T extends (...args: any[]) => Promise<any>>(
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
         // Create a race between the API call and the timeout
-        const result = await Promise.race([
-          apiFunction(...args),
-          createTimeoutPromise(timeout)
-        ]);
+        const result = await Promise.race([apiFunction(...args), createTimeoutPromise(timeout)]);
 
         return result;
       } catch (error) {
         lastError = error as Error;
-        
+
         // Don't retry on timeout errors or if this is the last attempt
         const apiError = error as ApiError;
         if (apiError.isTimeout || attempt === retries) {
@@ -64,7 +62,7 @@ export function withApiResilience<T extends (...args: any[]) => Promise<any>>(
         // Wait before retrying
         if (attempt < retries) {
           const delay = retryDelay * Math.pow(2, attempt);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
       }
     }
@@ -72,13 +70,13 @@ export function withApiResilience<T extends (...args: any[]) => Promise<any>>(
     // If we have a fallback value, return it instead of throwing
     if (fallbackValue !== undefined) {
       console.warn('API call failed, using fallback value:', lastError);
-      return fallbackValue;
+      return fallbackValue as ReturnType<T>;
     }
 
     // Enhance the error with additional context
     const isTimeout = !!(lastError as ApiError).isTimeout;
     const isNetworkError = !!(lastError as ApiError).isNetworkError;
-    const status = isTimeout ? 408 : (lastError as any).status;
+    const status = isTimeout ? 408 : (lastError as { status?: number }).status;
 
     const friendlyMessage = getFriendlyErrorMessage(status, isNetworkError);
 
@@ -88,12 +86,14 @@ export function withApiResilience<T extends (...args: any[]) => Promise<any>>(
     enhancedError.isTimeout = isTimeout;
 
     throw enhancedError;
-  }) as T;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  }) as any;
 }
 
 /**
  * Wraps any async function with basic error handling and logging
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function withErrorHandling<T extends (...args: any[]) => Promise<any>>(
   fn: T,
   context?: string
@@ -104,11 +104,12 @@ export function withErrorHandling<T extends (...args: any[]) => Promise<any>>(
     } catch (error) {
       const errorContext = context ? `[${context}]` : '';
       console.error(`${errorContext} API Error:`, error);
-      
-      // Re-throw the original error after logging
+
+      // re-throw the original error after logging
       throw error;
     }
-  }) as T;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  }) as any;
 }
 
 /**
@@ -116,7 +117,7 @@ export function withErrorHandling<T extends (...args: any[]) => Promise<any>>(
  */
 export async function safeApiCall<T>(
   apiCall: () => Promise<T>,
-  options: ApiCallOptions = {}
+  options: ApiCallOptions<Awaited<T>> = {}
 ): Promise<{ data?: T; error?: ApiError }> {
   try {
     const data = await withApiResilience(apiCall, options)();
@@ -129,12 +130,13 @@ export async function safeApiCall<T>(
 /**
  * Debounce function for API calls to prevent rapid successive calls
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
   waitMs: number
 ): (...args: Parameters<T>) => void {
   let timeoutId: NodeJS.Timeout;
-  
+
   return (...args: Parameters<T>) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => func(...args), waitMs);

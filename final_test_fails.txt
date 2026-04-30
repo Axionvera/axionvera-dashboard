@@ -1,0 +1,682 @@
+node.exe : FAIL tests/contexts/ThemeContext.test.tsx
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\ABUBAKAR ABDULRAHMAN\A ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (FAIL tests/cont...ontext.test.tsx:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  ΓùÅ ThemeContext ΓÇ║ initializes with system theme light if matches is false
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "system"
+    Received: ""
+
+    [0m [90m 86 |[39m     )[33m;[39m
+     [90m 87 |[39m
+    [31m[1m>[22m[39m[90m 88 |[39m     expect(screen[33m.[39mgetByTestId([32m'theme'[39m)[33m.[39mtextConten
+t)[33m.[39mtoBe([32m'system'[39m)[33m;[39m
+     [90m    |[39m                                                     [31m[1m^[22m[39m
+     [90m 89 |[39m     expect(screen[33m.[39mgetByTestId([32m'resolved'[39m)[33m.[39mtextContent)[33m.[39mtoB
+e([32m'light'[39m)[33m;[39m
+     [90m 90 |[39m     expect(document[33m.[39mdocumentElement[33m.[39mgetAttribute([32m'data-theme'[39m))[33m
+.[39mtoBe([32m'light'[39m)[33m;[39m
+     [90m 91 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/contexts/ThemeContext.test.tsx:88:53)
+
+  ΓùÅ ThemeContext ΓÇ║ initializes with system theme dark if matches is true
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "system"
+    Received: ""
+
+    [0m [90m  99 |[39m     )[33m;[39m
+     [90m 100 |[39m
+    [31m[1m>[22m[39m[90m 101 |[39m     expect(screen[33m.[39mgetByTestId([32m'theme'[39m)[33m.[39mtextConte
+nt)[33m.[39mtoBe([32m'system'[39m)[33m;[39m
+     [90m     |[39m                                                     [31m[1m^[22m[39m
+     [90m 102 |[39m     expect(screen[33m.[39mgetByTestId([32m'resolved'[39m)[33m.[39mtextContent)[33m.[39mto
+Be([32m'dark'[39m)[33m;[39m
+     [90m 103 |[39m     expect(document[33m.[39mdocumentElement[33m.[39mgetAttribute([32m'data-theme'[39m))[33
+m.[39mtoBe([32m'dark'[39m)[33m;[39m
+     [90m 104 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/contexts/ThemeContext.test.tsx:101:53)
+
+  ΓùÅ ThemeContext ΓÇ║ reads initial theme from localStorage
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "dark"
+    Received: ""
+
+    [0m [90m 112 |[39m     )[33m;[39m
+     [90m 113 |[39m
+    [31m[1m>[22m[39m[90m 114 |[39m     expect(screen[33m.[39mgetByTestId([32m'theme'[39m)[33m.[39mtextConte
+nt)[33m.[39mtoBe([32m'dark'[39m)[33m;[39m
+     [90m     |[39m                                                     [31m[1m^[22m[39m
+     [90m 115 |[39m     expect(screen[33m.[39mgetByTestId([32m'resolved'[39m)[33m.[39mtextContent)[33m.[39mto
+Be([32m'dark'[39m)[33m;[39m
+     [90m 116 |[39m   })[33m;[39m
+     [90m 117 |[39m[0m
+
+      at Object.toBe (tests/contexts/ThemeContext.test.tsx:114:53)
+
+  ΓùÅ ThemeContext ΓÇ║ updates theme and localStorage when setTheme is called
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "dark"
+    Received: ""
+
+    [0m [90m 128 |[39m     })[33m;[39m
+     [90m 129 |[39m
+    [31m[1m>[22m[39m[90m 130 |[39m     expect(screen[33m.[39mgetByTestId([32m'theme'[39m)[33m.[39mtextConte
+nt)[33m.[39mtoBe([32m'dark'[39m)[33m;[39m
+     [90m     |[39m                                                     [31m[1m^[22m[39m
+     [90m 131 |[39m     expect(screen[33m.[39mgetByTestId([32m'resolved'[39m)[33m.[39mtextContent)[33m.[39mto
+Be([32m'dark'[39m)[33m;[39m
+     [90m 132 |[39m     
+expect(localStorage[33m.[39mgetItem([32m'theme-preference'[39m))[33m.[39mtoBe([32m'dark'[39m)[33m;[39m
+     [90m 133 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/contexts/ThemeContext.test.tsx:130:53)
+
+  ΓùÅ ThemeContext ΓÇ║ updates resolved theme when system preference changes
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "light"
+    Received: ""
+
+    [0m [90m 141 |[39m     )[33m;[39m
+     [90m 142 |[39m
+    [31m[1m>[22m[39m[90m 143 |[39m     expect(screen[33m.[39mgetByTestId([32m'resolved'[39m)[33m.[39mtextCo
+ntent)[33m.[39mtoBe([32m'light'[39m)[33m;[39m
+     [90m     |[39m                                                        [31m[1m^[22m[39m
+     [90m 144 |[39m
+     [90m 145 |[39m     act(() [33m=>[39m {
+     [90m 146 |[39m       [36mconst[39m mediaQueryList [33m=[39m 
+window[33m.[39mmatchMedia([32m'(prefers-color-scheme: dark)'[39m) [36mas[39m 
+[33mMockMediaQueryList[39m[33m;[39m[0m
+
+      at Object.toBe (tests/contexts/ThemeContext.test.tsx:143:56)
+
+FAIL tests/components/Navbar.test.tsx
+  ΓùÅ Navbar ΓÇ║ shows disconnect button when connected
+
+    TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/disconnect 
+stellar wallet/i`
+
+    Here are the accessible roles:
+
+      banner:
+
+      Name "":
+      [36m<header[39m
+        [33mclass[39m=[32m"sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800 bg-white/80 
+dark:bg-slate-950/80 backdrop-blur transition-colors duration-300"[39m
+      [36m/>[39m
+
+      --------------------------------------------------
+      button:
+
+      Name "Open sidebar":
+      [36m<button[39m
+        [33maria-controls[39m=[32m"main-sidebar"[39m
+        [33maria-expanded[39m=[32m"false"[39m
+        [33maria-label[39m=[32m"Open sidebar"[39m
+        [33mclass[39m=[32m"flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 
+dark:border-slate-800 bg-slate-100/30 dark:bg-slate-900/30 text-slate-600 dark:text-slate-300 transition 
+hover:bg-slate-200/50 dark:hover:bg-slate-900/60 lg:hidden"[39m
+        [33mtype[39m=[32m"button"[39m
+      [36m/>[39m
+
+      Name "Expand sidebar":
+      [36m<button[39m
+        [33maria-expanded[39m=[32m"false"[39m
+        [33maria-label[39m=[32m"Expand sidebar"[39m
+        [33mclass[39m=[32m"hidden lg:flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 
+dark:border-slate-800 bg-slate-100/30 dark:bg-slate-900/30 text-slate-600 dark:text-slate-300 transition 
+hover:bg-slate-200/50 dark:hover:bg-slate-900/60"[39m
+        [33mtype[39m=[32m"button"[39m
+      [36m/>[39m
+
+      Name "Toggle Dark Mode":
+      [36m<button[39m
+        [33maria-label[39m=[32m"Toggle Dark Mode"[39m
+        [33mclass[39m=[32m"fixed bottom-6 right-6 p-3 rounded-full bg-background-secondary border 
+border-border-primary text-text-primary shadow-xl hover:shadow-axion-500/20 transition-all z-50 focus:outline-none 
+focus:ring-2 focus:ring-axion-500 group overflow-hidden"[39m
+      [36m/>[39m
+
+      Name "Connect Stellar wallet":
+      [36m<button[39m
+        [33maria-label[39m=[32m"Connect Stellar wallet"[39m
+        [33mclass[39m=[32m"rounded-xl bg-axion-500 px-4 py-2 text-sm font-medium text-white shadow-lg 
+shadow-axion-500/20 transition hover:bg-axion-400 disabled:cursor-not-allowed disabled:opacity-70"[39m
+        [33mtype[39m=[32m"button"[39m
+      [36m/>[39m
+
+      --------------------------------------------------
+      link:
+
+      Name "Axionvera logo Axionvera Dashboard":
+      [36m<a[39m
+        [33mclass[39m=[32m"flex items-center gap-2"[39m
+        [33mhref[39m=[32m"/"[39m
+      [36m/>[39m
+
+      Name "Vault":
+      [36m<a[39m
+        [33mclass[39m=[32m"rounded-lg px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-900/60"[39m
+        [33mhref[39m=[32m"/dashboard"[39m
+      [36m/>[39m
+
+      Name "Profile":
+      [36m<a[39m
+        [33mclass[39m=[32m"rounded-lg px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-900/60"[39m
+        [33mhref[39m=[32m"/profile"[39m
+      [36m/>[39m
+
+      Name "Soroban":
+      [36m<a[39m
+        [33mclass[39m=[32m"rounded-lg px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-900/60"[39m
+        [33mhref[39m=[32m"https://stellar.org/soroban"[39m
+        [33mrel[39m=[32m"noopener noreferrer"[39m
+        [33mtarget[39m=[32m"_blank"[39m
+      [36m/>[39m
+
+      --------------------------------------------------
+      img:
+
+      Name "Axionvera logo":
+      [36m<img[39m
+        [33malt[39m=[32m"Axionvera logo"[39m
+        [33mclass[39m=[32m"rounded-xl shadow-lg shadow-axion-500/20"[39m
+        [33mdata-nimg[39m=[32m"1"[39m
+        [33mdecoding[39m=[32m"async"[39m
+        [33mfetchpriority[39m=[32m"high"[39m
+        [33mheight[39m=[32m"36"[39m
+        [33msrc[39m=[32m"/axionvera.svg"[39m
+        [33mstyle[39m=[32m"color: transparent;"[39m
+        [33mwidth[39m=[32m"36"[39m
+      [36m/>[39m
+
+      --------------------------------------------------
+      navigation:
+
+      Name "":
+      [36m<nav[39m
+        [33mclass[39m=[32m"hidden items-center gap-3 text-sm text-slate-600 dark:text-slate-300 sm:flex"[39m
+      [36m/>[39m
+
+      --------------------------------------------------
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<header[39m
+          [33mclass[39m=[32m"sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800 bg-white/80 
+dark:bg-slate-950/80 backdrop-blur transition-colors duration-300"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-4"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-controls[39m=[32m"main-sidebar"[39m
+                [33maria-expanded[39m=[32m"false"[39m
+                [33maria-label[39m=[32m"Open sidebar"[39m
+                [33mclass[39m=[32m"flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 
+dark:border-slate-800 bg-slate-100/30 dark:bg-slate-900/30 text-slate-600 dark:text-slate-300 transition 
+hover:bg-slate-200/50 dark:hover:bg-slate-900/60 lg:hidden"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"h-5 w-5"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M4 6h16M4 12h16M4 18h16"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-expanded[39m=[32m"false"[39m
+                [33maria-label[39m=[32m"Expand sidebar"[39m
+                [33mclass[39m=[32m"hidden lg:flex h-10 w-10 items-center justify-center rounded-xl border 
+border-slate-200 dark:border-slate-800 bg-slate-100/30 dark:bg-slate-900/30 text-slate-600 dark:text-slate-300 
+transition hover:bg-slate-200/50 dark:hover:bg-slate-900/60"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"h-5 w-5 transition-transform duration-300"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mstyle[39m=[32m"transform: rotate(0deg);"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M13 5l7 7-7 7M5 5l7 7-7 7"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<a[39m
+                [33mclass[39m=[32m"flex items-center gap-2"[39m
+                [33mhref[39m=[32m"/"[39m
+              [36m>[39m
+                [36m<img[39m
+                  [33malt[39m=[32m"Axionvera logo"[39m
+                  [33mclass[39m=[32m"rounded-xl shadow-lg shadow-axion-500/20"[39m
+                  [33mdata-nimg[39m=[32m"1"[39m
+                  [33mdecoding[39m=[32m"async"[39m
+                  [33mfetchpriority[39m=[32m"high"[39m
+                  [33mheight[39m=[32m"36"[39m
+                  [33msrc[39m=[32m"/axionvera.svg"[39m
+                  [33mstyle[39m=[32m"color: transparent;"[39m
+                  [33mwidth[39m=[32m"36"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"leading-tight"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"text-sm font-semibold text-slate-900 dark:text-white"[39m
+                  [36m>[39m
+                    [0mAxionvera[0m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"text-xs text-slate-500 dark:text-slate-400"[39m
+                  [36m>[39m
+                    [0mDashboard[0m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</a>[39m
+              [36m<nav[39m
+                [33mclass[39m=[32m"hidden items-center gap-3 text-sm text-slate-600 dark:text-slate-300 
+sm:flex"[39m
+              [36m>[39m
+                [36m<a[39m
+                  [33mclass[39m=[32m"rounded-lg px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-900/60"[39m
+                  [33mhref[39m=[32m"/dashboard"[39m
+                [36m>[39m
+                  [0mVault[0m
+                [36m</a>[39m
+                [36m<a[39m
+                  [33mclass[39m=[32m"rounded-lg px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-900/60"[39m
+                  [33mhref[39m=[32m"/profile"[39m
+                [36m>[39m
+                  [0mProfile[0m
+                [36m</a>[39m
+                [36m<a[39m
+                  [33mclass[39m=[32m"rounded-lg px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-900/60"[39m
+                  [33mhref[39m=[32m"https://stellar.org/soroban"[39m
+                  [33mrel[39m=[32m"noopener noreferrer"[39m
+                  [33mtarget[39m=[32m"_blank"[39m
+                [36m>[39m
+                  [0mSoroban[0m
+                [36m</a>[39m
+              [36m</nav>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-4"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Toggle Dark Mode"[39m
+                [33mclass[39m=[32m"fixed bottom-6 right-6 p-3 rounded-full bg-background-secondary border 
+border-border-primary text-text-primary shadow-xl hover:shadow-axion-500/20 transition-all z-50 focus:outline-none 
+focus:ring-2 focus:ring-axion-500 group overflow-hidden"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"relative w-6 h-6"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"absolute inset-0 transform transition-transform duration-500 ease-in-out 
+rotate-0 scale-100 opacity-100"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M12 3v1m0 16v1m9-9h-1M4 9H3m15.364-6.364l-.707.707M6.343 
+17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"[39m
+                      [33mstroke-linecap[39m=[32m"round"[39m
+                      [33mstroke-linejoin[39m=[32m"round"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"absolute inset-0 transform transition-transform duration-500 ease-in-out 
+-rotate-90 scale-0 opacity-0"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 
+008.354-5.646z"[39m
+                      [33mstroke-linecap[39m=[32m"round"[39m
+                      [33mstroke-linejoin[39m=[32m"round"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</div>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Connect Stellar wallet"[39m
+                [33mclass[39m=[32m"rounded-xl bg-axion-500 px-4 py-2 text-sm font-medium text-white shadow-lg 
+shadow-axion-500/20 transition hover:bg-axion-400 disabled:cursor-not-allowed disabled:opacity-70"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mConnect Wallet[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</header>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+    [0m [90m 43 |[39m     )[33m;[39m
+     [90m 44 |[39m
+    [31m[1m>[22m[39m[90m 45 |[39m     [36mawait[39m 
+user[33m.[39mclick(screen[33m.[39mgetByRole([32m"button"[39m[33m,[39m { name[33m:[39m [35m/disconnect 
+stellar wallet/i[39m }))[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 46 |[39m     expect(onDisconnect)[33m.[39mtoHaveBeenCalledTimes([35m1[39m)[33m;[39m
+     [90m 47 |[39m   })[33m;[39m
+     [90m 48 |[39m })[33m;[39m[0m
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.getByRole (tests/components/Navbar.test.tsx:45:29)
+
+FAIL src/utils/__tests__/apiResilience.test.ts
+  ΓùÅ Console
+
+    console.warn
+      API call failed, using fallback value: Error: Fail
+          at Object.<anonymous> (C:\Users\ABUBAKAR 
+ABDULRAHMAN\Documents\axionvera-dashboard\src\utils\__tests__\apiResilience.test.ts:47:51)
+          at Promise.then.completed (C:\Users\ABUBAKAR 
+ABDULRAHMAN\Documents\axionvera-dashboard\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\Users\ABUBAKAR 
+ABDULRAHMAN\Documents\axionvera-dashboard\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\Users\ABUBAKAR 
+ABDULRAHMAN\Documents\axionvera-dashboard\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\Users\ABUBAKAR 
+ABDULRAHMAN\Documents\axionvera-dashboard\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\Users\ABUBAKAR 
+ABDULRAHMAN\Documents\axionvera-dashboard\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\Users\ABUBAKAR 
+ABDULRAHMAN\Documents\axionvera-dashboard\node_modules\jest-circus\build\run.js:121:9)
+          at _runTestsForDescribeBlock (C:\Users\ABUBAKAR 
+ABDULRAHMAN\Documents\axionvera-dashboard\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\Users\ABUBAKAR 
+ABDULRAHMAN\Documents\axionvera-dashboard\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\Users\ABUBAKAR ABDULRAHMAN\Documents\axionvera-dashboard\node_modul
+es\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\Users\ABUBAKAR 
+ABDULRAHMAN\Documents\axionvera-dashboard\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\Users\ABUBAKAR 
+ABDULRAHMAN\Documents\axionvera-dashboard\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\Users\ABUBAKAR 
+ABDULRAHMAN\Documents\axionvera-dashboard\node_modules\jest-runner\build\runTest.js:444:34)
+          at Object.worker (C:\Users\ABUBAKAR 
+ABDULRAHMAN\Documents\axionvera-dashboard\node_modules\jest-runner\build\testWorker.js:106:12)
+
+    [0m [90m 72 |[39m     [90m// If we have a fallback value, return it instead of throwing[39m
+     [90m 73 |[39m     [36mif[39m (fallbackValue [33m!==[39m undefined) {
+    [31m[1m>[22m[39m[90m 74 |[39m       console[33m.[39mwarn([32m'API call failed, using fallback 
+value:'[39m[33m,[39m lastError)[33m;[39m
+     [90m    |[39m               [31m[1m^[22m[39m
+     [90m 75 |[39m       [36mreturn[39m fallbackValue[33m;[39m
+     [90m 76 |[39m     }
+     [90m 77 |[39m[0m
+
+      at warn (src/utils/apiResilience.ts:74:15)
+      at Object.<anonymous> (src/utils/__tests__/apiResilience.test.ts:54:22)
+
+  ΓùÅ apiResilience utility ΓÇ║ withApiResilience ΓÇ║ should throw after all retries fail
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected pattern: /Permanent Fail/
+    Received message: "An unexpected network error occurred while communicating with the Stellar network."
+
+        [0m [90m 83 |[39m     [36mconst[39m friendlyMessage [33m=[39m getFriendlyErrorMessage(status[33m,[39m 
+isNetworkError)[33m;[39m
+         [90m 84 |[39m
+        [31m[1m>[22m[39m[90m 85 |[39m     [36mconst[39m enhancedError[33m:[39m [33mApiError[39m 
+[33m=[39m [36mnew[39m [33mError[39m(friendlyMessage)[33m;[39m
+         [90m    |[39m                                     [31m[1m^[22m[39m
+         [90m 86 |[39m     enhancedError[33m.[39moriginalError [33m=[39m lastError [36mas[39m 
+[33mError[39m[33m;[39m
+         [90m 87 |[39m     enhancedError[33m.[39misNetworkError [33m=[39m isNetworkError[33m;[39m
+         [90m 88 |[39m     enhancedError[33m.[39misTimeout [33m=[39m isTimeout[33m;[39m[0m
+
+      at src/utils/apiResilience.ts:85:37
+      at Object.<anonymous> (src/utils/__tests__/apiResilience.test.ts:35:7)
+      at Object.toThrow (node_modules/expect/build/index.js:218:22)
+      at Object.toThrow (src/utils/__tests__/apiResilience.test.ts:35:44)
+
+PASS tests/components/WithdrawForm.test.tsx
+FAIL src/hooks/useSidebar.test.ts
+  ΓùÅ useSidebar ΓÇ║ should default to open state when no saved state exists
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    [0m [90m 24 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useSidebar())[33m;[39m
+     [90m 25 |[39m     
+    [31m[1m>[22m[39m[90m 26 |[39m     
+expect(result[33m.[39mcurrent[33m.[39misOpen)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m    |[39m                                   [31m[1m^[22m[39m
+     [90m 27 |[39m   })[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m   it([32m'should load saved state from localStorage'[39m[33m,[39m [36masync[39m () 
+[33m=>[39m {[0m
+
+      at Object.toBe (src/hooks/useSidebar.test.ts:26:35)
+
+FAIL tests/hooks/useWallet.test.ts
+  ΓùÅ useWallet ΓÇ║ connect sets address
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "GCONNECTEDPUBLICKEY"
+    Received: null
+
+    [0m [90m 36 |[39m     })[33m;[39m
+     [90m 37 |[39m
+    [31m[1m>[22m[39m[90m 38 |[39m     
+expect(result[33m.[39mcurrent[33m.[39maddress)[33m.[39mtoBe([32m"GCONNECTEDPUBLICKEY"[39m)[33m;[39m
+     [90m    |[39m                                    [31m[1m^[22m[39m
+     [90m 39 |[39m     
+expect(result[33m.[39mcurrent[33m.[39misConnected)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 40 |[39m   })[33m;[39m
+     [90m 41 |[39m[0m
+
+      at Object.toBe (tests/hooks/useWallet.test.ts:38:36)
+
+FAIL src/utils/__tests__/networkConfig.test.ts
+  ΓùÅ networkConfig ΓÇ║ should use mainnet values when configured
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "mainnet"
+    Received: "testnet"
+
+    [0m [90m 23 |[39m     })[33m;[39m
+     [90m 24 |[39m     [36mconst[39m nc [33m=[39m require([32m'../networkConfig'[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 25 |[39m     
+expect(nc[33m.[39m[33mNETWORK[39m)[33m.[39mtoBe([32m'mainnet'[39m)[33m;[39m
+     [90m    |[39m                        [31m[1m^[22m[39m
+     [90m 26 |[39m   })[33m;[39m
+     [90m 27 |[39m
+     [90m 28 |[39m   it([32m'should use futurenet values when configured'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at Object.toBe (src/utils/__tests__/networkConfig.test.ts:25:24)
+
+  ΓùÅ networkConfig ΓÇ║ should use futurenet values when configured
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "futurenet"
+    Received: "testnet"
+
+    [0m [90m 32 |[39m     })[33m;[39m
+     [90m 33 |[39m     [36mconst[39m nc [33m=[39m require([32m'../networkConfig'[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 34 |[39m     
+expect(nc[33m.[39m[33mNETWORK[39m)[33m.[39mtoBe([32m'futurenet'[39m)[33m;[39m
+     [90m    |[39m                        [31m[1m^[22m[39m
+     [90m 35 |[39m   })[33m;[39m
+     [90m 36 |[39m
+     [90m 37 |[39m   it([32m'should respect custom URLs from env'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at Object.toBe (src/utils/__tests__/networkConfig.test.ts:34:24)
+
+  ΓùÅ networkConfig ΓÇ║ should respect custom URLs from env
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "https://custom-rpc.com"
+    Received: "https://soroban-testnet.stellar.org"
+
+    [0m [90m 41 |[39m     })[33m;[39m
+     [90m 42 |[39m     [36mconst[39m nc [33m=[39m require([32m'../networkConfig'[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 43 |[39m     
+expect(nc[33m.[39m[33mSOROBAN_RPC_URL[39m)[33m.[39mtoBe([32m'https://custom-rpc.com'[39m)[33m;[39m
+     [90m    |[39m                                [31m[1m^[22m[39m
+     [90m 44 |[39m   })[33m;[39m
+     [90m 45 |[39m
+     [90m 46 |[39m   it([32m'should respect custom contract IDs from env'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at Object.toBe (src/utils/__tests__/networkConfig.test.ts:43:32)
+
+  ΓùÅ networkConfig ΓÇ║ should respect custom contract IDs from env
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "VAULT123"
+    Received: "REPLACE_WITH_VAULT_CONTRACT_ID"
+
+    [0m [90m 50 |[39m     })[33m;[39m
+     [90m 51 |[39m     [36mconst[39m nc [33m=[39m require([32m'../networkConfig'[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 52 |[39m     
+expect(nc[33m.[39m[33mAXIONVERA_VAULT_CONTRACT_ID[39m)[33m.[39mtoBe([32m'VAULT123'[39m)[33m;[39m
+     [90m    |[39m                                            [31m[1m^[22m[39m
+     [90m 53 |[39m   })[33m;[39m
+     [90m 54 |[39m })[33m;[39m
+     [90m 55 |[39m[0m
+
+      at Object.toBe (src/utils/__tests__/networkConfig.test.ts:52:44)
+
+FAIL src/utils/__tests__/contractHelpers.test.ts (6.283 s)
+  ΓùÅ contractHelpers utility ΓÇ║ createAxionveraVaultSdk ΓÇ║ should withdraw (mocked)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "60"
+    Received: "0"
+
+    [0m [90m 104 |[39m       
+     [90m 105 |[39m       [36mconst[39m balances [33m=[39m [36mawait[39m sdk[33m.[39mgetBalances({ 
+walletAddress[33m:[39m [32m'G_WIT'[39m[33m,[39m network[33m:[39m [32m'testnet'[39m })[33m;[39m
+    [31m[1m>[22m[39m[90m 106 |[39m       
+expect(balances[33m.[39mbalance)[33m.[39mtoBe([32m'60'[39m)[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 107 |[39m     })[33m;[39m
+     [90m 108 |[39m
+     [90m 109 |[39m     it([32m'should claim rewards (mocked)'[39m[33m,[39m [36masync[39m () [33m=>[39m {[0m
+
+      at Object.toBe (src/utils/__tests__/contractHelpers.test.ts:106:32)
+
+  ΓùÅ contractHelpers utility ΓÇ║ createAxionveraVaultSdk ΓÇ║ should claim rewards (mocked)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "110"
+    Received: "0"
+
+    [0m [90m 118 |[39m       
+     [90m 119 |[39m       [36mconst[39m balances [33m=[39m [36mawait[39m sdk[33m.[39mgetBalances({ 
+walletAddress[33m:[39m [32m'G_CLA'[39m[33m,[39m network[33m:[39m [32m'testnet'[39m })[33m;[39m
+    [31m[1m>[22m[39m[90m 120 |[39m       
+expect(balances[33m.[39mbalance)[33m.[39mtoBe([32m'110'[39m)[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 121 |[39m       expect(balances[33m.[39mrewards)[33m.[39mtoBe([32m'0'[39m)[33m;[39m
+     [90m 122 |[39m     })[33m;[39m
+     [90m 123 |[39m[0m
+
+      at Object.toBe (src/utils/__tests__/contractHelpers.test.ts:120:32)
+
+PASS tests/components/ConfirmTransactionModal.test.tsx
+PASS src/utils/__tests__/env.test.ts
+PASS src/utils/__tests__/telemetry.test.ts
+PASS src/utils/__tests__/formatters.test.ts
+PASS src/utils/__tests__/notifications.test.ts
+PASS src/utils/__tests__/themeBootstrap.test.ts
+PASS src/utils/__tests__/validation.test.ts
+PASS tests/hooks/useVault.test.ts
+PASS tests/components/DepositForm.test.tsx
+FAIL tests/e2e/404.spec.ts
+  ΓùÅ Test suite failed to run
+
+    Playwright Test needs to be invoked via 'npx playwright test' and excluded from Jest test runs.
+    Creating one directory for Playwright tests and one for Jest is the recommended way of doing it.
+    See https://playwright.dev/docs/intro for more information about Playwright Test.
+
+    [0m [90m  6 |[39m [90m */[39m
+     [90m  7 |[39m
+    [31m[1m>[22m[39m[90m  8 |[39m test[33m.[39mdescribe([32m'404 Error Page'[39m[33m,[39m () [33m=>[39m {
+     [90m    |[39m      [31m[1m^[22m[39m
+     [90m  9 |[39m   test([32m'should display 404 page for non-existent route'[39m[33m,[39m [36masync[39m ({ 
+page }) [33m=>[39m {
+     [90m 10 |[39m     [36mconst[39m response [33m=[39m [36mawait[39m 
+page[33m.[39mgoto([32m'/this-route-does-not-exist'[39m)[33m;[39m
+     [90m 11 |[39m     [0m
+
+      at throwIfRunningInsideJest (node_modules/playwright/lib/common/testType.js:276:11)
+      at TestTypeImpl._describe (node_modules/playwright/lib/common/testType.js:114:5)
+      at Function.describe (node_modules/playwright/lib/transform/transform.js:275:12)
+      at Object.describe (tests/e2e/404.spec.ts:8:6)
+
+FAIL tests/e2e/navigation.spec.ts
+  ΓùÅ Test suite failed to run
+
+    Playwright Test needs to be invoked via 'npx playwright test' and excluded from Jest test runs.
+    Creating one directory for Playwright tests and one for Jest is the recommended way of doing it.
+    See https://playwright.dev/docs/intro for more information about Playwright Test.
+
+    [0m [90m  6 |[39m [90m */[39m
+     [90m  7 |[39m
+    [31m[1m>[22m[39m[90m  8 |[39m test[33m.[39mdescribe([32m'Navigation'[39m[33m,[39m () [33m=>[39m {
+     [90m    |[39m      [31m[1m^[22m[39m
+     [90m  9 |[39m   test[33m.[39mbeforeEach([36masync[39m ({ page }) [33m=>[39m {
+     [90m 10 |[39m     [90m// Mock wallet context to avoid Freighter extension requirement[39m
+     [90m 11 |[39m     [36mawait[39m page[33m.[39maddInitScript(() [33m=>[39m {[0m
+
+      at throwIfRunningInsideJest (node_modules/playwright/lib/common/testType.js:276:11)
+      at TestTypeImpl._describe (node_modules/playwright/lib/common/testType.js:114:5)
+      at Function.describe (node_modules/playwright/lib/transform/transform.js:275:12)
+      at Object.describe (tests/e2e/navigation.spec.ts:8:6)
+
