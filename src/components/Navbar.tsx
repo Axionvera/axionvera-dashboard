@@ -8,6 +8,7 @@ import ThemeToggle from "./ThemeToggle";
 import { NotificationCenter } from "@/components/notifications";
 import { WalletId, WalletMeta } from "@/types/wallet";
 import { WorkspaceSwitcher } from "@/workspaces";
+import { GlobalSearch } from "@/features/search";
 
 type NavbarProps = {
   publicKey: string | null;
@@ -181,6 +182,7 @@ export default function Navbar({
         </div>
 
         <div className="flex items-center gap-4">
+          <GlobalSearch />
           <WorkspaceSwitcher />
           <ThemeToggle />
 
