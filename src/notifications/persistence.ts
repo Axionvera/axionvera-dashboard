@@ -7,7 +7,15 @@ const STORAGE_KEY = `axionvera:notifications:v${NOTIFICATION_STORAGE_VERSION
 
   }`;
 
-const notificationMigrations: MigrationMap<PersistedNotificationState> = {};
+const notificationMigrations: MigrationMap<PersistedNotificationState> = {
+  0: (state) => {
+    return {
+      ...state,
+      version: 1,
+      filter: DEFAULT_NOTIFICATION_FILTER,
+    };
+  },
+};
 
 export interface PersistedNotificationState extends VersionedState {
   items: AppNotification[];
