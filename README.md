@@ -136,6 +136,8 @@ Illustrative UI snapshots for quick contributor orientation:
 - [Frontend guide](docs/frontend-guide.md)
 - [Architecture](docs/architecture.md)
 - [Environment validation](docs/ENVIRONMENT_VALIDATION.md)
+- [End-to-end testing](docs/testing/e2e.md)
+- [Visual regression testing](docs/testing/visual-regression.md)
 - [Terraform setup](terraform/README.md)
 
 ## Contributing
