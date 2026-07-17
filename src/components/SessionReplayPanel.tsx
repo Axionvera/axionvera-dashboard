@@ -19,6 +19,13 @@ const formatDuration = (startedAt: number, endedAt: number | undefined) => {
 
 interface SessionReplayPanelProps {
   className?: string;
+  /**
+   * Whether `useSessionReplay` should auto-start a recording on mount.
+   * Pass `false` to require an explicit click of the "Record" button — useful
+   * when mounting inside a developer toolbox you only open occasionally.
+   * Defaults to `true` for backward compatibility with existing call sites.
+   */
+  autoStart?: boolean;
 }
 
 type ViewMode = "list" | "playback";
@@ -32,8 +39,8 @@ type ViewMode = "list" | "playback";
  * metadata + export/delete) and a "playback" view (the
  * `SessionPlaybackPanel` timeline).
  */
-export default function SessionReplayPanel({ className }: SessionReplayPanelProps) {
-  const replay = useSessionReplay();
+export default function SessionReplayPanel({ className, autoStart = false }: SessionReplayPanelProps) {
+  const replay = useSessionReplay({ autoStart });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [view, setView] = useState<ViewMode>("list");
   const [loadedEvents, setLoadedEvents] = useState<SessionEvent[] | null>(null);
