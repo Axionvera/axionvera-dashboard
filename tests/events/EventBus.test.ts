@@ -28,9 +28,9 @@ describe("EventBus", () => {
     const bus = createBus();
     const calls: string[] = [];
 
-    bus.subscribe("alpha", () => calls.push("normal-1"));
-    bus.subscribe("alpha", () => calls.push("high"), { priority: 10 });
-    bus.subscribe("alpha", () => calls.push("normal-2"));
+    bus.subscribe("alpha", () => { calls.push("normal-1"); });
+    bus.subscribe("alpha", () => { calls.push("high"); }, { priority: 10 });
+    bus.subscribe("alpha", () => { calls.push("normal-2"); });
 
     await bus.publish("alpha", { value: 1 });
 
