@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrackedValue } from '@/types/provenance';
+import type { TrackedValue, TransformationStep } from '@/types/provenance';
 
 type Props = {
   trackedValue: any | TrackedValue<any>;
@@ -28,7 +28,7 @@ export function ProvenanceViewer({ trackedValue }: Props) {
         <div>
           <div className="text-text-muted mb-2 text-[10px] uppercase tracking-wider">Lineage</div>
           <div className="pl-3 border-l border-border-primary space-y-3">
-            {lineage.map((step, i) => (
+            {lineage.map((step: TransformationStep, i: number) => (
               <div key={i} className="relative">
                 <div className="absolute -left-3 top-2 w-2 border-t border-border-primary" />
                 <div className="text-blue-400 font-medium">

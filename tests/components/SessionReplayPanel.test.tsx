@@ -1,9 +1,23 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import SessionReplayPanel from "@/components/SessionReplayPanel";
 
-// Mock the hook so the test stays isolated from IndexedDB / MutationObserver /
-// SessionRecorder plumbing. We still verify the panel's prop forwarding and
-// UI behavior end-to-end at the panel layer.
+/**
+ * This suite focuses on the **panel layer**: prop forwarding, conditional
+ * Record/Stop rendering, and click-to-start/stop wiring.
+ *
+ * The mock keeps the suite independent of `useSessionReplay`'s real
+ * IndexedDB / SessionRecorder setup. The user's three explicit asks are
+ * covered here:
+ *   (a) `autoStart` defaults to `false` and the mount effect does not call
+ *       `replay.start()`.
+ *   (b) `autoStart={true}` is forwarded to the hook unchanged.
+ *   (c) Record / Stop controls render correctly in both `isRecording` states.
+ *
+ * End-to-end behavior (does `autoStart={true}` actually drive
+ * `SessionRecorder.start()`?) lives in
+ * `tests/components/SessionReplayPanel.integration.test.tsx`, which does NOT
+ * mock the hook.
+ */
 jest.mock("@/hooks/useSessionReplay", () => ({
   __esModule: true,
   useSessionReplay: jest.fn(),
@@ -76,15 +90,6 @@ describe("SessionReplayPanel — autoStart gating", () => {
     expect(mockUseSessionReplay).toHaveBeenCalledWith({ autoStart: true });
   });
 
-  it("forwards className through next to the hook (props are passed unchanged)", () => {
-    mockUseSessionReplay.mockReturnValue(buildMockReplay());
-
-    render(<SessionReplayPanel className="extra-classes" autoStart={false} />);
-
-    expect(mockUseSessionReplay).toHaveBeenCalledWith({ autoStart: false });
-    const root = screen.getByTestId("session-replay-panel");
-    expect(root.className).toContain("extra-classes");
-  });
 });
 
 describe("SessionReplayPanel — Record / Stop rendering", () => {

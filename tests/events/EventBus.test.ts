@@ -15,6 +15,7 @@ describe("EventBus", () => {
 
     bus.subscribe("alpha", (event) => {
       received.push(event);
+      return undefined;
     });
 
     const envelope = await bus.publish("alpha", { value: 42 }, { source: "test" });
@@ -28,9 +29,9 @@ describe("EventBus", () => {
     const bus = createBus();
     const calls: string[] = [];
 
-    bus.subscribe("alpha", () => calls.push("normal-1"));
-    bus.subscribe("alpha", () => calls.push("high"), { priority: 10 });
-    bus.subscribe("alpha", () => calls.push("normal-2"));
+    bus.subscribe("alpha", () => { calls.push("normal-1"); return undefined; });
+    bus.subscribe("alpha", () => { calls.push("high"); return undefined; }, { priority: 10 });
+    bus.subscribe("alpha", () => { calls.push("normal-2"); return undefined; });
 
     await bus.publish("alpha", { value: 1 });
 
@@ -62,6 +63,7 @@ describe("EventBus", () => {
     });
     bus.subscribe("beta", (event) => {
       calls.push(`${event.type}:${event.depth}:${event.path.join(">")}`);
+      return undefined;
     });
 
     await bus.publish("alpha", { value: 1 });
