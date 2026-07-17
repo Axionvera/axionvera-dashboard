@@ -53,7 +53,7 @@ describe('Replay Framework', () => {
   describe('ReplayEngine', () => {
     it('should replay events and reconstruct state', async () => {
       const events: ProtocolEvent[] = [
-        { id: '1', type: 'deposit', timestamp: 1, data: { amount: 100 }
+        { id: '1', type: 'deposit', timestamp: 1, data: { amount: 100 } }
       ];
       const store = new InMemoryEventStore({ events });
       
@@ -79,7 +79,7 @@ describe('Replay Framework', () => {
     
     it('should handle errors during replay', async () => {
       const events: ProtocolEvent[] = [
-        { id: '1', type: 'deposit', timestamp: 1, data: { amount: 100 }
+        { id: '1', type: 'deposit', timestamp: 1, data: { amount: 100 } }
       ];
       const store = new InMemoryEventStore({ events });
       

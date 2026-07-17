@@ -57,6 +57,15 @@ Object.defineProperty(window, "ResizeObserver", {
   value: ResizeObserverMock,
 });
 
+// `structuredClone` is a modern global. jsdom does not expose it, so we polyfill
+// it with a JSON-based clone. The replay engine only clones JSON-serializable
+// state in tests, so this is sufficient without pulling in `node:util` (which
+// some `@types/node` versions don't statically export to TS).
+const structuredClonePolyfill = <T>(value: T): T => JSON.parse(JSON.stringify(value));
+if (typeof globalThis.structuredClone !== "function") {
+  globalThis.structuredClone = structuredClonePolyfill as unknown as typeof structuredClone;
+}
+
 // Mock AppTooltip to avoid Radix UI dependency issues in tests
 jest.mock("@/components/AppTooltip", () => ({
   AppTooltip: ({ children }: { children: React.ReactNode }) => children,

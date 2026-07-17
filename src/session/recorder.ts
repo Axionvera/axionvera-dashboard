@@ -7,6 +7,7 @@ import type {
   MutationEventData,
   NavigationEventData,
   RecorderOptions,
+  RecorderPlatform,
   SessionEvent,
 } from "./types";
 import { DEFAULT_MAX_EVENTS } from "./types";
@@ -66,7 +67,11 @@ export class SessionRecorder {
   private readonly maxEvents: number;
 
   private readonly sessionId: string;
-  private platform: Required<RecorderOptions["platform"]>;
+  // `RecorderPlatform` exposes nullable `window | document | MutationObserver`
+  // because the recorder is designed to also work outside a real browser
+  // (server-side rendering, Node-based test environments). We use the
+  // definite-assignment assertion because every constructor branch assigns it.
+  private platform!: RecorderPlatform;
   private active = false;
   private listeners: Array<() => void> = [];
   private observer: MutationObserver | null = null;
@@ -87,20 +92,21 @@ export class SessionRecorder {
     this.mask = new Masker(options.mask);
     this.emit = options.emit;
     this.now = options.now ?? (() => Date.now());
-    this.idFactory = options.idFactory ?? (() => globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`);
+    this.idFactory =
+      options.idFactory ??
+      (() => String(globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`));
     this.onLimitReached = options.onLimitReached;
     this.maxEvents = options.maxEvents ?? DEFAULT_MAX_EVENTS;
     this.platform = this.resolvePlatform(options.platform);
   }
 
-  private resolvePlatform(
-    override: Partial<RecorderOptions["platform"]> | undefined,
-  ): Required<RecorderOptions["platform"]> {
+  private resolvePlatform(override: Partial<RecorderPlatform> | undefined): RecorderPlatform {
     const fallback = typeof window !== "undefined" ? window : undefined;
     return {
       window: override?.window ?? fallback ?? null,
       document: override?.document ?? fallback?.document ?? null,
-      MutationObserver: override?.MutationObserver ?? fallback?.MutationObserver ?? null,
+      MutationObserver:
+        override?.MutationObserver ?? fallback?.MutationObserver ?? null,
     };
   }
 
@@ -114,16 +120,17 @@ export class SessionRecorder {
 
   start(): void {
     if (this.active) return;
-    if (!this.platform.window || !this.platform.document || !this.platform.MutationObserver) {
+    const { window: win, document: doc, MutationObserver: Observer } = this.platform;
+    if (!win || !doc || !Observer) {
       throw new Error(
         "SessionRecorder cannot start without a browser platform. Pass a `platform` override in non-browser environments.",
       );
     }
     this.active = true;
-    this.attachListeners();
-    this.attachMutationObserver();
-    this.attachHistoryHooks();
-    this.attachConsolePatch();
+    this.attachListeners(win, doc);
+    this.attachMutationObserver(doc, Observer);
+    this.attachHistoryHooks(win, doc);
+    this.attachConsolePatch(win);
     this.record({ type: "session:start", data: {} });
   }
 
@@ -132,16 +139,16 @@ export class SessionRecorder {
     this.flushMutations();
     this.detachListeners();
     this.detachMutationObserver();
-    this.detachHistoryHooks();
-    this.detachConsolePatch();
+    const win = this.platform.window;
+    if (win) {
+      this.detachHistoryHooks(win);
+      this.detachConsolePatch(win);
+    }
     this.active = false;
     this.record({ type: "session:stop", data: {} });
   }
 
-  private attachListeners(): void {
-    const document = this.platform.document!;
-    const window = this.platform.window!;
-
+  private attachListeners(win: Window, doc: Document): void {
     const clickHandler = (rawEvent: Event) => {
       const event = rawEvent as MouseEvent;
       const target = event.target as Element | null;
@@ -156,70 +163,69 @@ export class SessionRecorder {
       };
       this.record({ type: "click", data: payload });
     };
-    document.addEventListener("click", clickHandler, { capture: true });
-    this.listeners.push(() => document.removeEventListener("click", clickHandler, { capture: true }));
+    doc.addEventListener("click", clickHandler, { capture: true });
+    this.listeners.push(() => doc.removeEventListener("click", clickHandler, { capture: true }));
 
     const inputHandler = (rawEvent: Event) => {
       const event = rawEvent as InputEvent;
       const target = event.target;
+      if (!target) return;
       if (
-        !target ||
         !(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement)
       ) {
         return;
       }
-      const payload: InputEventData = {
-        selector: this.mask.buildSelector(target),
-        name: target.name,
-        value: this.mask.maskInputValue(target, target.value ?? ""),
-        type:
-          target instanceof HTMLSelectElement
-            ? "select"
-            : target instanceof HTMLTextAreaElement
-            ? "textarea"
-            : classifyInputType(target),
-        source: "input",
-      };
-      this.record({ type: "input", data: payload });
+      this.record({
+        type: "input",
+        data: this.buildInputPayload(target, "input"),
+      });
     };
-    document.addEventListener("input", inputHandler, { capture: true });
-    this.listeners.push(() => document.removeEventListener("input", inputHandler, { capture: true }));
+    doc.addEventListener("input", inputHandler, { capture: true });
+    this.listeners.push(() => doc.removeEventListener("input", inputHandler, { capture: true }));
 
     const changeHandler = (rawEvent: Event) => {
       const event = rawEvent as Event;
       const target = event.target;
+      if (!target) return;
       if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement)) {
         return;
       }
-      const payload: InputEventData = {
-        selector: this.mask.buildSelector(target),
-        name: target.name,
-        value: this.mask.maskInputValue(target, target.value ?? ""),
-        type:
-          target instanceof HTMLSelectElement
-            ? "select"
-            : target instanceof HTMLTextAreaElement
-            ? "textarea"
-            : classifyInputType(target),
-        source: "change",
-      };
-      this.record({ type: "input", data: payload });
+      this.record({
+        type: "input",
+        data: this.buildInputPayload(target, "change"),
+      });
     };
-    document.addEventListener("change", changeHandler, { capture: true });
-    this.listeners.push(() => document.removeEventListener("change", changeHandler, { capture: true }));
+    doc.addEventListener("change", changeHandler, { capture: true });
+    this.listeners.push(() => doc.removeEventListener("change", changeHandler, { capture: true }));
 
-    const popstateHandler = () => this.recordNavigation("popstate");
-    window.addEventListener("popstate", popstateHandler);
-    this.listeners.push(() => window.removeEventListener("popstate", popstateHandler));
+    const popstateHandler = () => this.recordNavigation("popstate", win, doc);
+    win.addEventListener("popstate", popstateHandler);
+    this.listeners.push(() => win.removeEventListener("popstate", popstateHandler));
 
-    const hashchangeHandler = () => this.recordNavigation("popstate");
-    window.addEventListener("hashchange", hashchangeHandler);
-    this.listeners.push(() => window.removeEventListener("hashchange", hashchangeHandler));
+    const hashchangeHandler = () => this.recordNavigation("popstate", win, doc);
+    win.addEventListener("hashchange", hashchangeHandler);
+    this.listeners.push(() => win.removeEventListener("hashchange", hashchangeHandler));
   }
 
-  private attachMutationObserver(): void {
-    const document = this.platform.document!;
-    const Observer = this.platform.MutationObserver!;
+  private buildInputPayload(
+    target: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement,
+    source: "input" | "change",
+  ): InputEventData {
+    return {
+      selector: this.mask.buildSelector(target),
+      name: target.name,
+      value: this.mask.maskInputValue(target, target.value ?? ""),
+      type:
+        target instanceof HTMLSelectElement
+          ? "select"
+          : target instanceof HTMLTextAreaElement
+          ? "textarea"
+          : classifyInputType(target as HTMLInputElement),
+      source,
+    };
+  }
+
+  private attachMutationObserver(doc: Document, Observer: typeof MutationObserver): void {
     this.observer = new Observer((mutations) => {
       for (const mutation of mutations) {
         const event = this.buildMutationEvent(mutation);
@@ -227,7 +233,7 @@ export class SessionRecorder {
       }
       this.scheduleMutationFlush();
     });
-    this.observer.observe(document.documentElement, {
+    this.observer.observe(doc.documentElement, {
       childList: true,
       attributes: true,
       characterData: true,
@@ -247,7 +253,9 @@ export class SessionRecorder {
   }
 
   private scheduleMutationFlush(): void {
-    if (this.mutationFlushTimer || !this.platform.window) return;
+    if (this.mutationFlushTimer) return;
+    const win = this.platform.window;
+    if (!win) return;
     this.mutationFlushTimer = setTimeout(() => {
       this.mutationFlushTimer = null;
       this.flushMutations();
@@ -288,21 +296,18 @@ export class SessionRecorder {
     };
   }
 
-  private recordNavigation(method: NavigationEventData["method"]): void {
-    const window = this.platform.window;
-    if (!window) return;
+  private recordNavigation(method: NavigationEventData["method"], win: Window, doc: Document): void {
     const payload: NavigationEventData = {
-      url: window.location.href,
+      url: win.location.href,
       method,
-      title: typeof document !== "undefined" ? document.title : undefined,
+      title: doc.title,
     };
     this.record({ type: "navigation", data: payload });
   }
 
-  private attachHistoryHooks(): void {
-    const window = this.platform.window!;
+  private attachHistoryHooks(win: Window, doc: Document): void {
     type HistoryWithFlag = History & { [HISTORY_PATCH_FLAG]?: boolean };
-    const historyRef = window.history as HistoryWithFlag;
+    const historyRef = win.history as HistoryWithFlag;
     if (historyRef[HISTORY_PATCH_FLAG]) {
       this.historyPatch = {
         pushState: historyRef.pushState.bind(historyRef),
@@ -314,7 +319,7 @@ export class SessionRecorder {
     const originalReplace = historyRef.replaceState.bind(historyRef);
     const tap = (method: HistoryMethod) => (...args: Parameters<typeof originalPush>) => {
       const result = (originalPush as (...a: unknown[]) => unknown).apply(historyRef, args);
-      this.recordNavigation(method);
+      this.recordNavigation(method, win, doc);
       return result;
     };
     historyRef.pushState = tap("pushState") as typeof originalPush;
@@ -323,19 +328,18 @@ export class SessionRecorder {
     this.historyPatch = { pushState: originalPush, replaceState: originalReplace };
   }
 
-  private detachHistoryHooks(): void {
-    const window = this.platform.window;
-    if (!window || !this.historyPatch) return;
-    const historyRef = window.history as { [HISTORY_PATCH_FLAG]?: boolean };
+  private detachHistoryHooks(win: Window): void {
+    if (!this.historyPatch) return;
+    type HistoryWithFlag = History & { [HISTORY_PATCH_FLAG]?: boolean };
+    const historyRef = win.history as HistoryWithFlag;
     historyRef.pushState = this.historyPatch.pushState;
     historyRef.replaceState = this.historyPatch.replaceState;
     delete historyRef[HISTORY_PATCH_FLAG];
     this.historyPatch = null;
   }
 
-  private attachConsolePatch(): void {
-    const window = this.platform.window!;
-    const consoleRef = window.console;
+  private attachConsolePatch(win: Window): void {
+    const consoleRef = (win as unknown as { console?: Console }).console ?? globalThis.console;
     if (!consoleRef) return;
     const levels: Array<"log" | "info" | "warn" | "error"> = ["log", "info", "warn", "error"];
     for (const level of levels) {
@@ -353,13 +357,12 @@ export class SessionRecorder {
     }
   }
 
-  private detachConsolePatch(): void {
-    const consoleRef = this.platform.window?.console;
+  private detachConsolePatch(win: Window): void {
+    const consoleRef = (win as unknown as { console?: Console }).console ?? globalThis.console;
     if (!consoleRef) return;
-    for (const [level, original] of Object.entries(this.consolePatch) as Array<[
-      "log" | "info" | "warn" | "error",
-      (...args: unknown[]) => void,
-    ]>) {
+    for (const [level, original] of Object.entries(this.consolePatch) as Array<
+      ["log" | "info" | "warn" | "error", (...args: unknown[]) => void]
+    >) {
       consoleRef[level] = original;
     }
     this.consolePatch = {};

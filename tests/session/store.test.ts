@@ -3,7 +3,11 @@ import type { SessionEvent, SessionMetadata } from "@/session";
 import { FakeIDBFactory } from "../utils/fakeIndexedDB";
 
 const createStoreFactory = () => {
-  const idbFactory = new FakeIDBFactory();
+  // The production `IndexedDBSessionStore` accepts a real `IDBFactory`.
+  // `FakeIDBFactory` satisfies the structural shape but is a declared class,
+  // so we erase the nominal class type at the boundary to keep the rest of
+  // the tests free of `as unknown` casts.
+  const idbFactory = new FakeIDBFactory() as unknown as IDBFactory;
   return { idbFactory };
 };
 
@@ -13,7 +17,7 @@ const createStoreFactory = () => {
  * helper that turns the request's `onsuccess` into a real Promise.
  */
 const openDatabase = (
-  idbFactory: FakeIDBFactory,
+  idbFactory: IDBFactory,
   name: string,
   version: number,
 ): Promise<unknown> =>
