@@ -134,10 +134,143 @@ describe("SessionPlaybackPanel", () => {
       id: "bad",
       type: "click",
       timestamp: 1000,
-      data: { selector: undefined as unknown as string },
+      data: { selector: undefined as unknown as string } as unknown as SessionEvent["data"],
     });
     render(<SessionPlaybackPanel metadata={makeMetadata({ events: 1 })} events={[malformed]} onBack={() => {}} />);
     const entry = screen.getByTestId("playback-event-0");
     expect(entry.textContent).toContain("<unknown>");
+  });
+
+  describe("rAF batching", () => {
+    /**
+     * Install a fake `requestAnimationFrame` / `cancelAnimationFrame` pair so
+     * the tests can assert exactly how many frames are scheduled and which
+     * ones get cancelled. Returns a handle with cleanup to run in `finally`.
+     */
+    const installRafMock = () => {
+      const callbacks: Array<() => void> = [];
+      const cancelledIds: number[] = [];
+      let nextId = 1;
+      const realRaf = window.requestAnimationFrame;
+      const realCancel = window.cancelAnimationFrame;
+      Object.defineProperty(window, "requestAnimationFrame", {
+        configurable: true,
+        writable: true,
+        value: (cb: FrameRequestCallback) => {
+          callbacks.push(() => cb(0));
+          return nextId++;
+        },
+      });
+      Object.defineProperty(window, "cancelAnimationFrame", {
+        configurable: true,
+        writable: true,
+        value: (id: number) => {
+          cancelledIds.push(id);
+        },
+      });
+      return {
+        callbacks,
+        cancelledIds,
+        restore: () => {
+          Object.defineProperty(window, "requestAnimationFrame", {
+            configurable: true,
+            writable: true,
+            value: realRaf,
+          });
+          Object.defineProperty(window, "cancelAnimationFrame", {
+            configurable: true,
+            writable: true,
+            value: realCancel,
+          });
+        },
+      };
+    };
+
+    it("coalesces a burst of onStep callbacks from flush() into a single rAF", () => {
+      const mock = installRafMock();
+      try {
+        const events = Array.from({ length: 50 }, (_, i) =>
+          makeEvent({ id: `e${i}`, timestamp: 1000 + i * 100 }),
+        );
+        render(
+          <SessionPlaybackPanel metadata={makeMetadata({ events: 50 })} events={events} onBack={() => {}} />,
+        );
+
+        // `flush()` runs every event synchronously and fires onStep for each.
+        // The renderer should coalesce those 50 events into ONE rAF.
+        act(() => {
+          fireEvent.click(screen.getByTestId("playback-flush"));
+        });
+        expect(mock.callbacks).toHaveLength(1);
+
+        // handleFlush defensively cancels the pending rAF after flush() and
+        // writes the final index synchronously. The scrubber therefore reflects
+        // the last event without any manual drain required.
+        const scrubber = screen.getByTestId("playback-scrubber") as HTMLInputElement;
+        expect(scrubber.value).toBe("49");
+        expect(mock.cancelledIds).toEqual([1]);
+      } finally {
+        mock.restore();
+      }
+    });
+
+    it("cancels any pending rAF when the user scrubs so feedback wins over playback", () => {
+      const mock = installRafMock();
+      try {
+        const events = Array.from({ length: 50 }, (_, i) =>
+          makeEvent({ id: `e${i}`, timestamp: 1000 + i * 100 }),
+        );
+        render(
+          <SessionPlaybackPanel metadata={makeMetadata({ events: 50 })} events={events} onBack={() => {}} />,
+        );
+
+        // Schedule a pending rAF via flush.
+        act(() => {
+          fireEvent.click(screen.getByTestId("playback-flush"));
+        });
+        expect(mock.callbacks).toHaveLength(1);
+
+        // User scrubs to position 7. handleSeek must cancel the pending frame
+        // and write the new index synchronously.
+        const scrubber = screen.getByTestId("playback-scrubber") as HTMLInputElement;
+        act(() => {
+          fireEvent.change(scrubber, { target: { value: "7" } });
+        });
+        expect(scrubber.value).toBe("7");
+        expect(mock.cancelledIds).toContain(1);
+
+        // The original rAF callback is still in the array (the mock does not
+        // splice it on cancel) but invoking it now must NOT overwrite the
+        // scrubber because rafRef.current was reset.
+        act(() => {
+          mock.callbacks[0]();
+        });
+        // The scrubber stays where the user dropped it.
+        expect((screen.getByTestId("playback-scrubber") as HTMLInputElement).value).toBe("7");
+      } finally {
+        mock.restore();
+      }
+    });
+
+    it("cancels a pending rAF when the panel unmounts mid-playback", () => {
+      const mock = installRafMock();
+      try {
+        const events = Array.from({ length: 10 }, (_, i) =>
+          makeEvent({ id: `e${i}`, timestamp: 1000 + i }),
+        );
+        const { unmount } = render(
+          <SessionPlaybackPanel metadata={makeMetadata({ events: 10 })} events={events} onBack={() => {}} />,
+        );
+        act(() => {
+          fireEvent.click(screen.getByTestId("playback-flush"));
+        });
+        expect(mock.callbacks).toHaveLength(1);
+
+        unmount();
+        expect(mock.cancelledIds).toContain(1);
+      } finally {
+        mock.restore();
+      }
+    });
   });
 });

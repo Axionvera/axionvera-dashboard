@@ -103,6 +103,13 @@ export default function SessionPlaybackPanel({ metadata, events, onBack }: Sessi
   const sandboxRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<SessionPlayer | null>(null);
   const wasPlayingOnPointerDown = useRef(false);
+  // The SessionPlayer emits one `onStep` per captured event. For long
+  // sessions (or high replay speeds) that means dozens of React renders per
+  // second, which thrashes the inspector / scrubber. We write the latest
+  // index into a ref and coalesce React state updates through a single
+  // requestAnimationFrame per paint frame.
+  const currentIndexRef = useRef(0);
+  const rafRef = useRef<number | ReturnType<typeof setTimeout> | null>(null);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -115,14 +122,68 @@ export default function SessionPlaybackPanel({ metadata, events, onBack }: Sessi
   const lastTimestamp = events[events.length - 1]?.timestamp ?? metadata.startedAt;
   const totalDurationMs = Math.max(1, lastTimestamp - firstTimestamp);
 
+  /**
+   * Cancel any pending React sync. Safe to call even when no frame is pending.
+   * The handle type is a union: rAF returns a number, the setTimeout fallback
+   * returns the host platform's timer handle.
+   */
+  const cancelPendingFrame = useCallback((): void => {
+    const handle = rafRef.current;
+    if (handle === null) return;
+    rafRef.current = null;
+    if (
+      typeof window !== "undefined" &&
+      typeof window.cancelAnimationFrame === "function" &&
+      typeof handle === "number"
+    ) {
+      window.cancelAnimationFrame(handle);
+      return;
+    }
+    clearTimeout(handle as ReturnType<typeof setTimeout>);
+  }, []);
+
+  /**
+   * Schedule a single React render for the next animation frame (or a 16ms
+   * setTimeout fallback in environments without rAF, e.g. some jsdom configs).
+   * Coalesces by skipping a second schedule while one is already pending.
+   *
+   * IMPORTANT: the callback runs at PAINT time, not at the time the caller
+   * scheduled it. The callback must therefore read the latest state via refs
+   * (e.g. `currentIndexRef.current`) rather than capturing stale values. This
+   * contract guarantees that 50 `onStep` calls in a single frame produce ONE
+   * React render with the last observed index.
+   */
+  const scheduleFrame = useCallback((cb: () => void): void => {
+    if (rafRef.current !== null) return;
+    if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+      rafRef.current = window.requestAnimationFrame(() => {
+        rafRef.current = null;
+        cb();
+      });
+      return;
+    }
+    rafRef.current = setTimeout(() => {
+      rafRef.current = null;
+      cb();
+    }, 16);
+  }, []);
+
   useEffect(() => {
     if (!sandboxRef.current) return undefined;
+    // Cancel any pending frame from a previous session and reset index state.
+    cancelPendingFrame();
+    currentIndexRef.current = 0;
+    setCurrentIndex(0);
+
     const player = new SessionPlayer({
       events,
       sandbox: sandboxRef.current,
       speed,
       onStep: (event, index) => {
-        setCurrentIndex(index);
+        currentIndexRef.current = index;
+        scheduleFrame(() => {
+          setCurrentIndex(currentIndexRef.current);
+        });
         if (event.type === "session:stop") {
           // Persist "ended" state so the timeline stops on the natural note.
         }
@@ -133,10 +194,14 @@ export default function SessionPlaybackPanel({ metadata, events, onBack }: Sessi
     return () => {
       player.stop();
       playerRef.current = null;
+      cancelPendingFrame();
     };
     // The player is recreated when the event stream changes (i.e. when the
     // user selects a different session). Playback state is intentionally
     // reset on every events prop change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- scheduleFrame /
+    // cancelPendingFrame are stable (useCallback with [] deps) and intentionally
+    // omitted so the effect doesn't tear down on every render.
   }, [events]);
 
   const handlePlay = useCallback(() => {
@@ -145,11 +210,13 @@ export default function SessionPlaybackPanel({ metadata, events, onBack }: Sessi
     // they can replay without having to hit Stop first.
     if (playerRef.current.currentIndex >= total - 1) {
       playerRef.current.seek(0);
+      cancelPendingFrame();
+      currentIndexRef.current = 0;
       setCurrentIndex(0);
     }
     playerRef.current.play();
     setIsPlaying(true);
-  }, [total]);
+  }, [total, cancelPendingFrame]);
 
   const handlePause = useCallback(() => {
     playerRef.current?.pause();
@@ -159,17 +226,23 @@ export default function SessionPlaybackPanel({ metadata, events, onBack }: Sessi
   const handleStop = useCallback(() => {
     playerRef.current?.stop();
     setIsPlaying(false);
+    cancelPendingFrame();
+    currentIndexRef.current = 0;
     setCurrentIndex(0);
-  }, []);
+  }, [cancelPendingFrame]);
 
   const handleSeek = useCallback(
     (index: number) => {
       if (!playerRef.current) return;
       const clamped = Math.max(0, Math.min(index, total - 1));
       playerRef.current.seek(clamped);
+      // Cancel any pending rAF so the rAF callback cannot overwrite the
+      // scrubber feedback with a stale index from the playback loop.
+      cancelPendingFrame();
+      currentIndexRef.current = clamped;
       setCurrentIndex(clamped);
     },
-    [total],
+    [total, cancelPendingFrame],
   );
 
   const handleScrubberChange = useCallback(
@@ -199,9 +272,17 @@ export default function SessionPlaybackPanel({ metadata, events, onBack }: Sessi
   }, []);
 
   const handleFlush = useCallback(() => {
-    playerRef.current?.flush();
+    if (!playerRef.current) return;
+    playerRef.current.flush();
+    // Drop any pending rAF so the React state can't be overwritten by an
+    // in-flight batch from a previous playback. After flush() the player
+    // has processed every event, so write the final index synchronously.
+    cancelPendingFrame();
+    const finalIndex = total > 0 ? total - 1 : 0;
+    currentIndexRef.current = finalIndex;
+    setCurrentIndex(finalIndex);
     setIsPlaying(false);
-  }, []);
+  }, [cancelPendingFrame, total]);
 
   const timeline = useMemo(
     () =>
