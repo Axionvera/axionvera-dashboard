@@ -61,3 +61,21 @@ Object.defineProperty(window, "ResizeObserver", {
 jest.mock("@/components/AppTooltip", () => ({
   AppTooltip: ({ children }: { children: React.ReactNode }) => children,
 }), { virtual: true });
+
+// Lightweight in-memory IndexedDB shim so session store tests can exercise
+// the full open/get/put/delete cycle without browser globals.
+import { fakeIndexedDB, fakeIDBKeyRange } from "./utils/fakeIndexedDB";
+if (typeof globalThis.indexedDB === "undefined") {
+  Object.defineProperty(globalThis, "indexedDB", {
+    configurable: true,
+    writable: true,
+    value: fakeIndexedDB,
+  });
+}
+if (typeof globalThis.IDBKeyRange === "undefined") {
+  Object.defineProperty(globalThis, "IDBKeyRange", {
+    configurable: true,
+    writable: true,
+    value: fakeIDBKeyRange,
+  });
+}
