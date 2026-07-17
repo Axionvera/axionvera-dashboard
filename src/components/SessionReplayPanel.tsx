@@ -4,7 +4,8 @@ import { useCallback, useMemo, useState } from "react";
 import { Disc, Download, Pause, Play, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useSessionReplay } from "@/hooks/useSessionReplay";
-import type { SessionMetadata } from "@/session";
+import type { SessionEvent, SessionMetadata } from "@/session";
+import SessionPlaybackPanel from "@/components/SessionPlaybackPanel";
 
 const formatTimestamp = (ms: number) => new Date(ms).toLocaleString();
 
@@ -20,14 +21,23 @@ interface SessionReplayPanelProps {
   className?: string;
 }
 
+type ViewMode = "list" | "playback";
+
 /**
  * `SessionReplayPanel` is a developer-facing UI that lists every recording
  * captured by the `useSessionReplay` hook. It never renders inside the public
  * app: dashboard operators gate it behind an environment variable.
+ *
+ * The panel switches between a "list" view (recordings + per-session
+ * metadata + export/delete) and a "playback" view (the
+ * `SessionPlaybackPanel` timeline).
  */
 export default function SessionReplayPanel({ className }: SessionReplayPanelProps) {
   const replay = useSessionReplay();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [view, setView] = useState<ViewMode>("list");
+  const [loadedEvents, setLoadedEvents] = useState<SessionEvent[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const selectedSession = useMemo<SessionMetadata | null>(
     () => replay.sessions.find((session) => session.id === selectedId) ?? null,
     [replay.sessions, selectedId],
@@ -75,7 +85,11 @@ export default function SessionReplayPanel({ className }: SessionReplayPanelProp
     async (sessionId: string) => {
       try {
         await replay.deleteSession(sessionId);
-        if (selectedId === sessionId) setSelectedId(null);
+        if (selectedId === sessionId) {
+          setSelectedId(null);
+          setLoadedEvents(null);
+          setView("list");
+        }
         toast.success("Session deleted");
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Failed to delete session");
@@ -83,6 +97,26 @@ export default function SessionReplayPanel({ className }: SessionReplayPanelProp
     },
     [replay, selectedId],
   );
+
+  const handleReplay = useCallback(
+    async (sessionId: string) => {
+      setLoadError(null);
+      const events = await replay.loadSessionEvents(sessionId);
+      if (events === null) {
+        setLoadError(replay.error ?? "Failed to load session events");
+        return;
+      }
+      setLoadedEvents(events);
+      setSelectedId(sessionId);
+      setView("playback");
+    },
+    [replay],
+  );
+
+  const handleBackToList = useCallback(() => {
+    setView("list");
+    setLoadedEvents(null);
+  }, []);
 
   return (
     <section
@@ -135,6 +169,15 @@ export default function SessionReplayPanel({ className }: SessionReplayPanelProp
         </div>
       ) : null}
 
+      {view === "playback" && selectedSession && loadedEvents ? (
+        <SessionPlaybackPanel
+          metadata={selectedSession}
+          events={loadedEvents}
+          onBack={handleBackToList}
+        />
+      ) : null}
+
+      {view === "list" ? (
       <div className="grid grid-cols-1 gap-4 md:grid-cols-[260px_1fr]">
         <ul className="flex flex-col gap-2" data-testid="session-list">
           {replay.sessions.length === 0 ? (
@@ -208,15 +251,23 @@ export default function SessionReplayPanel({ className }: SessionReplayPanelProp
                 >
                   <Trash2 className="h-4 w-4" /> Delete
                 </button>
-                <span className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground">
-                  <Play className="h-3 w-3" /> Replay available via{" "}
-                  <code className="rounded bg-muted px-1">SessionPlayer</code>
-                </span>
+                <button
+                  type="button"
+                  onClick={() => handleReplay(selectedSession.id)}
+                  className="ml-auto inline-flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm transition hover:bg-accent"
+                  data-testid="session-replay"
+                >
+                  <Play className="h-4 w-4" /> Replay session
+                </button>
               </div>
+              {loadError ? (
+                <p className="text-xs text-destructive">{loadError}</p>
+              ) : null}
             </div>
           )}
         </div>
       </div>
+      ) : null}
     </section>
   );
 }

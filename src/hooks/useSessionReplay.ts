@@ -44,6 +44,8 @@ export interface UseSessionReplayResult {
   exportSession: (sessionId: string) => Promise<Blob | null>;
   deleteSession: (sessionId: string) => Promise<void>;
   refresh: () => Promise<void>;
+  /** Returns the recorded events for a given session, or `null` when the store is unavailable. */
+  loadSessionEvents: (sessionId: string) => Promise<SessionEvent[] | null>;
 }
 
 /**
@@ -177,6 +179,17 @@ export function useSessionReplay(options: UseSessionReplayOptions = {}): UseSess
     [refresh],
   );
 
+  const loadSessionEvents = useCallback(async (sessionId: string): Promise<SessionEvent[] | null> => {
+    const store = storeRef.current;
+    if (!store) return null;
+    try {
+      return await store.getEvents(sessionId);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+      return null;
+    }
+  }, []);
+
   useEffect(() => {
     if (!storeRef.current) return;
     let cancelled = false;
@@ -223,6 +236,7 @@ export function useSessionReplay(options: UseSessionReplayOptions = {}): UseSess
       exportSession,
       deleteSession,
       refresh,
+      loadSessionEvents,
     }),
     [
       isRecording,
@@ -236,6 +250,7 @@ export function useSessionReplay(options: UseSessionReplayOptions = {}): UseSess
       exportSession,
       deleteSession,
       refresh,
+      loadSessionEvents,
     ],
   );
 }
