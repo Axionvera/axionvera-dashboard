@@ -2,9 +2,9 @@ import type {
   Policy,
   PolicyContext,
   PolicyEvaluationResponse,
-  PolicyEvaluationResult,
   PolicyViolation
 } from './types';
+import { PolicyEvaluationResult } from './types';
 
 export abstract class BasePolicy implements Policy {
   readonly id: string;

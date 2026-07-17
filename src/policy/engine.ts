@@ -2,11 +2,11 @@ import type {
   Policy,
   PolicyContext,
   PolicyEvaluationResponse,
-  PolicyEvaluationResult,
   PolicyEvent,
   PolicyEventHandler,
   PolicyViolation
 } from './types';
+import { PolicyEvaluationResult } from './types';
 
 export class PolicyEngine {
   private policies: Map<string, Policy> = new Map();
