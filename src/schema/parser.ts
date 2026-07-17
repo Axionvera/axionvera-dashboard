@@ -60,7 +60,10 @@ function validateNode(node: unknown, path: string, ids: Set<string>, warnings: s
   }
 
   if (node.className) warnings.push(`${path}: className is accepted but should only use design-system utility classes.`);
-  return node as DashboardSchemaNode;
+  // Post-validation cast: every required field has been checked above
+  // (requireString for ids/labels, components.includes for the discriminator,
+  // Array.isArray for child/field/column collections).
+  return node as unknown as DashboardSchemaNode;
 }
 
 export function parseDashboardSchema(input: unknown): ParsedDashboardSchema {
@@ -70,5 +73,7 @@ export function parseDashboardSchema(input: unknown): ParsedDashboardSchema {
   requireString(input, "title", "$schema");
   const warnings: string[] = [];
   validateNode(input.root, "$schema.root", new Set(), warnings);
-  return { schema: input as DashboardPageSchema, warnings };
+  // Post-validation cast: version / id / title were checked above and the
+  // nested `root` schema has been recursively validated by validateNode.
+  return { schema: input as unknown as DashboardPageSchema, warnings };
 }
