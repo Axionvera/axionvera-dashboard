@@ -11,6 +11,7 @@ import { useRBAC } from "@/contexts/RBACContext";
 import { UserRole, Permission, RouteAccess } from "@/types/rbac";
 import { getRouteAccess } from "@/permissions/routes";
 import { validateNavigationTransition } from "@/navigation/stateMachine";
+import { canAccessRoute } from "@/permissions/rbac";
 
 interface RouteGuardProps {
   /** Content to render if access is granted */
@@ -137,6 +138,10 @@ export function withRouteGuard<P extends object>(
     const fallback = options?.fallback;
     const loadingComponent = options?.loadingComponent;
     const redirectTo = options?.redirectTo ?? "/";
+
+    // Hoist option references for stable closures
+    const redirectPath = options?.redirectTo ?? "/";
+    const fallback = options?.fallback;
 
     // Get route config from ROUTE_ACCESS_CONFIG
     const routeConfig = getRouteAccess(router.pathname);

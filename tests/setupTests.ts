@@ -63,7 +63,34 @@ if (typeof window !== "undefined") {
   });
 }
 
+// `structuredClone` is a modern global. jsdom does not expose it, so we polyfill
+// it with a JSON-based clone. The replay engine only clones JSON-serializable
+// state in tests, so this is sufficient without pulling in `node:util` (which
+// some `@types/node` versions don't statically export to TS).
+const structuredClonePolyfill = <T>(value: T): T => JSON.parse(JSON.stringify(value));
+if (typeof globalThis.structuredClone !== "function") {
+  globalThis.structuredClone = structuredClonePolyfill as unknown as typeof structuredClone;
+}
+
 // Mock AppTooltip to avoid Radix UI dependency issues in tests
 jest.mock("@/components/AppTooltip", () => ({
   AppTooltip: ({ children }: { children: React.ReactNode }) => children,
 }), { virtual: true });
+
+// Lightweight in-memory IndexedDB shim so session store tests can exercise
+// the full open/get/put/delete cycle without browser globals.
+import { fakeIndexedDB, fakeIDBKeyRange } from "./utils/fakeIndexedDB";
+if (typeof globalThis.indexedDB === "undefined") {
+  Object.defineProperty(globalThis, "indexedDB", {
+    configurable: true,
+    writable: true,
+    value: fakeIndexedDB,
+  });
+}
+if (typeof globalThis.IDBKeyRange === "undefined") {
+  Object.defineProperty(globalThis, "IDBKeyRange", {
+    configurable: true,
+    writable: true,
+    value: fakeIDBKeyRange,
+  });
+}

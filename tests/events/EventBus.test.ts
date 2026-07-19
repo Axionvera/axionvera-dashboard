@@ -15,6 +15,7 @@ describe("EventBus", () => {
 
     bus.subscribe("alpha", (event) => {
       received.push(event);
+      return undefined;
     });
 
     const envelope = await bus.publish("alpha", { value: 42 }, { source: "test" });
@@ -68,6 +69,7 @@ describe("EventBus", () => {
     });
     bus.subscribe("beta", (event) => {
       calls.push(`${event.type}:${event.depth}:${event.path.join(">")}`);
+      return undefined;
     });
 
     await bus.publish("alpha", { value: 1 });

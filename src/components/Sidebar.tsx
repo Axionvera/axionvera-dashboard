@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { useSidebar } from "@/hooks/useSidebar";
+import { isSessionReplayEnabled } from "@/utils/env";
 
 interface SidebarProps {
   className?: string;
@@ -53,13 +54,31 @@ export default function Sidebar({ className = "" }: SidebarProps) {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, close]);
 
-  const menuItems = [
+  // The "Diagnostics" entry is gated behind `NEXT_PUBLIC_ENABLE_SESSION_REPLAY`.
+  // The same gate is enforced server-side in `pages/diagnostics.tsx` via
+  // `getServerSideProps`, so leaking the link in the sidebar without the env
+  // being set would simply 404 the route.
+  const replayEnabled = isSessionReplayEnabled();
+
+  // Single source of truth for sidebar entries. Declared explicitly so that
+  // `baseMenuItems` and `diagnosticsItem` share `external?: boolean` (the
+  // soroban link is external; everything else is internal) — without this the
+  // TS spread is inferred as a narrow union and `item.external` becomes a
+  // TS2339 in the iterator.
+  type SidebarItem = {
+    readonly href: string;
+    readonly label: string;
+    readonly icon: React.ReactNode;
+    readonly external?: boolean;
+  };
+
+  const baseMenuItems: ReadonlyArray<SidebarItem> = [
     {
       href: "/dashboard",
       label: "Vault",
       icon: (
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a2 2 0 00-3 3v8a2 2 0 003 3z" />
         </svg>
       ),
     },
@@ -92,6 +111,20 @@ export default function Sidebar({ className = "" }: SidebarProps) {
       external: true,
     },
   ];
+
+  const diagnosticsItem: SidebarItem = {
+    href: "/diagnostics",
+    label: "Diagnostics",
+    icon: (
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M22 12h-4l-3 9L9 3l-3 9H2" />
+      </svg>
+    ),
+  };
+
+  const menuItems: SidebarItem[] = replayEnabled
+    ? [...baseMenuItems, diagnosticsItem]
+    : [...baseMenuItems];
 
   return (
     <>
@@ -156,6 +189,7 @@ export default function Sidebar({ className = "" }: SidebarProps) {
                       target="_blank"
                       rel="noreferrer noopener"
                       className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-text-secondary transition hover:bg-background-secondary/60 hover:text-text-primary"
+                      data-testid={`sidebar-link-${item.href.replace(/[^a-zA-Z0-9]+/g, "-")}`}
                     >
                       <span className="text-slate-400 transition-colors">{item.icon}</span>
                       <span>{item.label}<span className="sr-only"> (opens in new tab)</span></span>
@@ -165,6 +199,7 @@ export default function Sidebar({ className = "" }: SidebarProps) {
                       href={item.href}
                       onClick={close}
                       className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-text-secondary transition hover:bg-background-secondary/60 hover:text-text-primary"
+                      data-testid={`sidebar-link-${item.href.replace(/[^a-zA-Z0-9]+/g, "-")}`}
                     >
                       <span className="text-slate-400 transition-colors">{item.icon}</span>
                       <span>{item.label}</span>
