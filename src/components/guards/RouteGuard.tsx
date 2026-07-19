@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import { useRBAC } from "@/contexts/RBACContext";
 import { UserRole, Permission, RouteAccess } from "@/types/rbac";
 import { getRouteAccess } from "@/permissions/routes";
+import { canAccessRoute } from "@/permissions/rbac";
 import { validateNavigationTransition } from "@/navigation/stateMachine";
 import { canAccessRoute } from "@/permissions/rbac";
 
@@ -132,6 +133,11 @@ export function withRouteGuard<P extends object>(
     fallback?: ReactNode;
   }
 ) {
+  // Hoist the HOC options so they're stable references inside the inner component.
+  const redirectPath = options?.redirectTo ?? "/";
+  const fallback = options?.fallback;
+  const loadingComponent = options?.loadingComponent;
+
   const GuardedComponent = (props: P) => {
     const router = useRouter();
     const { user, isAuthenticated } = useRBAC();
