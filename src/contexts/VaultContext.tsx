@@ -28,6 +28,7 @@ import {
   cacheAnalytics,
   getCachedAnalytics,
 } from "@/cache/offlineCache";
+import { useOffline } from "@/pwa/OfflineProvider";
 
 type VaultActionType = "deposit" | "withdraw";
 type VaultActionState = {
@@ -92,12 +93,18 @@ function createPending(type: VaultActionType, amount: string): VaultTx {
   return { id: `pending-${type}-${Date.now()}`, type, amount, status: "pending", createdAt: new Date().toISOString() };
 }
 
+function isBrowserOffline() {
+  return typeof navigator !== "undefined" && navigator.onLine === false;
+}
+
 type VaultProviderProps = { children: ReactNode; walletAddress: string | null; sdk?: AxionveraVaultSdk };
 
 export function VaultProvider({ children, walletAddress, sdk: providedSdk }: VaultProviderProps) {
   const sdk = useMemo(() => providedSdk ?? createAxionveraVaultSdk(), [providedSdk]);
+  const { isOnline: isAppOnline } = useOffline();
   const [state, setState] = useState<VaultState>(INITIAL_STATE);
   const walletRef = useRef(walletAddress);
+  const isOnlineRef = useRef(true);
   walletRef.current = walletAddress;
 
   const refresh = useCallback(async () => {
@@ -105,6 +112,24 @@ export function VaultProvider({ children, walletAddress, sdk: providedSdk }: Vau
       setState((s) => ({ ...s, balance: "0", rewards: "0", transactions: [], error: null }));
       return;
     }
+
+    if (!isAppOnline || !isOnlineRef.current || isBrowserOffline()) {
+      const cachedBalances = getCachedBalances(walletRef.current);
+      const cachedTransactions = getCachedTransactions(walletRef.current);
+      if (cachedBalances || cachedTransactions) {
+        setState((s) => ({
+          ...s,
+          balance: cachedBalances?.balance ?? "0",
+          rewards: cachedBalances?.rewards ?? "0",
+          transactions: cachedTransactions ?? [],
+          isLoading: false,
+          error: null,
+        }));
+        notify.info("Offline Mode", "Displaying cached vault details.");
+        return;
+      }
+    }
+
     setState((s) => ({ ...s, isLoading: true, error: null }));
     try {
       const [balances, transactions] = await Promise.all([
@@ -133,7 +158,7 @@ export function VaultProvider({ children, walletAddress, sdk: providedSdk }: Vau
         setState((s) => ({ ...s, isLoading: false, error: message }));
       }
     }
-  }, [sdk]);
+  }, [isAppOnline, sdk]);
 
   const refreshAnalytics = useCallback(async () => {
     if (!walletRef.current) {
@@ -190,6 +215,7 @@ export function VaultProvider({ children, walletAddress, sdk: providedSdk }: Vau
       notify.warning("Sync Conflict", error.message);
     },
   });
+  isOnlineRef.current = isOnline;
 
   useSorobanEvents({
     contractId: AXIONVERA_VAULT_CONTRACT_ID,

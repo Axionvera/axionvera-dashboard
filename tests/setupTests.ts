@@ -12,6 +12,10 @@ global.ResizeObserver = class ResizeObserver {
 global.URL.createObjectURL = jest.fn(() => "blob:mock-url");
 global.URL.revokeObjectURL = jest.fn();
 
+if (typeof global.structuredClone === "undefined") {
+  global.structuredClone = <T>(value: T): T => JSON.parse(JSON.stringify(value));
+}
+
 // Render Recharts ResponsiveContainer at a fixed size so chart children mount
 jest.mock("recharts", () => {
   const Recharts = jest.requireActual("recharts");
@@ -32,30 +36,32 @@ jest.mock("recharts", () => {
   };
 });
 
-Object.defineProperty(window, "matchMedia", {
-  writable: true,
-  value: jest.fn().mockImplementation((query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    dispatchEvent: jest.fn()
-  }))
-});
+if (typeof window !== "undefined") {
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: jest.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      dispatchEvent: jest.fn()
+    }))
+  });
 
-// Mock ResizeObserver for Recharts ResponsiveContainer in jsdom
-class ResizeObserverMock {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
+  // Mock ResizeObserver for Recharts ResponsiveContainer in jsdom
+  class ResizeObserverMock {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  Object.defineProperty(window, "ResizeObserver", {
+    writable: true,
+    value: ResizeObserverMock,
+  });
 }
-Object.defineProperty(window, "ResizeObserver", {
-  writable: true,
-  value: ResizeObserverMock,
-});
 
 // Mock AppTooltip to avoid Radix UI dependency issues in tests
 jest.mock("@/components/AppTooltip", () => ({

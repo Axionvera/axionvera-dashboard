@@ -5,7 +5,8 @@ Axionvera uses Playwright screenshot assertions to detect unintended UI changes 
 ## Snapshot strategy
 
 - Tests live in `tests/visual/` and run with `playwright.visual.config.ts`.
-- Baselines are committed under Playwright's standard snapshot folders next to each spec.
+- Baselines are committed under Playwright snapshot folders next to each spec.
+- Snapshot paths are platform-neutral so CI and local runs use the same reviewed baselines.
 - Chromium desktop is the canonical baseline browser to minimize cross-browser rendering noise.
 - The suite fixes viewport, locale, timezone, color scheme, reduced motion, and common animation styles before comparing screenshots.
 - Dynamic regions can be hidden by adding `data-visual-mask="true"` to an element or by extending the shared mask selector list in the visual spec.

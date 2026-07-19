@@ -1,8 +1,8 @@
+import { PolicyEvaluationResult } from './types';
 import type {
   Policy,
   PolicyContext,
   PolicyEvaluationResponse,
-  PolicyEvaluationResult,
   PolicyEvent,
   PolicyEventHandler,
   PolicyViolation

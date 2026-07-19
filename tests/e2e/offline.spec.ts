@@ -99,6 +99,7 @@ test.describe('PWA Offline Resilience', () => {
 
     // Go offline
     await context.setOffline(true);
+    await expect(page.getByText('Offline Mode').first()).toBeVisible();
     
     // Click the "Refresh" button on the dashboard to trigger state update while offline
     const refreshButton = page.locator('button[aria-label="Refresh vault balances"]');
@@ -106,15 +107,15 @@ test.describe('PWA Offline Resilience', () => {
     await refreshButton.click();
 
     // Dashboard should successfully display cached state instead of blank/error state
-    const cachedBalance = page.locator('text=1,234.5678');
+    const cachedBalance = page.getByText('1,234.5678', { exact: true }).first();
     await expect(cachedBalance).toBeVisible({ timeout: 5000 });
 
     // Verify transaction history loads the cached tx
-    const txRow = page.locator('text=1,000');
+    const txRow = page.getByText('1,000', { exact: true }).first();
     await expect(txRow).toBeVisible();
 
     // Verify indicator tells user they are viewing cached data
-    const toastMsg = page.locator('text=Displaying cached vault details');
+    const toastMsg = page.getByText('Displaying cached vault details.').first();
     await expect(toastMsg).toBeVisible();
     
     // Restore network

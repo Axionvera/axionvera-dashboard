@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+import {
+  applyEnvDefaults,
+  loadPlaywrightTestEnv,
+} from './tests/e2e/helpers/testEnv';
 
 /**
  * Playwright configuration for E2E testing
@@ -10,6 +14,8 @@ import { defineConfig, devices } from '@playwright/test';
  */
 
 const isWindows = process.platform === 'win32';
+const e2eEnv = loadPlaywrightTestEnv();
+applyEnvDefaults(process.env, e2eEnv);
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -44,6 +50,10 @@ export default defineConfig({
 
   webServer: {
     command: 'npm run build && npm run start',
+    env: {
+      ...e2eEnv,
+      ...process.env,
+    },
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
