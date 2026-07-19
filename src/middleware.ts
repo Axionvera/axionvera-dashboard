@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { isPublicRoute, requiresAuth } from "@/permissions/routes";
+import { isKnownRoute, isPublicRoute, requiresAuth } from "@/permissions/routes";
 
 /**
  * Middleware for route protection based on RBAC.
@@ -14,6 +14,11 @@ export function middleware(request: NextRequest) {
 
   // Allow public routes
   if (isPublicRoute(pathname)) {
+    return NextResponse.next();
+  }
+
+  // Let unknown routes reach Next.js 404 handling instead of redirecting them.
+  if (!isKnownRoute(pathname)) {
     return NextResponse.next();
   }
 

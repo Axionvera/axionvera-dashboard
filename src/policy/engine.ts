@@ -1,3 +1,4 @@
+import { PolicyEvaluationResult } from './types';
 import type {
   Policy,
   PolicyContext,

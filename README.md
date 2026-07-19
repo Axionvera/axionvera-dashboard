@@ -10,6 +10,7 @@ This project helps users:
 - View vault balance and rewards
 - Deposit to and withdraw from the vault
 - Track transaction history
+- Customize the dashboard layout by dragging widgets, resizing them, and keeping the arrangement across refreshes
 
 For contributors, the frontend follows a simple pattern:
 
@@ -66,8 +67,10 @@ npm test
 axionvera-dashboard/
 ├── src/
 │   ├── components/      # Reusable UI components
+│   ├── components/layout/ # Draggable dashboard widget layout primitives
 │   ├── contexts/        # React providers (ThemeContext)
 │   ├── hooks/           # Custom hooks for wallet, vault, forms, errors
+│   ├── layout/          # Dashboard layout types and persistence logic
 │   ├── pages/           # Next.js routes (Pages Router)
 │   ├── styles/          # Global + generated theme styles
 │   ├── tokens.json      # Theme token source of truth
@@ -136,6 +139,8 @@ Illustrative UI snapshots for quick contributor orientation:
 - [Frontend guide](docs/frontend-guide.md)
 - [Architecture](docs/architecture.md)
 - [Environment validation](docs/ENVIRONMENT_VALIDATION.md)
+- [End-to-end testing](docs/testing/e2e.md)
+- [Visual regression testing](docs/testing/visual-regression.md)
 - [Terraform setup](terraform/README.md)
 
 ## Contributing

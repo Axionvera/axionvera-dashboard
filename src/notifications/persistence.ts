@@ -1,12 +1,40 @@
 import type { AppNotification, NotificationFilter } from './types';
 import { DEFAULT_NOTIFICATION_FILTER, NOTIFICATION_STORAGE_VERSION } from './types';
+import { migrateState } from '@/migrations/engine';
+import type { MigrationMap, VersionedState } from '@/migrations/types';
 
-const STORAGE_KEY = `axionvera:notifications:v${NOTIFICATION_STORAGE_VERSION}`;
+const STORAGE_KEY = `axionvera:notifications:v${NOTIFICATION_STORAGE_VERSION
 
-export interface PersistedNotificationState {
-  version: number;
+  }`;
+
+const notificationMigrations: MigrationMap<PersistedNotificationState> = {
+  0: (state) => {
+    return {
+      ...state,
+      version: 1,
+      filter: DEFAULT_NOTIFICATION_FILTER,
+    };
+  },
+};
+
+export interface PersistedNotificationState extends VersionedState {
   items: AppNotification[];
   filter: NotificationFilter;
+}
+
+function isPersistedNotificationState(
+  value: unknown,
+): value is PersistedNotificationState {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const state = value as Partial<PersistedNotificationState>;
+
+  return (
+    typeof state.version === 'number' &&
+    Array.isArray(state.items)
+  );
 }
 
 export function loadNotificationState(): PersistedNotificationState | null {
@@ -14,13 +42,21 @@ export function loadNotificationState(): PersistedNotificationState | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as PersistedNotificationState;
-    if (parsed.version !== NOTIFICATION_STORAGE_VERSION) return null;
-    if (!Array.isArray(parsed.items)) return null;
+    const parsed = JSON.parse(raw);
+    if (!isPersistedNotificationState(parsed)) {
+      return null;
+    }
+
+    const migrated = migrateState(
+      parsed,
+      NOTIFICATION_STORAGE_VERSION,
+      notificationMigrations,
+    );
+
     return {
       version: NOTIFICATION_STORAGE_VERSION,
-      items: parsed.items,
-      filter: parsed.filter ?? DEFAULT_NOTIFICATION_FILTER,
+      items: migrated.items,
+      filter: migrated.filter ?? DEFAULT_NOTIFICATION_FILTER,
     };
   } catch {
     return null;
@@ -44,3 +80,5 @@ export function clearNotificationStorage(): void {
     /* ignore */
   }
 }
+
+

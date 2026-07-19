@@ -12,6 +12,7 @@ import { UserRole, Permission, RouteAccess } from "@/types/rbac";
 import { getRouteAccess } from "@/permissions/routes";
 import { canAccessRoute } from "@/permissions/rbac";
 import { validateNavigationTransition } from "@/navigation/stateMachine";
+import { canAccessRoute } from "@/permissions/rbac";
 
 interface RouteGuardProps {
   /** Content to render if access is granted */
@@ -140,36 +141,33 @@ export function withRouteGuard<P extends object>(
   const GuardedComponent = (props: P) => {
     const router = useRouter();
     const { user, isAuthenticated } = useRBAC();
+    const fallback = options?.fallback;
+    const loadingComponent = options?.loadingComponent;
+    const redirectTo = options?.redirectTo ?? "/";
+
+    // Hoist option references for stable closures
+    const redirectPath = options?.redirectTo ?? "/";
+    const fallback = options?.fallback;
 
     // Get route config from ROUTE_ACCESS_CONFIG
     const routeConfig = getRouteAccess(router.pathname);
-    const accessResult = routeConfig
-      ? canAccessRoute(user, routeConfig)
-      : { granted: true };
+    const transition = validateNavigationTransition("public", {
+      pathname: router.pathname,
+      user,
+      isAuthenticated,
+      routeAccess: routeConfig,
+    });
 
     useEffect(() => {
-      if (!routeConfig) return;
-      if (!accessResult.granted && !fallback) {
-        router.push(redirectPath);
+      if (!transition.allowed && !fallback) {
+        router.push(transition.redirectTo ?? redirectTo);
       }
-    }, [accessResult.granted, fallback, redirectPath, routeConfig, router]);
+    }, [fallback, redirectTo, router, transition.allowed, transition.redirectTo]);
 
     // If no config found, allow access (default behavior)
     if (!routeConfig) {
       return <Component {...props} />;
     }
-
-    const transition = validateNavigationTransition("public", {
-      pathname: router.pathname,
-      user,
-      isAuthenticated,
-    });
-
-    useEffect(() => {
-      if (!transition.allowed && !fallback) {
-        router.push(transition.redirectTo ?? redirectPath);
-      }
-    }, [fallback, redirectPath, router, transition.allowed, transition.redirectTo]);
 
     // Access denied
     if (!transition.allowed) {
