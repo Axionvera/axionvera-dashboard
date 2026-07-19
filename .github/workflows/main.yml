@@ -18,6 +18,9 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
+    
+    - name: Create .env file for build scripts
+      run: cp .env.test .env
         
     - name: Install dependencies
       run: npm ci
@@ -41,12 +44,23 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
+    
+    - name: Create .env file for build scripts
+      run: cp .env.test .env
         
     - name: Install dependencies
       run: npm ci
       
     - name: Run Jest tests
-      run: npm test
+      run: npm run test:ci
+    
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-report
+        path: coverage/
+        retention-days: 7
 
   e2e:
     name: E2E Tests
@@ -67,15 +81,20 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
+    
+    - name: Create .env file for build scripts
+      run: cp .env.test .env
         
     - name: Install dependencies
       run: npm ci
       
     - name: Install Playwright browsers
-      run: npx playwright install --with-deps
+      run: npx playwright install --with-deps chromium firefox webkit
       
     - name: Run Playwright tests
       run: npm run test:e2e
+      env:
+        CI: true
       
     - name: Upload Playwright report
       uses: actions/upload-artifact@v4
@@ -104,6 +123,9 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
+    
+    - name: Create .env file for build scripts
+      run: cp .env.test .env
 
     - name: Install dependencies
       run: npm ci
@@ -113,6 +135,8 @@ jobs:
 
     - name: Run visual regression tests
       run: npm run test:visual
+      env:
+        CI: true
 
     - name: Upload visual regression report
       uses: actions/upload-artifact@v4
@@ -150,6 +174,9 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
+    
+    - name: Create .env file for build scripts
+      run: cp .env.test .env
         
     - name: Install dependencies
       run: npm ci

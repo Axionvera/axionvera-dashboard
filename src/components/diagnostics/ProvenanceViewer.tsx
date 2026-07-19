@@ -1,5 +1,5 @@
 import React from 'react';
-import type { TrackedValue, TransformationStep } from '@/types/provenance';
+import { TrackedValue, TransformationStep } from '@/types/provenance';
 
 type Props = {
   trackedValue: any | TrackedValue<any>;

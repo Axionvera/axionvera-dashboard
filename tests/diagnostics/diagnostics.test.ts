@@ -75,12 +75,20 @@ describe('Diagnostics', () => {
   });
 
   it('should filter events since a date', () => {
-    emit('old');
-    const since = new Date();
-    emit('new');
-    const recent = getEvents({ since });
-    expect(recent).toHaveLength(1);
-    expect(recent[0].type).toBe('new');
+    jest.useFakeTimers();
+    try {
+      jest.setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
+      emit('old');
+      const since = new Date('2026-01-01T00:00:00.001Z');
+      jest.setSystemTime(new Date('2026-01-01T00:00:00.002Z'));
+      emit('new');
+
+      const recent = getEvents({ since });
+      expect(recent).toHaveLength(1);
+      expect(recent[0].type).toBe('new');
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('should return error and warning events', () => {

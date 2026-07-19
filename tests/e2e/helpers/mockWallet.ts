@@ -21,6 +21,21 @@ const DEFAULT_MOCK_CONFIG: Required<MockWalletConfig> = {
   isConnected: true,
 };
 
+async function seedMiddlewareWalletCookie(
+  context: BrowserContext,
+  isConnected: boolean
+) {
+  await context.addCookies([
+    {
+      name: 'hasWallet',
+      value: isConnected ? 'true' : 'false',
+      domain: 'localhost',
+      path: '/',
+      sameSite: 'Lax',
+    },
+  ]);
+}
+
 /**
  * Mock wallet context for a page
  * This should be called before navigating to any page
@@ -30,6 +45,7 @@ export async function mockWalletContext(
   config: MockWalletConfig = {}
 ) {
   const mockConfig = { ...DEFAULT_MOCK_CONFIG, ...config };
+  await seedMiddlewareWalletCookie(page.context(), mockConfig.isConnected);
 
   await page.addInitScript((config) => {
     // Keep middleware auth check in sync with mocked wallet connection state.
@@ -76,6 +92,7 @@ export async function mockWalletForContext(
   config: MockWalletConfig = {}
 ) {
   const mockConfig = { ...DEFAULT_MOCK_CONFIG, ...config };
+  await seedMiddlewareWalletCookie(context, mockConfig.isConnected);
 
   await context.addInitScript((config) => {
     document.cookie = `hasWallet=${config.isConnected ? 'true' : 'false'}; path=/`;

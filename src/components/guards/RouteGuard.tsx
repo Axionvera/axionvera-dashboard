@@ -135,6 +135,9 @@ export function withRouteGuard<P extends object>(
   const GuardedComponent = (props: P) => {
     const router = useRouter();
     const { user, isAuthenticated } = useRBAC();
+    const fallback = options?.fallback;
+    const loadingComponent = options?.loadingComponent;
+    const redirectTo = options?.redirectTo ?? "/";
 
     // Hoist option references for stable closures
     const redirectPath = options?.redirectTo ?? "/";
@@ -142,40 +145,30 @@ export function withRouteGuard<P extends object>(
 
     // Get route config from ROUTE_ACCESS_CONFIG
     const routeConfig = getRouteAccess(router.pathname);
-    const accessResult = routeConfig
-      ? canAccessRoute(user, routeConfig)
-      : { granted: true };
+    const transition = validateNavigationTransition("public", {
+      pathname: router.pathname,
+      user,
+      isAuthenticated,
+      routeAccess: routeConfig,
+    });
 
     useEffect(() => {
-      if (!routeConfig) return;
-      if (!accessResult.granted && !fallback) {
-        router.push(redirectPath);
+      if (!transition.allowed && !fallback) {
+        router.push(transition.redirectTo ?? redirectTo);
       }
-    }, [accessResult.granted, fallback, redirectPath, routeConfig, router]);
+    }, [fallback, redirectTo, router, transition.allowed, transition.redirectTo]);
 
     // If no config found, allow access (default behavior)
     if (!routeConfig) {
       return <Component {...props} />;
     }
 
-    const transition = validateNavigationTransition("public", {
-      pathname: router.pathname,
-      user,
-      isAuthenticated,
-    });
-
-    useEffect(() => {
-      if (!transition.allowed && !options?.fallback) {
-        router.push(transition.redirectTo ?? options?.redirectTo ?? "/");
-      }
-    }, [options?.fallback, options?.redirectTo, router, transition.allowed, transition.redirectTo]);
-
     // Access denied
     if (!transition.allowed) {
-      if (options?.fallback) {
-        return <>{options.fallback}</>;
+      if (fallback) {
+        return <>{fallback}</>;
       }
-      return options?.loadingComponent ? <>{options.loadingComponent}</> : null;
+      return loadingComponent ? <>{loadingComponent}</> : null;
     }
 
     // Access granted
