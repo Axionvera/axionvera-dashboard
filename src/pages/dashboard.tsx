@@ -1,21 +1,15 @@
+import { Suspense, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 
-import {
-  MemoizedBalanceCard,
-  MemoizedDepositForm,
-  MemoizedWithdrawForm,
-  MemoizedTransactionHistory,
-  MemoizedAnalyticsDashboard
-} from "@/components/optimized";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
-import { useEffect, useMemo, useState } from "react";
 import { useVaultContext } from "@/contexts/VaultContext";
 import { useWalletContext } from "@/hooks/useWallet";
+import { useWidgetLoading } from "@/hooks/useWidgetLoading";
+import { widgetRegistry } from "@/widgets/registry";
 import { RenderBoundary } from "@/rendering";
 import { DashboardLayoutManager, DashboardWidgetCard } from "@/components/layout";
-import { DashboardPlacement } from "@/layout/types";
 
 export default function DashboardPage() {
   const wallet = useWalletContext();
@@ -24,7 +18,15 @@ export default function DashboardPage() {
 
   const [mounted, setMounted] = useState(false);
   const [draggedWidgetId, setDraggedWidgetId] = useState<string | null>(null);
-  const widgetIds = useMemo(() => ["balance", "deposit", "analytics"], []);
+
+  const widgets = useSyncExternalStore(
+    widgetRegistry.subscribe.bind(widgetRegistry),
+    () => widgetRegistry.getWidgets(),
+    () => widgetRegistry.getWidgets(),
+  );
+  const widgetIds = useMemo(() => widgets.map((widget) => widget.id), [widgets]);
+  const { isLoading: widgetsLoading, error: widgetsError } = useWidgetLoading();
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -54,140 +56,68 @@ export default function DashboardPage() {
             onSwitch={wallet.switchWallet}
           />
           <div className="mx-auto max-w-6xl px-4 sm:px-6 py-6 md:py-8 w-full space-y-6">
-            <DashboardLayoutManager widgetIds={widgetIds}>
-              {({ placements, activeBreakpoint, onReorder, onResize }) => (
-                <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
-                  {placements.map((placement) => {
-                    const widgetContent = (() => {
-                      switch (placement.id) {
-                        case "balance":
-                          return (
-                            <RenderBoundary
-                              name="balance-section"
-                              dependencies={[wallet.isConnected, wallet.publicKey, vault.balance, vault.rewards, vault.isLoading, vault.error]}
-                            >
-                              <MemoizedBalanceCard
-                                isConnected={wallet.isConnected}
-                                publicKey={wallet.publicKey}
-                                balance={vault.balance}
-                                rewards={vault.rewards}
-                                isLoading={vault.isLoading}
-                                error={vault.error}
-                                onRefresh={vault.refresh}
-                              />
-                            </RenderBoundary>
-                          );
-                        case "deposit":
-                          return (
-                            <RenderBoundary
-                              name="deposit-section"
-                              dependencies={[wallet.isConnected, vault.isSubmitting, vault.depositStatus, wallet.balance, wallet.publicKey, vault.lastDepositAmount, vault.depositError, vault.depositHash]}
-                            >
-                              <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-                                <MemoizedDepositForm
-                                  isConnected={wallet.isConnected}
-                                  isSubmitting={vault.isSubmitting}
-                                  onDeposit={vault.deposit}
-                                  status={vault.depositStatus}
-                                  walletBalance={wallet.balance ? parseFloat(wallet.balance) : null}
-                                  walletAddress={wallet.publicKey}
-                                  statusMessage={
-                                    vault.depositStatus === "pending"
-                                      ? `Depositing ${vault.lastDepositAmount ?? "0"} tokens into the vault.`
-                                      : vault.depositStatus === "success"
-                                        ? `Successfully deposited ${vault.lastDepositAmount ?? "0"} tokens.`
-                                        : vault.depositStatus === "error"
-                                          ? vault.depositError
-                                          : null
-                                  }
-                                  transactionHash={vault.depositHash}
-                                />
-                                <MemoizedWithdrawForm
-                                  isConnected={wallet.isConnected}
-                                  isSubmitting={vault.isSubmitting}
-                                  balance={vault.balance}
-                                  onWithdraw={vault.withdraw}
-                                  status={vault.withdrawStatus}
-                                  statusMessage={
-                                    vault.withdrawStatus === "pending"
-                                      ? `Withdrawing ${vault.lastWithdrawAmount ?? "0"} tokens from the vault.`
-                                      : vault.withdrawStatus === "success"
-                                        ? `Successfully withdrew ${vault.lastWithdrawAmount ?? "0"} tokens.`
-                                        : vault.withdrawStatus === "error"
-                                          ? vault.withdrawError
-                                          : null
-                                  }
-                                  transactionHash={vault.withdrawHash}
-                                  walletAddress={wallet.publicKey}
-                                />
+            {widgetsLoading ? (
+              <div className="rounded-2xl border border-border-primary bg-background-secondary/30 p-6 text-sm text-text-muted">
+                Loading dashboard widgets...
+              </div>
+            ) : widgetsError ? (
+              <div className="rounded-2xl border border-red-500 bg-red-500/10 p-6 text-sm text-red-600">
+                {widgetsError}
+              </div>
+            ) : (
+              <DashboardLayoutManager
+                widgetIds={widgetIds}
+                children={({ placements, activeBreakpoint, onReorder, onResize }) => (
+                  <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
+                    {placements.map((placement) => {
+                      const widget = widgetRegistry.getWidget(placement.id);
+                      const WidgetComponent = widget?.component;
+                      const widgetTitle = widget?.metadata?.title ?? placement.id;
+                      const widgetDescription = widget?.metadata?.description;
+                      const widgetConfig = widget?.config ?? {};
+                      const widgetContent = WidgetComponent ? (
+                        <RenderBoundary name={`widget-${placement.id}`}>
+                          <Suspense
+                            fallback={
+                              <div className="rounded-xl border border-border-primary bg-background-secondary/30 p-4 text-sm text-text-muted">
+                                Loading {widgetTitle}...
                               </div>
-                            </RenderBoundary>
-                          );
-                        case "analytics":
-                          return (
-                            <div className="space-y-6">
-                              <RenderBoundary
-                                name="analytics-section"
-                                dependencies={[wallet.isConnected, wallet.publicKey, vault.transactions]}
-                              >
-                                <MemoizedAnalyticsDashboard />
-                              </RenderBoundary>
-                              <RenderBoundary
-                                name="transactions-section"
-                                dependencies={[wallet.isConnected, wallet.publicKey, vault.isLoading, vault.transactions, vault.isClaiming]}
-                              >
-                                <MemoizedTransactionHistory
-                                  isConnected={wallet.isConnected}
-                                  publicKey={wallet.publicKey}
-                                  isLoading={vault.isLoading}
-                                  transactions={vault.transactions}
-                                  onClaimRewards={vault.claimRewards}
-                                  isClaiming={vault.isClaiming}
-                                />
-                              </RenderBoundary>
-                            </div>
-                          );
-                        default:
-                          return null;
-                      }
-                    })();
+                            }
+                          >
+                            <WidgetComponent {...(widgetConfig as Record<string, unknown>)} />
+                          </Suspense>
+                        </RenderBoundary>
+                      ) : (
+                        <div className="rounded-xl border border-border-primary bg-background-secondary/30 p-4 text-sm text-text-muted">
+                          Widget {placement.id} has not been registered yet.
+                        </div>
+                      );
 
-                    const titleMap: Record<string, string> = {
-                      balance: "Balance",
-                      deposit: "Vault Actions",
-                      analytics: "Protocol Insights",
-                    };
-
-                    const descriptionMap: Record<string, string> = {
-                      balance: "Key balance, rewards, and refresh controls.",
-                      deposit: "Deposit and withdraw actions in one place.",
-                      analytics: "Analytics and history for the active vault.",
-                    };
-
-                    return (
-                      <DashboardWidgetCard
-                        key={placement.id}
-                        widgetId={placement.id}
-                        title={titleMap[placement.id] ?? placement.id}
-                        description={descriptionMap[placement.id]}
-                        placement={placement}
-                        isDragging={draggedWidgetId === placement.id}
-                        onDragStart={() => setDraggedWidgetId(placement.id)}
-                        onDrop={() => {
-                          if (draggedWidgetId && draggedWidgetId !== placement.id) {
-                            onReorder(draggedWidgetId, placement.id);
-                          }
-                          setDraggedWidgetId(null);
-                        }}
-                        onResize={(width) => onResize(placement.id, width)}
-                      >
-                        {widgetContent}
-                      </DashboardWidgetCard>
-                    );
-                  })}
-                </div>
-              )}
-            </DashboardLayoutManager>
+                      return (
+                        <DashboardWidgetCard
+                          key={placement.id}
+                          widgetId={placement.id}
+                          title={widgetTitle}
+                          description={widgetDescription}
+                          placement={placement}
+                          isDragging={draggedWidgetId === placement.id}
+                          onDragStart={() => setDraggedWidgetId(placement.id)}
+                          onDrop={() => {
+                            if (draggedWidgetId && draggedWidgetId !== placement.id) {
+                              onReorder(draggedWidgetId, placement.id);
+                            }
+                            setDraggedWidgetId(null);
+                          }}
+                          onResize={(width) => onResize(placement.id, width)}
+                        >
+                          {widgetContent}
+                        </DashboardWidgetCard>
+                      );
+                    })}
+                  </div>
+                )}
+              />
+            )}
           </div>
         </div>
       </main>

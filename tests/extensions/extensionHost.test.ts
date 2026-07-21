@@ -1,8 +1,14 @@
 import { ExtensionHost, type DashboardExtension } from "@/sdk";
+import { dashboardExtensionHost } from "@/core/extensions";
 import { sampleProtocolExtension } from "@/extensions";
 import { selectExtensionWidgets } from "@/widgets/extensionWidgets";
+import { widgetRegistry } from "@/widgets/registry";
 
 describe("ExtensionHost", () => {
+  afterEach(async () => {
+    await dashboardExtensionHost.deactivate("axionvera.sample-protocol");
+  });
+
   it("automatically activates registered extensions and exposes contributions", async () => {
     const host = new ExtensionHost({ logger: silentLogger });
 
@@ -60,6 +66,22 @@ describe("ExtensionHost", () => {
 
     expect(deactivated).toBe(true);
     expect(host.getContributions()).toHaveLength(0);
+  });
+
+  it("registers extension widgets in the shared widget registry", async () => {
+    expect(widgetRegistry.getWidget("sample-protocol-health")).toBeUndefined();
+
+    const result = await dashboardExtensionHost.register(sampleProtocolExtension);
+    expect(result.status).toBe("loaded");
+
+    const registeredWidget = widgetRegistry.getWidget("sample-protocol-health");
+    expect(registeredWidget).toBeDefined();
+    expect(registeredWidget?.metadata?.title).toBe("Protocol Health Widget");
+    expect(registeredWidget?.metadata?.description).toContain("Shows how an extension contributes a dashboard widget.");
+
+    const deactivated = await dashboardExtensionHost.deactivate("axionvera.sample-protocol");
+    expect(deactivated).toBe(true);
+    expect(widgetRegistry.getWidget("sample-protocol-health")).toBeUndefined();
   });
 
   it("selects extension widgets for dashboard rendering", () => {
