@@ -1,6 +1,6 @@
 import React from 'react';
 import type { NextPage } from 'next';
-import { AuditLogView } from '@/components/audit/AuditLogView';
+import { AuditLogView } from '@/features/audit';
 import Head from 'next/head';
 
 const AuditPage: NextPage = () => {

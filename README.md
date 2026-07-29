@@ -91,7 +91,7 @@ axionvera-dashboard/
 
 | Folder | Responsibility |
 | :--- | :--- |
-| `components/` | Presentational UI, grouped by domain subfolder |
+| `components/` | Shared UI only, in seven categories: `ui`, `layout`, `errors`, `guards`, `optimized`, `schema`, `visualizations` |
 | `design-system/` | Base primitives (`Button`, `Card`, `Dialog`, `Alert`, `Badge`) |
 | `charts/` | Recharts wrappers (`LineChart`, `BarChart`, `PieChart`, …) |
 | `visualizations/` | Visualization framework: theme, hooks, utils |
@@ -104,7 +104,7 @@ axionvera-dashboard/
 
 | Folder | Responsibility |
 | :--- | :--- |
-| `features/` | Vertical slices: `analytics`, `governance`, `monitoring`, `recovery`, `search`, `transactions` |
+| `features/` | Vertical slices, each owning its UI behind an `index.ts` barrel: `activity`, `analytics`, `audit`, `diagnostics`, `governance`, `insights`, `monitoring`, `notifications`, `profile`, `recovery`, `search`, `transactions`, `vault` |
 | `wallets/` | Wallet adapters and registry |
 | `workspaces/` | Workspace switching, context, and store |
 | `collaboration/` | Presence, conflict resolution, sync protocol |
@@ -157,6 +157,10 @@ axionvera-dashboard/
 | `pwa/` | Service worker registration and offline provider |
 | `tests/` | Co-located suites (see note below) |
 
+> **Where does my code go?** [docs/structure.md](docs/structure.md) has the rules for
+> `pages/`, `features/` and `components/`, and a table for placing new code. Those rules
+> are enforced by `tests/baseline.test.ts`.
+
 > **Note on duplication.** A few modules overlap by design and a few by accident —
 > `logger/` vs `logging/`, `charts/` vs `visualizations/`, `observability/` vs
 > `diagnostics/` and `performance/`, and tests living in four different places.
@@ -170,28 +174,35 @@ axionvera-dashboard/
 | :--- | :--- | :--- |
 | `src/pages/index.tsx` | `/` | Landing and entry screen |
 | `src/pages/dashboard.tsx` | `/dashboard` | Main vault dashboard |
+| `src/pages/analytics.tsx` | `/analytics` | Portfolio analytics |
+| `src/pages/governance.tsx` | `/governance` | Proposals and voting |
+| `src/pages/audit.tsx` | `/audit` | Audit log |
+| `src/pages/monitoring.tsx` | `/monitoring` | Protocol health |
+| `src/pages/diagnostics.tsx` | `/diagnostics` | Session replay and diagnostics |
 | `src/pages/profile.tsx` | `/profile` | User profile/security settings |
+| `src/pages/schema-demo.tsx` | `/schema-demo` | Schema-driven rendering demo |
 | `src/pages/_app.tsx` | N/A | Global app wrapper/providers |
 | `src/pages/_document.tsx` | N/A | Custom HTML document + theme bootstrap |
 
 ## Components
 
-Main UI components in `src/components/`:
+Shared UI lives in `src/components/`; domain UI lives in its feature and is imported
+through the feature barrel. See [docs/structure.md](docs/structure.md).
 
-| Component | Responsibility |
-| :--- | :--- |
-| `Navbar.tsx` | Wallet status and top navigation |
-| `Sidebar.tsx` | Primary navigation for dashboard pages |
-| `BalanceCard.tsx` | Displays balance/reward summary |
-| `DepositForm.tsx` | Deposit flow UI |
-| `WithdrawForm.tsx` | Withdraw flow UI |
-| `TransactionHistory.tsx` | Transaction list and rewards actions |
-| `ProfileForm.tsx` | Profile editing form |
-| `SecuritySettingsForm.tsx` | Security preferences form |
-| `FormInput.tsx` | Shared form input primitive |
-| `ThemeToggle.tsx` | Theme mode switcher |
-| `Skeleton.tsx` / `Skeletons.tsx` | Loading placeholders |
-| `ErrorBoundary.tsx` / `ErrorFallback.tsx` | Error containment and fallback UI |
+| Component | Location | Responsibility |
+| :--- | :--- | :--- |
+| `Navbar.tsx` | `components/layout/` | Wallet status and top navigation |
+| `Sidebar.tsx` | `components/layout/` | Primary navigation for dashboard pages |
+| `FormInput.tsx` | `components/ui/` | Shared form input primitive |
+| `ThemeToggle.tsx` | `components/ui/` | Theme mode switcher |
+| `Skeleton.tsx` / `Skeletons.tsx` | `components/ui/` | Loading placeholders |
+| `ErrorBoundary.tsx` / `ErrorFallback.tsx` | `components/errors/` | Error containment and fallback UI |
+| `BalanceCard.tsx` | `@/features/vault` | Displays balance/reward summary |
+| `DepositForm.tsx` | `@/features/vault` | Deposit flow UI |
+| `WithdrawForm.tsx` | `@/features/vault` | Withdraw flow UI |
+| `TransactionHistory.tsx` | `@/features/transactions` | Transaction list and rewards actions |
+| `ProfileForm.tsx` | `@/features/profile` | Profile editing form |
+| `SecuritySettingsForm.tsx` | `@/features/profile` | Security preferences form |
 
 ## Hooks
 
@@ -220,7 +231,8 @@ Illustrative UI snapshots for quick contributor orientation:
 ## Documentation
 
 - [Frontend guide](docs/frontend-guide.md)
-- [Architecture](docs/architecture.md)
+- [Architecture](docs/architecture.md) — runtime data flow and SDK interaction
+- [Folder structure](docs/structure.md) — where code goes in `src/`, and the checks that enforce it
 - [Dashboard cleanup checklist](docs/dashboard-cleanup-checklist.md) — folder, component, API, state, and testing rules for contributors
 - [Environment validation](docs/ENVIRONMENT_VALIDATION.md)
 - [End-to-end testing](docs/testing/e2e.md)
@@ -238,8 +250,3 @@ dashboard maintainable.
 ## License
 
 MIT. See [LICENSE](LICENSE).
-## Regression Test Baseline
-- Added tests, fixtures, scripts, and documentation.
-
-## Architecture Documentation
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for details.

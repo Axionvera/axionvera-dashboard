@@ -2,8 +2,8 @@ import { Suspense, useEffect, useMemo, useState, useSyncExternalStore } from "re
 import { useRouter } from "next/router";
 import Head from "next/head";
 
-import Navbar from "@/components/Navbar";
-import Sidebar from "@/components/Sidebar";
+import Navbar from "@/components/layout/Navbar";
+import Sidebar from "@/components/layout/Sidebar";
 import { useVault } from "@/hooks/useVault";
 import { useWalletContext } from "@/hooks/useWallet";
 import { useWidgetLoading } from "@/hooks/useWidgetLoading";

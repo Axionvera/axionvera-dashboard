@@ -6,9 +6,9 @@
 
 import { DependencyManager } from "@/core/dependency/DependencyManager";
 import { DashboardWidget, DataSource } from "./types";
-import BalanceCard from "@/components/BalanceCard";
-import { AnalyticsDashboard } from "@/components/analytics/AnalyticsDashboard";
-import TransactionHistory from "@/components/TransactionHistory";
+import { BalanceCard } from "@/features/vault";
+import { AnalyticsDashboard } from "@/features/analytics";
+import { TransactionHistory } from "@/features/transactions";
 
 const manager = new DependencyManager();
 

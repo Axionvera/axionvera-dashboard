@@ -5,7 +5,7 @@
  */
 
 import React, { memo } from "react";
-import { AnalyticsDashboard } from "@/components/analytics/AnalyticsDashboard";
+import { AnalyticsDashboard } from "@/features/analytics";
 
 /**
  * Since AnalyticsDashboard uses hooks (useWalletContext, useVault, useAnalytics)

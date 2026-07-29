@@ -2,10 +2,9 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-import Navbar from "@/components/Navbar";
-import ProfileForm from "@/components/ProfileForm";
-import SecuritySettingsForm from "@/components/SecuritySettingsForm";
-import { UserProfileSkeleton } from "@/components/Skeletons";
+import Navbar from "@/components/layout/Navbar";
+import { ProfileForm, SecuritySettingsForm } from "@/features/profile";
+import { UserProfileSkeleton } from "@/components/ui/Skeletons";
 import { useSidebar } from "@/hooks/useSidebar";
 import { useWalletContext } from "@/hooks/useWallet";
 import { ProfileFormData, SecuritySettingsFormData } from "@/utils/validation";

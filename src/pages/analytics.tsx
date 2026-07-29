@@ -1,11 +1,10 @@
 import { useRouter } from "next/router";
 import { useVault } from "@/hooks/useVault";
 import { useWalletContext } from "@/hooks/useWallet";
-import Sidebar from "@/components/Sidebar";
-import Navbar from "@/components/Navbar";
-import AnalyticsMetrics from "@/components/AnalyticsMetrics";
-import BalanceTrendChart from "@/components/BalanceTrendChart";
-import { StatisticsSkeleton } from "@/components/Skeletons";
+import Sidebar from "@/components/layout/Sidebar";
+import Navbar from "@/components/layout/Navbar";
+import { AnalyticsMetrics, BalanceTrendChart } from "@/features/analytics";
+import { StatisticsSkeleton } from "@/components/ui/Skeletons";
 import { useEffect } from "react";
 import { SectionErrorBoundary } from "@/components/errors/SectionErrorBoundary";
 

@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import SessionPlaybackPanel from "@/components/SessionPlaybackPanel";
+import SessionPlaybackPanel from "@/features/diagnostics/components/SessionPlaybackPanel";
 import type { SessionEvent, SessionMetadata } from "@/session";
 
 const makeEvent = (overrides: Partial<SessionEvent> = {}): SessionEvent => ({

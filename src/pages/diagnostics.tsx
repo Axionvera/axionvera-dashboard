@@ -1,7 +1,7 @@
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
 import { isSessionReplayEnabled } from "@/utils/env";
-import SessionReplayPanel from "@/components/SessionReplayPanel";
+import { SessionReplayPanel } from "@/features/diagnostics";
 
 /**
  * `/diagnostics` is the entry point to the Session Replay & User Journey
