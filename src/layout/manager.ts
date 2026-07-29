@@ -57,13 +57,13 @@ export function normalizeDashboardLayout(
   };
 
   const normalizeBreakpoint = (breakpoint: DashboardBreakpoint): DashboardPlacement[] => {
+    const maxCols = breakpointBounds[breakpoint].maxCols;
     const source = input?.[breakpoint] ?? fallback[breakpoint];
     const validItems = Array.isArray(source)
       ? source.filter((item) => item && typeof item.id === "string")
       : [];
 
     const normalized = validItems.map((item) => {
-      const maxCols = breakpointBounds[breakpoint].maxCols;
       const safeW = Math.max(1, Math.min(Math.floor(item.w ?? 1), maxCols));
       const safeH = Math.max(1, Math.floor(item.h ?? 1));
       const safeX = Math.max(0, Math.min(Math.floor(item.x ?? 0), maxCols - safeW));
