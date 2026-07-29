@@ -1,6 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ErrorBoundary } from '@/components/errors/ErrorBoundary';
 import { clearRecoveryDiagnostics, getRecoveryDiagnostics } from '@/errors';
 
 function Exploder({ shouldThrow }: { shouldThrow: boolean }) {

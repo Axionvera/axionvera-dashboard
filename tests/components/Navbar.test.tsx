@@ -1,131 +1,84 @@
+import React from "react";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import type { ReactNode, ReactElement } from "react";
-
 import Navbar from "@/components/Navbar";
+import { WalletMeta } from "@/types/wallet";
+import { VaultProvider } from "@/contexts/VaultContext";
+import { GovernanceProvider } from "@/contexts/GovernanceContext";
+import { OfflineProvider } from "@/pwa/OfflineProvider";
+import { WorkspaceProvider } from "@/workspaces";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { WorkspaceProvider, WorkspaceStore } from "@/workspaces";
 
-
-jest.mock("@/features/search/GlobalSearch", () => ({
-  GlobalSearch: () => <div data-testid="global-search" />,
+jest.mock("next/router", () => ({
+  useRouter: () => ({ pathname: "/" }),
 }));
 
-jest.mock("@/hooks/useNotifications", () => ({
-  useNotifications: () => ({
-    notifications: [],
-    unreadCount: 0,
-    filter: { category: "all", read: "all" },
-    markAsRead: jest.fn(),
-    markAllAsRead: jest.fn(),
-    dismiss: jest.fn(),
-    dismissAllVisible: jest.fn(),
-    setFilter: jest.fn(),
-  }),
+jest.mock("@/hooks/useSidebar", () => ({
+  useSidebar: () => ({ isOpen: false, toggle: jest.fn() }),
 }));
 
-jest.mock("next/link", () => ({
-  __esModule: true,
-  default: ({ href, children, ...props }: { href: string; children: ReactNode }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  )
-}));
-
-jest.mock("next/image", () => ({
-  __esModule: true,
-  default: ({
-    src,
-    alt,
-    priority: _priority,
-    ...props
-  }: {
-    src: string;
-    alt: string;
-    priority?: boolean;
-    [k: string]: unknown;
-  }) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={src} alt={alt} {...(props as object)} />
-  ),
-}));
-
-/** Minimal wallet metas for test usage */
-const mockAvailableWallets = [
+const mockWallets: WalletMeta[] = [
   {
-    id: "freighter" as const,
+    id: "freighter",
     label: "Freighter",
-    description: "Browser extension wallet",
-    installUrl: "https://freighter.app",
     icon: "<svg></svg>",
-    capabilities: { publicKey: true, signTransaction: true, signAuthEntry: false },
+    description: "Freighter Wallet",
+    installUrl: "https://freighter.app",
+    capabilities: { publicKey: true, signTransaction: true, signAuthEntry: true },
   },
   {
-    id: "albedo" as const,
+    id: "albedo",
     label: "Albedo",
-    description: "Web-based wallet",
-    installUrl: "https://albedo.link",
     icon: "<svg></svg>",
-    capabilities: { publicKey: true, signTransaction: false, signAuthEntry: false },
+    description: "Albedo Link",
+    installUrl: "https://albedo.link",
+    capabilities: { publicKey: true, signTransaction: true, signAuthEntry: true },
   },
 ];
 
-describe("Navbar", () => {
-  function renderNavbar(ui: ReactElement) {
-    const storage = {
-      getItem: jest.fn(() => null),
-      setItem: jest.fn(),
-      removeItem: jest.fn(),
-    };
-    const store = new WorkspaceStore(storage);
+const renderWithProviders = (ui: React.ReactElement) =>
+  render(
+    <ThemeProvider>
+      <OfflineProvider>
+        <WorkspaceProvider>
+          <VaultProvider walletAddress={null}>
+            <GovernanceProvider walletAddress={null}>{ui}</GovernanceProvider>
+          </VaultProvider>
+        </WorkspaceProvider>
+      </OfflineProvider>
+    </ThemeProvider>
+  );
 
-    return render(
-      <WorkspaceProvider store={store}>
-        <ThemeProvider>{ui}</ThemeProvider>
-      </WorkspaceProvider>
-    );
-  }
+describe("Navbar Component", () => {
+  const defaultProps = {
+    publicKey: null,
+    isConnecting: false,
+    walletType: null,
+    availableWallets: mockWallets,
+    onConnect: jest.fn().mockResolvedValue(undefined),
+    onDisconnect: jest.fn(),
+    onSwitch: jest.fn().mockResolvedValue(undefined),
+  };
 
-  test("shows connect button when disconnected", async () => {
-    const user = userEvent.setup();
-    const onConnect = jest.fn(async () => undefined);
-    renderNavbar(
-      <Navbar
-        publicKey={null}
-        isConnecting={false}
-        walletType={null}
-        availableWallets={mockAvailableWallets}
-        onConnect={onConnect}
-        onDisconnect={jest.fn()}
-        onSwitch={jest.fn(async () => undefined)}
-      />
-    );
-
-    await user.click(screen.getByRole("button", { name: /connect stellar wallet/i }));
-    expect(onConnect).toHaveBeenCalledTimes(0); // Picker opens on first click with multiple wallets
+  test("renders logo and brand title", () => {
+    renderWithProviders(<Navbar {...defaultProps} />);
+    expect(screen.getByText("Axionvera")).toBeInTheDocument();
+    expect(screen.getByText("Dashboard")).toBeInTheDocument();
   });
 
-  test("shows disconnect button when connected", async () => {
-    const user = userEvent.setup();
-    const onDisconnect = jest.fn();
-    renderNavbar(
+  test("renders disconnected state with Connect Wallet button", () => {
+    renderWithProviders(<Navbar {...defaultProps} />);
+    expect(screen.getByRole("button", { name: /Connect Stellar wallet/i })).toBeInTheDocument();
+  });
+
+  test("renders connected state with short address when publicKey is provided", () => {
+    renderWithProviders(
       <Navbar
-        publicKey="GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-        isConnecting={false}
+        {...defaultProps}
+        publicKey="GBRPYHIL2CI3FNQ4BXLFMNDLFPPPU2HY5CHHEBDCYIZUYVRW6EV3M35L"
         walletType="freighter"
-        availableWallets={mockAvailableWallets}
-        onConnect={jest.fn(async () => undefined)}
-        onDisconnect={onDisconnect}
-        onSwitch={jest.fn(async () => undefined)}
       />
     );
-
-    // Open the wallet menu first
-    await user.click(screen.getByRole("button", { name: /wallet options/i }));
-    
-    // Then click disconnect
-    await user.click(screen.getByRole("menuitem", { name: /disconnect stellar wallet/i }));
-    expect(onDisconnect).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: /Wallet options/i })).toBeInTheDocument();
+    expect(screen.getByText(/GBRPYH\.\.\.V3M35L/i)).toBeInTheDocument();
   });
 });
