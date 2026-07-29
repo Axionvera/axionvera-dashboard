@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { WorkspaceProvider, WorkspaceStore } from "@/workspaces";
 
 
-jest.mock("@/features/search/GlobalSearch", () => ({
+jest.mock("@/features/search", () => ({
   GlobalSearch: () => <div data-testid="global-search" />,
 }));
 
