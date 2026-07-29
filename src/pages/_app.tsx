@@ -20,6 +20,7 @@ import { OfflineProvider } from "@/pwa/OfflineProvider";
 import { WorkspaceProvider } from "@/workspaces";
 import { AssetPreloadEngine } from "@/preload";
 import { ServiceProvider } from "@/providers";
+import { loadBundledExtensions } from "@/core/extensions";
 
 
 function AppInner(props: AppProps) {
@@ -28,6 +29,7 @@ function AppInner(props: AppProps) {
 
   useEffect(() => {
     initTelemetry();
+    void loadBundledExtensions();
   }, []);
 
   useEffect(() => {
