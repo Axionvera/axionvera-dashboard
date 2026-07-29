@@ -67,6 +67,7 @@ export const AuditLogFilter: React.FC<Props> = ({
 
                 {/* Action Filter */}
                 <select
+                    aria-label="Action"
                     value={localFilters.action || ''}
                     onChange={(e) => handleChange('action', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
@@ -80,6 +81,7 @@ export const AuditLogFilter: React.FC<Props> = ({
 
                 {/* Status Filter */}
                 <select
+                    aria-label="Status"
                     value={localFilters.status || 'all'}
                     onChange={(e) => handleChange('status', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"

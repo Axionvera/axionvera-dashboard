@@ -16,9 +16,9 @@ export const AuditLogExport: React.FC<Props> = ({
     return (
         <button
             onClick={onExport}
-            disabled={disabled || loading || total === 0}
+            disabled={disabled || loading}
             className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                disabled || loading || total === 0
+                disabled || loading
                     ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                     : 'bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
             }`}

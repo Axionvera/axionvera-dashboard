@@ -1,21 +1,14 @@
-import { Inter, JetBrains_Mono } from 'next/font/google';
-
 /**
- * Primary brand font — Inter.
- * next/font downloads the font at build time and serves it from the same origin,
- * eliminating external network round-trips and completely preventing FOIT/FOUT.
+ * Font CSS variable hooks.
+ *
+ * CI and local preview environments may not have outbound access to Google Fonts.
+ * Keep the variables stable for Tailwind/CSS consumers while letting the CSS font
+ * stacks fall back to system fonts without a build-time network fetch.
  */
-export const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-});
+export const inter = {
+  variable: 'font-inter',
+};
 
-/**
- * Monospace font used for addresses, code snippets, and numeric data.
- */
-export const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-mono',
-});
+export const jetbrainsMono = {
+  variable: 'font-mono',
+};
