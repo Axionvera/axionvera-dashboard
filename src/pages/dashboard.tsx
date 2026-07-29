@@ -10,6 +10,7 @@ import { useWidgetLoading } from "@/hooks/useWidgetLoading";
 import { widgetRegistry } from "@/widgets/registry";
 import { RenderBoundary } from "@/rendering";
 import { DashboardLayoutManager, DashboardWidgetCard } from "@/components/layout";
+import { SectionErrorBoundary } from "@/components/errors/SectionErrorBoundary";
 
 export default function DashboardPage() {
   const wallet = useWalletContext();
@@ -76,17 +77,19 @@ export default function DashboardPage() {
                       const widgetDescription = widget?.metadata?.description;
                       const widgetConfig = widget?.config ?? {};
                       const widgetContent = WidgetComponent ? (
-                        <RenderBoundary name={`widget-${placement.id}`}>
-                          <Suspense
-                            fallback={
-                              <div className="rounded-xl border border-border-primary bg-background-secondary/30 p-4 text-sm text-text-muted">
-                                Loading {widgetTitle}...
-                              </div>
-                            }
-                          >
-                            <WidgetComponent {...(widgetConfig as Record<string, unknown>)} />
-                          </Suspense>
-                        </RenderBoundary>
+                        <SectionErrorBoundary sectionName={widgetTitle}>
+                          <RenderBoundary name={`widget-${placement.id}`}>
+                            <Suspense
+                              fallback={
+                                <div className="rounded-xl border border-border-primary bg-background-secondary/30 p-4 text-sm text-text-muted">
+                                  Loading {widgetTitle}...
+                                </div>
+                              }
+                            >
+                              <WidgetComponent {...(widgetConfig as Record<string, unknown>)} />
+                            </Suspense>
+                          </RenderBoundary>
+                        </SectionErrorBoundary>
                       ) : (
                         <div className="rounded-xl border border-border-primary bg-background-secondary/30 p-4 text-sm text-text-muted">
                           Widget {placement.id} has not been registered yet.

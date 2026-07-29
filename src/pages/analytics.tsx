@@ -7,6 +7,7 @@ import AnalyticsMetrics from "@/components/AnalyticsMetrics";
 import BalanceTrendChart from "@/components/BalanceTrendChart";
 import { StatisticsSkeleton } from "@/components/Skeletons";
 import { useEffect } from "react";
+import { SectionErrorBoundary } from "@/components/errors/SectionErrorBoundary";
 
 export default function AnalyticsPage() {
   const wallet = useWalletContext();
@@ -57,15 +58,15 @@ export default function AnalyticsPage() {
                 </button>
               </div>
             ) : analytics ? (
-              <>
-                <AnalyticsMetrics
-                  rewardPerformance={analytics.rewardPerformance}
-                  participationMetrics={analytics.participationMetrics}
-                />
-                <div className="mt-8">
-                  <BalanceTrendChart data={analytics.historicalBalances} />
-                </div>
-              </>
+                <SectionErrorBoundary sectionName="Analytics Metrics">
+                  <AnalyticsMetrics
+                    rewardPerformance={analytics.rewardPerformance}
+                    participationMetrics={analytics.participationMetrics}
+                  />
+                  <div className="mt-8">
+                    <BalanceTrendChart data={analytics.historicalBalances} />
+                  </div>
+                </SectionErrorBoundary>
             ) : null}
           </div>
         </div>
