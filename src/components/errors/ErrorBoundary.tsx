@@ -139,18 +139,20 @@ export class ErrorBoundary extends Component<Props, State> {
               </button>
             </div>
 
-            <details className="mt-6 text-left">
-              <summary className="cursor-pointer text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
-                Recovery details
-              </summary>
-              <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-mono text-red-600 dark:text-red-400 overflow-auto max-h-48 transition-colors">
-                <div className="font-bold mb-2">Error:</div>
-                {this.state.error?.toString()}
-                <div className="font-bold mt-3 mb-2">Lifecycle:</div>
-                {this.state.recovery?.diagnostic.lifecycle.join(' → ')}
-                {this.state.errorInfo && <pre className="mt-3 whitespace-pre-wrap">{this.state.errorInfo.componentStack}</pre>}
-              </div>
-            </details>
+            {process.env.NODE_ENV === 'development' && (
+              <details className="mt-6 text-left">
+                <summary className="cursor-pointer text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+                  Recovery details
+                </summary>
+                <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-mono text-red-600 dark:text-red-400 overflow-auto max-h-48 transition-colors">
+                  <div className="font-bold mb-2">Error:</div>
+                  {this.state.error?.toString()}
+                  <div className="font-bold mt-3 mb-2">Lifecycle:</div>
+                  {this.state.recovery?.diagnostic.lifecycle.join(' → ')}
+                  {this.state.errorInfo && <pre className="mt-3 whitespace-pre-wrap">{this.state.errorInfo.componentStack}</pre>}
+                </div>
+              </details>
+            )}
           </div>
         </div>
       );

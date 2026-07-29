@@ -47,6 +47,7 @@ import {
   restoreSession,
   pollSession
 } from "@/services/walletService";
+import { apiGet } from "@/utils/enhancedApiClient";
 
 type WalletState = {
   address: string | null;
@@ -109,11 +110,10 @@ async function fetchBalance(address: string, network: StellarNetwork): Promise<s
         ? "https://horizon.stellar.org"
         : "https://horizon-testnet.stellar.org";
 
-    const response = await fetch(`${horizonUrl}/accounts/${address}`);
-    if (!response.ok) throw new Error("Failed to fetch account");
+    const response = await apiGet(`${horizonUrl}/accounts/${address}`);
+    if (!response.success || !response.data) throw new Error("Failed to fetch account");
 
-    const data = await response.json();
-    const xlmBalance = data.balances?.find(
+    const xlmBalance = response.data.balances?.find(
       (b: { asset_type: string; balance: string }) => b.asset_type === "native",
     );
     return xlmBalance?.balance ?? "0";

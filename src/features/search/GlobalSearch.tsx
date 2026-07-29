@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useRef } from 'react';
 
-import { useGovernanceContext } from '@/contexts/GovernanceContext';
-import { useVaultContext } from '@/contexts/VaultContext';
+import { useGovernance } from '@/hooks/useGovernance';
+import { useVault } from '@/hooks/useVault';
 import { Badge } from '@/design-system';
 import { useSearch } from '@/hooks/useSearch';
 import { SEARCH_ENTITY_LABELS, type SearchDocument, type SearchEntityType } from '@/search';
@@ -48,8 +48,8 @@ function SearchResultItem({ doc, onSelect }: { doc: SearchDocument; onSelect: ()
  * Mounted in the navbar and searches across vault, governance, and protocol data.
  */
 export function GlobalSearch() {
-  const { transactions, balance, rewards } = useVaultContext();
-  const { proposals } = useGovernanceContext();
+  const { transactions, balance, rewards } = useVault();
+  const { proposals } = useGovernance();
   const panelRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 

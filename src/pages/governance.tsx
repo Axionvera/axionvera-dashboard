@@ -9,12 +9,12 @@ import ProposalDetail from "@/components/governance/ProposalDetail";
 import GovernanceStats from "@/components/governance/GovernanceStats";
 import CreateProposalModal from "@/components/governance/CreateProposalModal";
 import { useWalletContext } from "@/hooks/useWallet";
-import { useGovernanceContext } from "@/contexts/GovernanceContext";
+import { useGovernance } from "@/hooks/useGovernance";
 
 export default function GovernancePage() {
   const wallet = useWalletContext();
   const router = useRouter();
-  const governance = useGovernanceContext();
+  const governance = useGovernance();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {

@@ -1,21 +1,19 @@
 import { SOROBAN_RPC_URL } from '@/utils/networkConfig';
 import type { EventFetcher, RawSorobanEvent } from './types';
+import { apiPost } from '@/utils/enhancedApiClient';
 
 /**
  * JSON-RPC helper for the Soroban RPC server.
  */
 async function rpcCall<T>(rpcUrl: string, method: string, params: unknown): Promise<T> {
-  const res = await fetch(rpcUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
-  });
+  const payload = { jsonrpc: '2.0', id: 1, method, params };
+  const response = await apiPost(rpcUrl, payload);
 
-  if (!res.ok) {
-    throw new Error(`Soroban RPC ${method} failed: HTTP ${res.status}`);
+  if (!response.success || !response.data) {
+    throw response.error || new Error(`Soroban RPC ${method} failed`);
   }
 
-  const body = (await res.json()) as { result?: T; error?: { message?: string } };
+  const body = response.data as { result?: T; error?: { message?: string } };
   if (body.error) {
     throw new Error(`Soroban RPC ${method} error: ${body.error.message ?? 'unknown'}`);
   }
