@@ -12,6 +12,7 @@ export type SearchEntityType =
 
 /** Normalized document stored in the search index. */
 export interface SearchDocument {
+  [key: string]: unknown;
   id: string;
   entityType: SearchEntityType;
   title: string;

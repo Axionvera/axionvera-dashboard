@@ -1,5 +1,6 @@
 import { type GovernanceStats as GovernanceStatsType } from "@/utils/contractHelpersGovernance";
 import { Skeleton } from "@/components/Skeleton";
+import { MetricCard } from "@/design-system";
 
 interface GovernanceStatsProps {
   stats: GovernanceStatsType | null;
@@ -28,13 +29,13 @@ export default function GovernanceStats({ stats, isLoading }: GovernanceStatsPro
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
       {items.map((item) => (
-        <div
+        <MetricCard
           key={item.label}
-          className="rounded-xl border border-border-primary bg-background-primary p-4"
-        >
-          <p className="text-xs text-text-muted">{item.label}</p>
-          <p className="mt-1 text-xl font-bold text-text-primary">{item.value}</p>
-        </div>
+          label={item.label}
+          value={item.value}
+          compact
+          className="rounded-xl bg-background-primary shadow-none"
+        />
       ))}
     </div>
   );

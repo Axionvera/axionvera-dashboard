@@ -19,6 +19,9 @@ export type { InputProps } from "./Input";
 
 export { Label } from "./Label";
 
+export { MetricCard } from "./MetricCard";
+export type { MetricCardProps } from "./MetricCard";
+
 export { Select } from "./Select";
 export type { SelectProps } from "./Select";
 
