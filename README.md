@@ -152,3 +152,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 MIT. See [LICENSE](LICENSE).
 ## Regression Test Baseline
 - Added tests, fixtures, scripts, and documentation.
+
+## Architecture Documentation
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for details.
