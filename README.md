@@ -65,21 +65,104 @@ npm test
 
 ```text
 axionvera-dashboard/
-├── src/
-│   ├── components/      # Reusable UI components
-│   ├── components/layout/ # Draggable dashboard widget layout primitives
-│   ├── contexts/        # React providers (ThemeContext)
-│   ├── hooks/           # Custom hooks for wallet, vault, forms, errors
-│   ├── layout/          # Dashboard layout types and persistence logic
-│   ├── pages/           # Next.js routes (Pages Router)
-│   ├── styles/          # Global + generated theme styles
-│   ├── tokens.json      # Theme token source of truth
-│   └── utils/           # Network config and contract helper utilities
+├── src/                 # Application source (54 modules — see tables below)
 ├── docs/                # Architecture and contributor docs
-├── tests/               # Test suites
+├── tests/               # Jest suites (see Testing note below)
 ├── scripts/             # Build-time helpers (theme/env validation)
+├── mock-backend/        # Local stub API for development
+├── public/              # Static assets
 └── terraform/           # Infrastructure as code
 ```
+
+`src/` has grown to 54 top-level modules. They group by concern as follows.
+
+**App shell and routing**
+
+| Folder | Responsibility |
+| :--- | :--- |
+| `pages/` | Next.js routes (Pages Router) |
+| `middleware.ts` | Edge middleware |
+| `providers/` | Root service-provider composition |
+| `layout/` | Dashboard layout types, manager, persistence logic |
+| `navigation/` | Navigation state machine |
+| `core/` | DI container, app services, extension wiring |
+
+**UI**
+
+| Folder | Responsibility |
+| :--- | :--- |
+| `components/` | Presentational UI, grouped by domain subfolder |
+| `design-system/` | Base primitives (`Button`, `Card`, `Dialog`, `Alert`, `Badge`) |
+| `charts/` | Recharts wrappers (`LineChart`, `BarChart`, `PieChart`, …) |
+| `visualizations/` | Visualization framework: theme, hooks, utils |
+| `widgets/` | Dashboard widget registry |
+| `styles/` | Global and generated theme CSS |
+| `tokens/`, `tokens.json` | Design-token source of truth and accessors |
+| `rendering/` | Render boundaries and incremental update helpers |
+
+**Domain features**
+
+| Folder | Responsibility |
+| :--- | :--- |
+| `features/` | Vertical slices: `analytics`, `governance`, `monitoring`, `recovery`, `search`, `transactions` |
+| `wallets/` | Wallet adapters and registry |
+| `workspaces/` | Workspace switching, context, and store |
+| `collaboration/` | Presence, conflict resolution, sync protocol |
+| `insights/` | Protocol insight generation |
+| `search/` | Search service, fuzzy matching, index builder |
+| `notifications/` | Filtering, normalization, prioritization, persistence |
+
+**State and data**
+
+| Folder | Responsibility |
+| :--- | :--- |
+| `contexts/` | React providers: `Vault`, `Wallet`, `RBAC`, `Governance`, `Theme` |
+| `store/` | Framework-free stores consumed via `useSyncExternalStore` |
+| `hooks/` | Custom hooks — the consumption boundary for all state |
+| `services/` | Data access: analytics, events, audit, protocol health, SDK |
+| `sdk/` | Host bindings and validation |
+| `query/` | Query engine and cache |
+| `data/` | Dashboard data pipeline |
+| `cache/`, `sync/` | Offline cache and sync |
+| `indexing/` | On-chain event indexer |
+| `schema/` | Dashboard schema parser |
+| `migrations/` | State migration engine |
+| `types/` | Shared domain types |
+
+**Cross-cutting**
+
+| Folder | Responsibility |
+| :--- | :--- |
+| `utils/` | Network config, contract helpers, API resilience, formatting |
+| `lib/` | Fonts and small shared helpers |
+| `config/` | Static configuration (experiments) |
+| `errors/` | Error detection, categorization, recovery |
+| `events/` | Application event bus |
+| `permissions/`, `policy/` | RBAC roles, route guards, policy engine |
+| `extensions/` | Protocol extension points |
+
+**Observability and performance**
+
+| Folder | Responsibility |
+| :--- | :--- |
+| `observability/` | Diagnostics and performance instrumentation |
+| `logger/` | Canonical logger (levels, transports, configuration) |
+| `logging/` | ⚠️ Deprecated duplicate of `logger/` — no importers; do not use |
+| `performance/`, `profiler/` | Performance metrics and React profiling |
+| `diagnostics/` | Runtime diagnostic reporting |
+| `session/`, `replay/` | Session recording, masking, and replay engine |
+| `experiments/` | Feature flags and experiment evaluation |
+| `preload/` | Asset preloading engine |
+| `scheduler/` | Resource scheduling policies |
+| `pwa/` | Service worker registration and offline provider |
+| `tests/` | Co-located suites (see note below) |
+
+> **Note on duplication.** A few modules overlap by design and a few by accident —
+> `logger/` vs `logging/`, `charts/` vs `visualizations/`, `observability/` vs
+> `diagnostics/` and `performance/`, and tests living in four different places.
+> Before adding a folder or component, read the
+> [dashboard cleanup checklist](docs/dashboard-cleanup-checklist.md), which documents
+> which module is canonical in each case.
 
 ## Routes
 
@@ -138,6 +221,7 @@ Illustrative UI snapshots for quick contributor orientation:
 
 - [Frontend guide](docs/frontend-guide.md)
 - [Architecture](docs/architecture.md)
+- [Dashboard cleanup checklist](docs/dashboard-cleanup-checklist.md) — folder, component, API, state, and testing rules for contributors
 - [Environment validation](docs/ENVIRONMENT_VALIDATION.md)
 - [End-to-end testing](docs/testing/e2e.md)
 - [Visual regression testing](docs/testing/visual-regression.md)
@@ -145,7 +229,11 @@ Illustrative UI snapshots for quick contributor orientation:
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, branch naming, and quality gates.
+
+Before opening a PR, review the [dashboard cleanup checklist](docs/dashboard-cleanup-checklist.md) —
+it defines the folder structure, component reuse, API/state, and testing rules that keep the
+dashboard maintainable.
 
 ## License
 
