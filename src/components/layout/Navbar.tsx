@@ -9,7 +9,7 @@ import { NotificationCenter } from "@/features/notifications";
 import { WalletId, WalletMeta } from "@/types/wallet";
 import { WorkspaceSwitcher } from "@/workspaces";
 import { GlobalSearch } from "@/features/search";
-import { ConnectedWalletDropdown, NavLinks, WalletPickerDropdown } from "./nav";
+import { ConnectedWalletDropdown, NavLinks, WalletPickerDropdown } from "./nav/index";
 
 export type NavbarProps = {
   publicKey: string | null;

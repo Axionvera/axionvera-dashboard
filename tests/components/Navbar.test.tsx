@@ -1,13 +1,19 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import type { ReactNode, ReactElement } from "react";
-
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/layout/Navbar";
+import type { WalletMeta } from "@/types/wallet";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { OfflineProvider } from "@/pwa/OfflineProvider";
+import { WorkspaceProvider } from "@/workspaces";
+import { VaultProvider } from "@/contexts/VaultContext";
+import { GovernanceProvider } from "@/contexts/GovernanceContext";
 
-jest.mock("@/features/search/GlobalSearch", () => ({
+jest.mock("@/features/search", () => ({
   GlobalSearch: () => <div data-testid="global-search" />,
+}));
+
+jest.mock("@/features/notifications", () => ({
+  NotificationCenter: () => <div data-testid="notification-center" />,
 }));
 
 jest.mock("@/hooks/useSidebar", () => ({

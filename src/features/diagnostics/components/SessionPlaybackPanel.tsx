@@ -10,7 +10,7 @@ import {
   PlaybackControls,
   PlaybackInspector,
   PlaybackTimeline,
-} from "./playback";
+} from "./playback/index";
 
 export interface SessionPlaybackPanelProps {
   metadata: SessionMetadata;
