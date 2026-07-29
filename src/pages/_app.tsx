@@ -8,7 +8,7 @@ import { WalletProvider } from "@/contexts/WalletContext";
 import { RBACProvider } from "@/contexts/RBACContext";
 import { VaultProvider } from "@/hooks/useVault";
 import { useWalletContext } from "@/hooks/useWallet";
-import ThemeToggle from "@/components/ThemeToggle";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import { inter, jetbrainsMono } from "@/lib/fonts";
 
 import { useEffect } from "react";

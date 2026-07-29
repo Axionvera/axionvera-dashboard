@@ -1,15 +1,13 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import type { ReactNode, ReactElement } from "react";
+
 import Navbar from "@/components/Navbar";
-import { WalletMeta } from "@/types/wallet";
-import { VaultProvider } from "@/contexts/VaultContext";
-import { GovernanceProvider } from "@/contexts/GovernanceContext";
-import { OfflineProvider } from "@/pwa/OfflineProvider";
-import { WorkspaceProvider } from "@/workspaces";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 
-jest.mock("next/router", () => ({
-  useRouter: () => ({ pathname: "/" }),
+jest.mock("@/features/search/GlobalSearch", () => ({
+  GlobalSearch: () => <div data-testid="global-search" />,
 }));
 
 jest.mock("@/hooks/useSidebar", () => ({

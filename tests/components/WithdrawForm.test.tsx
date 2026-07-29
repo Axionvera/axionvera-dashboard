@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import WithdrawForm from "@/components/WithdrawForm";
+import WithdrawForm from "@/features/vault/components/WithdrawForm";
 
 // Mock the SDK barrel — this is the path useSimulation imports from
 jest.mock("@/services/sdk", () => ({

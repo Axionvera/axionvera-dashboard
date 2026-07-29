@@ -8,10 +8,12 @@ real case in this codebase — not generic advice. Cite these examples in review
 PR is about to repeat one.
 
 **Scope.** This complements [`docs/architecture.md`](./architecture.md), which covers the
-runtime data flow (`useWallet` → `useVault` → pages) and SDK/contract interaction. That
-document explains *how the app works*. This one covers *where code goes and how it is
-named*: folder structure, component reuse, API and state conventions, testing, and docs.
-Do not duplicate architecture content here — link to it.
+runtime data flow (`useWallet` → `useVault` → pages) and SDK/contract interaction, and
+[`docs/structure.md`](./structure.md), which defines the `pages/` / `features/` /
+`components/` layout and the checks that enforce it. Those documents explain *how the app
+works* and *where UI lives*. This one covers the remaining conventions: component reuse,
+API and state, testing, and the duplication backlog. Do not duplicate their content here —
+link to it.
 
 Branch naming (`feat/`, `fix/`, `docs/`, `refactor/`, `chore/`) and the quality gates
 (`npm run lint`, `npm run typecheck`, `npm test`) are defined in
@@ -39,20 +41,20 @@ Branch naming (`feat/`, `fix/`, `docs/`, `refactor/`, `chore/`) and the quality 
       This repo already has `src/logger/` and `src/logging/` — two folders, one letter
       apart, each with its own logger implementation. Before adding `src/<name>/`, grep
       for singular/plural and verb/noun variants of that name.
-- [ ] **Respect the logic/UI split for twin folders.** Six domains are split across
-      `src/<domain>/` (pure logic, types, persistence) and `src/components/<domain>/` (React):
-      `layout`, `notifications`, `diagnostics`, `insights`, `schema`, `visualizations`.
-      `src/notifications/` (filtering, normalize, persistence, selectors) versus
-      `src/components/notifications/` (`NotificationCenter`, `NotificationItem`) is the
-      reference example. If you add to one of these domains, put non-React code in
-      `src/<domain>/` and JSX in `src/components/<domain>/`. Do not put JSX in the logic folder.
-- [ ] **Pick one home: `components/` or `features/`.** Use `src/features/<domain>/` for a
-      self-contained vertical slice (its own types, model, data access). Use
-      `src/components/<domain>/` for presentational UI reused across pages. Do not place
-      the same concept in both — see the `AnalyticsDashboard` case in §2.
-- [ ] **Update the README structure table** when you add or move a folder. The README's
-      "Project Structure" block is currently stale: it lists ~10 folders and describes
-      `contexts/` as "React providers (ThemeContext)" when there are five contexts.
+- [ ] **Domain UI goes in `src/features/<domain>/components/`; `src/components/` is shared
+      only.** This is enforced by `tests/baseline.test.ts` — see
+      [`docs/structure.md`](./structure.md) for the full rule set. `src/components/` accepts
+      seven categories (`ui`, `layout`, `errors`, `guards`, `optimized`, `schema`,
+      `visualizations`) and nothing else.
+- [ ] **Keep the logic/UI split honest while it lasts.** Six domains still keep non-React
+      code in `src/<domain>/` while their UI lives in the feature: `layout`, `notifications`,
+      `diagnostics`, `insights`, `schema`, `visualizations`. `src/notifications/` (filtering,
+      normalize, persistence, selectors) versus `src/features/notifications/components/`
+      (`NotificationCenter`, `NotificationItem`) is the reference example. Put non-React code
+      in `src/<domain>/` and JSX in the feature. Folding those folders into their feature is
+      tracked in §6.
+- [ ] **Update the README structure table** when you add or move a folder, and keep
+      [`docs/structure.md`](./structure.md) in step.
 - [ ] **New docs go in `docs/`, not the repo root.** The root holds 18 `.md` files that
       overlap `docs/` — `ANALYTICS_IMPLEMENTATION.md` vs `docs/ANALYTICS.md`,
       `PERFORMANCE_IMPLEMENTATION.md` vs `docs/PERFORMANCE.md`,
@@ -63,25 +65,25 @@ Branch naming (`feat/`, `fix/`, `docs/`, `refactor/`, `chore/`) and the quality 
 
 ## 2. Component reuse rules
 
-- [ ] **Grep for the component name before creating it.** `AnalyticsDashboard.tsx` exists
-      in **both** `src/components/analytics/` and `src/features/analytics/`, and **both are
-      live**, reached through different entry points:
+- [ ] **Grep for the component name before creating it.** `AnalyticsDashboard.tsx` used to
+      exist in **both** `src/components/analytics/` and `src/features/analytics/`, both live,
+      reached through different entry points. They were never copies — one reads data through
+      hooks (`useAnalytics`, `useVaultContext`), the other through the service layer
+      (`fetchAnalyticsData`). Same name, same concept, two data architectures.
 
-      - `src/components/optimized/LazyComponents.tsx` → `@/features/analytics`
-      - `src/widgets/registry.ts` and `src/components/optimized/MemoizedAnalyticsDashboard.tsx`
-        → `@/components/analytics/AnalyticsDashboard`
-
-      They are not copies — the `components/` version reads data through hooks
-      (`useAnalytics`, `useVaultContext`), the `features/` version through the service layer
-      (`fetchAnalyticsData`). Same name, same concept, two data architectures. Do not add a third.
+      They now live side by side in `src/features/analytics/components/` under distinct
+      names: `AnalyticsDashboard` (hooks, no props, wired into the widget registry) and
+      `AnalyticsReportPanel` (takes an `address`, fetches a period report). Do not add a third,
+      and do not reintroduce the name collision.
 
 - [ ] **Extend the existing component instead of forking it.** If an existing component
       almost fits, add a prop. A new file with a `Enhanced`/`New`/`V2` prefix is a smell —
       see `enhancedApiClient.ts` in §3, which was added alongside `apiClient.ts` and left
       both unused.
-- [ ] **Route new UI through an existing barrel.** Domain folders export through `index.ts`
-      (`src/components/analytics/index.ts`, `src/features/governance/index.ts`). Import from
-      the barrel, not from deep paths, so internals can move.
+- [ ] **Route new UI through an existing barrel.** Every feature exports through
+      `src/features/<domain>/index.ts`, and shared UI through `src/components/<category>/index.ts`.
+      Import `@/features/vault`, never `@/features/vault/components/BalanceCard`, so internals
+      can move. `tests/baseline.test.ts` fails the build on deep feature imports.
 - [ ] **Compose, don't clone.** `SessionReplayPanel` imports `SessionPlaybackPanel` rather
       than reimplementing playback controls — that is the pattern to follow.
 - [ ] **Do not "consolidate" complementary components.** These pairs look redundant and are
@@ -157,12 +159,11 @@ other state library; it is hand-rolled and there is no state dependency in `pack
       third pattern. If you believe one is needed, open a `refactor/` issue first.
 - [ ] **Always expose state through a hook.** Components consume `useNotifications`,
       `useActivityFeed`, `useSearch` — not the store module directly. Keep that boundary.
-- [ ] **One type per domain concept.** Governance currently has two incompatible proposal
-      shapes: `Proposal` in `src/utils/contractHelpersGovernance.ts` (on-chain, used by
-      `GovernanceContext`, `useGovernance`, and every `components/governance/` file) and
-      `GovernanceProposal` in `src/features/governance/types.ts` (used by
-      `features/governance/governanceModel.ts`). Before defining a domain type, grep for an
-      existing one and extend it.
+- [ ] **One type per domain concept.** Governance used to carry two incompatible proposal
+      shapes: the on-chain `Proposal` in `src/utils/contractHelpersGovernance.ts` and a
+      `GovernanceProposal` behind a second, mock-backed dashboard. The mock stack was removed;
+      `Proposal` is now the only governance proposal type, and `@/features/governance` re-exports
+      it. Before defining a domain type, grep for an existing one and extend it.
 - [ ] **Keep persistence and selectors out of the store body.** `notificationStore` delegates
       to `@/notifications/persistence`, `@/notifications/selectors`, and
       `@/notifications/filtering`. Follow that separation.
@@ -199,6 +200,9 @@ all four run:
       `npm run test:e2e`, and they are excluded from Jest via `testPathIgnorePatterns`.
 - [ ] **Do not delete a test to make CI pass.** Fix the behavior or explain the removal in
       the PR description.
+- [ ] **Do not weaken `tests/baseline.test.ts` to land a change.** It asserts the folder
+      layout described in [`docs/structure.md`](./structure.md). If a rule genuinely needs to
+      change, change the rule and the doc together, and say why in the PR.
 
 ---
 
@@ -210,8 +214,9 @@ Verified state of the repo. Do not extend these; reducing them is welcome in a `
 | :--- | :--- | :--- |
 | Logger | `src/logger/` — 4 importers, has barrel, transports, `configureLogger`, `module` field | `src/logging/logger.ts` — **zero importers**, no transports, spreads `meta` over the entry so it can overwrite `timestamp`/`level` |
 | API client | `src/utils/apiResilience.ts` — real consumers + tests | `src/utils/apiClient.ts` and `src/utils/enhancedApiClient.ts` — **both orphaned** |
-| Analytics dashboard | — decision pending | `components/analytics/AnalyticsDashboard.tsx` and `features/analytics/AnalyticsDashboard.tsx` — both live, different data strategies |
-| Proposal type | `Proposal` in `utils/contractHelpersGovernance.ts` — used by contexts, hooks, and all governance components | `GovernanceProposal` in `features/governance/types.ts` |
+| Analytics dashboard | Name collision resolved: `AnalyticsDashboard` (hooks) and `AnalyticsReportPanel` (service layer), both in `features/analytics/components/` | — choosing one data strategy is still open |
+| Proposal type | **Resolved.** `Proposal` in `utils/contractHelpersGovernance.ts` is the only proposal type | — the `GovernanceProposal` mock stack was removed |
+| Domain logic vs. feature UI | `src/features/<domain>/` owns the UI | `@/notifications`, `@/insights`, `@/diagnostics`, `@/schema`, `@/layout`, `@/visualizations` still hold their domain logic in a top-level folder |
 | Soroban RPC envelope | one shared helper (to be chosen) | `sorobanRpc` in `apiClient.ts` vs. `rpcCall` in `services/events/sorobanRpcFetcher.ts` |
 | Diagnostics buffer | `src/diagnostics/` — superset API | `src/observability/diagnostics.ts` — minimal duplicate, **separate buffer** (see below) |
 | Performance helpers | `src/performance/` — marks, metrics, `MetricType` | `src/observability/performance.ts` — **zero importers**; redefines `measureAsync` |
@@ -253,6 +258,7 @@ into new features until that is decided.**
 ## Related documentation
 
 - [Architecture](./architecture.md) — runtime data flow, wallet→vault, SDK/contract interaction
+- [Folder structure](./structure.md) — `pages` / `features` / `components` layout and the checks that enforce it
 - [Frontend guide](./frontend-guide.md)
 - [State architecture](./STATE_ARCHITECTURE.md)
 - [Contributing](../CONTRIBUTING.md) — branch naming, commits, quality gates

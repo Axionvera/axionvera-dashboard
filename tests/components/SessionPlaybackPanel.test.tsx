@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import SessionPlaybackPanel from "@/components/SessionPlaybackPanel";
-import { SessionEvent, SessionMetadata } from "@/session";
+import SessionPlaybackPanel from "@/features/diagnostics/components/SessionPlaybackPanel";
+import type { SessionEvent, SessionMetadata } from "@/session";
 
 const mockMetadata: SessionMetadata = {
   id: "test-session-12345",

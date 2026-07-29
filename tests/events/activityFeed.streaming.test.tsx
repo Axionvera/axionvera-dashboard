@@ -1,5 +1,5 @@
 import { act, render, screen } from '@testing-library/react';
-import ActivityFeed from '@/components/activity/ActivityFeed';
+import ActivityFeed from '@/features/activity/components/ActivityFeed';
 import { resetSharedEventStreamForTests } from '@/services/events/sharedStreamLifecycle';
 import { activityStore } from '@/store/activityStore';
 import type {

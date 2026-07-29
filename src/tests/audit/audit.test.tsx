@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { AuditLogView } from '@/components/audit/AuditLogView';
+import { AuditLogView } from '@/features/audit';
 import { auditService } from '@/services/auditService';
 
 // Mock the service
