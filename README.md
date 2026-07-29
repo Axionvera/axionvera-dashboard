@@ -150,3 +150,5 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 ## License
 
 MIT. See [LICENSE](LICENSE).
+## Regression Test Baseline
+- Added tests, fixtures, scripts, and documentation.
