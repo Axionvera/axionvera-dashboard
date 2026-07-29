@@ -5,7 +5,7 @@
  */
 
 import React, { memo } from "react";
-import WithdrawForm from "@/components/WithdrawForm";
+import { WithdrawForm } from "@/features/vault";
 
 function arePropsEqual(
   prevProps: React.ComponentProps<typeof WithdrawForm>,

@@ -36,7 +36,7 @@ export const LazyAnalyticsDashboard = dynamic(
  * Heavy component that can be loaded on-demand.
  */
 export const LazyTransactionHistory = dynamic(
-  () => import("@/components/TransactionHistory"),
+  () => import("@/features/transactions").then((mod) => ({ default: mod.TransactionHistory })),
   {
     loading: () => <LoadingFallback />,
     ssr: false,
@@ -47,7 +47,7 @@ export const LazyTransactionHistory = dynamic(
  * Lazy-loaded Governance components.
  */
 export const LazyGovernanceStats = dynamic(
-  () => import("@/components/governance/GovernanceStats"),
+  () => import("@/features/governance").then((mod) => ({ default: mod.GovernanceStatsPanel })),
   {
     loading: () => <LoadingFallback />,
     ssr: false,
@@ -55,7 +55,7 @@ export const LazyGovernanceStats = dynamic(
 );
 
 export const LazyProposalList = dynamic(
-  () => import("@/components/governance/ProposalList"),
+  () => import("@/features/governance").then((mod) => ({ default: mod.ProposalList })),
   {
     loading: () => <LoadingFallback />,
     ssr: false,
@@ -111,7 +111,7 @@ export const LazyStatisticsBar = dynamic(
  * Modals are only loaded when opened.
  */
 export const LazyCreateProposalModal = dynamic(
-  () => import("@/components/governance/CreateProposalModal"),
+  () => import("@/features/governance").then((mod) => ({ default: mod.CreateProposalModal })),
   {
     loading: () => <LoadingFallback />,
     ssr: false,

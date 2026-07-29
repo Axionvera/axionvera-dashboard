@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode, ReactElement } from "react";
 
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/layout/Navbar";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { WorkspaceProvider, WorkspaceStore } from "@/workspaces";
 

@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import SessionReplayPanel from "@/components/SessionReplayPanel";
+import SessionReplayPanel from "@/features/diagnostics/components/SessionReplayPanel";
 
 /**
  * This suite focuses on the **panel layer**: prop forwarding, conditional

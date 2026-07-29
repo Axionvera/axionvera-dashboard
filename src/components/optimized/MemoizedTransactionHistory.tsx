@@ -5,7 +5,7 @@
  */
 
 import React, { memo } from "react";
-import TransactionHistory from "@/components/TransactionHistory";
+import { TransactionHistory } from "@/features/transactions";
 
 function arePropsEqual(
   prevProps: React.ComponentProps<typeof TransactionHistory>,

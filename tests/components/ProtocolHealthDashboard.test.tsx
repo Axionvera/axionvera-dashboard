@@ -1,6 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 
-import ProtocolHealthDashboard from "@/features/monitoring/ProtocolHealthDashboard";
+import ProtocolHealthDashboard from "@/features/monitoring/components/ProtocolHealthDashboard";
 import { getProtocolHealthSnapshot, type ProtocolHealthSnapshot } from "@/services/protocolHealth";
 
 jest.mock("@/services/protocolHealth", () => ({

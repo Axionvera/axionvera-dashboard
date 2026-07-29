@@ -1,7 +1,7 @@
 import Head from "next/head";
 
-import Navbar from "@/components/Navbar";
-import Sidebar from "@/components/Sidebar";
+import Navbar from "@/components/layout/Navbar";
+import Sidebar from "@/components/layout/Sidebar";
 import { DashboardSchemaRenderer } from "@/components/schema/DashboardSchemaRenderer";
 import { protocolDashboardSchema } from "@/schema/examples";
 import { useWalletContext } from "@/hooks/useWallet";

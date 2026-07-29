@@ -2,9 +2,9 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 
-import Navbar from "@/components/Navbar";
-import Sidebar from "@/components/Sidebar";
-import ProtocolHealthDashboard from "@/features/monitoring/ProtocolHealthDashboard";
+import Navbar from "@/components/layout/Navbar";
+import Sidebar from "@/components/layout/Sidebar";
+import { ProtocolHealthDashboard } from "@/features/monitoring";
 import { useWalletContext } from "@/hooks/useWallet";
 
 export default function MonitoringPage() {

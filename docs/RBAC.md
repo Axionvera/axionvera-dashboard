@@ -34,7 +34,7 @@ The AxionVera dashboard implements a comprehensive Role-Based Access Control (RB
    - `RouteGuard`: Page-level access control
    - `withRouteGuard`: HOC for route protection
 
-6. **Navigation Components** (`src/components/RoleAwareNav.tsx`)
+6. **Navigation Components** (`src/components/layout/RoleAwareNav.tsx`)
    - Role-aware navigation rendering
    - Dynamic menu filtering
 
@@ -213,7 +213,7 @@ function MyComponent() {
 ### Role-Aware Navigation
 
 ```typescript
-import { RoleAwareNav, NavItem } from "@/components/RoleAwareNav";
+import { RoleAwareNav, NavItem } from "@/components/layout";
 import { Permission, UserRole } from "@/types/rbac";
 
 const navItems: NavItem[] = [

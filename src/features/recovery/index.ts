@@ -14,3 +14,10 @@ export {
   getRecoveryWorkflow,
   executeRecoveryWorkflow
 } from './workflows';
+
+export {
+  RecoveryUI,
+  type RecoveryUIProps,
+  ErrorBadge,
+  type ErrorBadgeProps,
+} from './components/RecoveryUI';

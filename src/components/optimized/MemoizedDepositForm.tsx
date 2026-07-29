@@ -5,7 +5,7 @@
  */
 
 import React, { memo } from "react";
-import DepositForm from "@/components/DepositForm";
+import { DepositForm } from "@/features/vault";
 
 function arePropsEqual(
   prevProps: React.ComponentProps<typeof DepositForm>,
