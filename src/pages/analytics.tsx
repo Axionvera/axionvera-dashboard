@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useVaultContext } from "@/contexts/VaultContext";
+import { useVault } from "@/hooks/useVault";
 import { useWalletContext } from "@/hooks/useWallet";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
@@ -11,7 +11,7 @@ import { useEffect } from "react";
 export default function AnalyticsPage() {
   const wallet = useWalletContext();
   const router = useRouter();
-  const { analytics, analyticsLoading: isLoading, analyticsError: error, refreshAnalytics: refresh } = useVaultContext();
+  const { analytics, analyticsLoading: isLoading, analyticsError: error, refreshAnalytics: refresh } = useVault();
 
   useEffect(() => {
     if (!wallet.isConnected && !wallet.isConnecting) {

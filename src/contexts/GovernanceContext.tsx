@@ -241,3 +241,5 @@ export function useGovernanceContext() {
   if (!ctx) throw new Error("useGovernanceContext must be used within a GovernanceProvider");
   return ctx;
 }
+
+export const useGovernance = useGovernanceContext;

@@ -1,4 +1,5 @@
 import { onCLS, onINP, onLCP, onFCP, onTTFB, Metric } from 'web-vitals';
+import { apiPost } from '@/utils/enhancedApiClient';
 
 /**
  * Identify user device type for metric categorization
@@ -44,14 +45,10 @@ const pushToMetricsServer = (metric: Metric) => {
       const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
       navigator.sendBeacon(url, blob);
     } else {
-      // Fallback to fetch for browsers that do not support sendBeacon
-      fetch(url, {
-        body: JSON.stringify(payload),
-        method: 'POST',
+      // Fallback to apiPost for browsers that do not support sendBeacon
+      apiPost(url, payload, {
         keepalive: true,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        retryPolicy: 'none'
       }).catch(err => console.debug('Telemetry push failed:', err));
     }
   } catch (err) {

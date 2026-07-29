@@ -1,6 +1,6 @@
 import React, { useState, memo } from "react";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { useVaultContext } from "@/contexts/VaultContext";
+import { useVault } from "@/hooks/useVault";
 import { useWalletContext } from "@/hooks/useWallet";
 import { RewardTrendsPanel } from "./RewardTrendsPanel";
 import { APYHistoryPanel } from "./APYHistoryPanel";
@@ -79,7 +79,7 @@ AnalyticsTabs.displayName = "AnalyticsTabs";
 export function AnalyticsDashboard() {
   const [activeTab, setActiveTab] = useState<TabKey>("rewards");
   const wallet = useWalletContext();
-  const vault = useVaultContext();
+  const vault = useVault();
 
   const { data: analytics, isLoading, error, refresh } = useAnalytics({
     transactions: vault.transactions,

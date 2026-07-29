@@ -4,7 +4,7 @@ import Head from "next/head";
 
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
-import { useVaultContext } from "@/contexts/VaultContext";
+import { useVault } from "@/hooks/useVault";
 import { useWalletContext } from "@/hooks/useWallet";
 import { useWidgetLoading } from "@/hooks/useWidgetLoading";
 import { widgetRegistry } from "@/widgets/registry";
@@ -14,7 +14,7 @@ import { DashboardLayoutManager, DashboardWidgetCard } from "@/components/layout
 export default function DashboardPage() {
   const wallet = useWalletContext();
   const router = useRouter();
-  const vault = useVaultContext();
+  const vault = useVault();
 
   const [mounted, setMounted] = useState(false);
   const [draggedWidgetId, setDraggedWidgetId] = useState<string | null>(null);

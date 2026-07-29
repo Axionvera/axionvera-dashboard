@@ -5,6 +5,7 @@ import {
   NETWORK,
   SOROBAN_RPC_URL,
 } from "@/utils/networkConfig";
+import { getApiClient } from "@/utils/enhancedApiClient";
 
 export type ProtocolHealthStatus = "operational" | "degraded" | "down";
 
@@ -58,20 +59,20 @@ async function probeEndpoint(
   timeoutMs = DEFAULT_TIMEOUT_MS,
 ): Promise<ProbeResult> {
   const startedAt = performance.now();
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const response = await fetch(url, {
+    const client = getApiClient();
+    const response = await client.request(url, {
       ...options,
-      signal: controller.signal,
+      timeout: timeoutMs,
+      retryPolicy: 'none',
     });
     const latencyMs = Math.round(performance.now() - startedAt);
 
     return {
-      ok: response.ok,
+      ok: response.success,
       latencyMs,
-      message: response.ok ? `${response.status} OK` : `${response.status} ${response.statusText}`,
+      message: response.success ? `${response.statusCode || 200} OK` : response.error?.message || "Endpoint probe failed",
     };
   } catch (error) {
     const latencyMs = Math.round(performance.now() - startedAt);
@@ -80,8 +81,6 @@ async function probeEndpoint(
       latencyMs,
       message: error instanceof Error ? error.message : "Endpoint probe failed",
     };
-  } finally {
-    clearTimeout(timeout);
   }
 }
 

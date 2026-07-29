@@ -322,3 +322,5 @@ export function useVaultContext() {
   if (!ctx) throw new Error("useVaultContext must be used within a VaultProvider");
   return ctx;
 }
+
+export const useVault = useVaultContext;
