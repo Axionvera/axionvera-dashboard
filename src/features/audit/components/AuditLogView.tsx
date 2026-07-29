@@ -83,7 +83,6 @@ export const AuditLogView: React.FC = () => {
                     </button>
                     <AuditLogExport
                         onExport={handleExport}
-                        disabled={loading}
                         loading={isExporting}
                         total={total}
                     />
@@ -95,7 +94,6 @@ export const AuditLogView: React.FC = () => {
                 filters={filters}
                 onFilterChange={setFilters}
                 onClearFilters={clearFilters}
-                loading={loading}
             />
 
             {/* Table */}

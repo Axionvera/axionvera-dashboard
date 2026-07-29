@@ -6,6 +6,11 @@ import Navbar from "@/components/layout/Navbar";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { WorkspaceProvider, WorkspaceStore } from "@/workspaces";
 
+
+jest.mock("@/features/search/GlobalSearch", () => ({
+  GlobalSearch: () => <div data-testid="global-search" />,
+}));
+
 jest.mock("@/hooks/useNotifications", () => ({
   useNotifications: () => ({
     notifications: [],

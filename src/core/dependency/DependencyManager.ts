@@ -4,6 +4,8 @@
  * Centralized manager for tracking widget dependencies and resolving loading order.
  */
 
+import type { ComponentType } from "react";
+
 import { Graph } from "./Graph";
 
 export interface DataSource {
@@ -16,12 +18,21 @@ export interface Widget {
   id: string;
   name: string;
   dependencies: string[]; // List of DataSource IDs or Widget IDs
+  component?: ComponentType<Record<string, unknown>>;
+  metadata?: {
+    title?: string;
+    description?: string;
+    author?: string;
+    version?: string;
+  };
+  config?: Record<string, unknown>;
 }
 
 export class DependencyManager {
   private widgets: Map<string, Widget> = new Map();
   private dataSources: Map<string, DataSource> = new Map();
   private graph: Graph<string> = new Graph();
+  private subscribers: Set<() => void> = new Set();
 
   /**
    * Register a data source.
@@ -46,6 +57,37 @@ export class DependencyManager {
     if (this.graph.hasCycle()) {
       throw new Error(`Circular dependency detected after registering widget: ${widget.id}`);
     }
+
+    this.notifySubscribers();
+  }
+
+  unregisterWidget(widgetId: string): boolean {
+    const removed = this.widgets.delete(widgetId);
+    if (removed) {
+      this.rebuildGraph();
+      this.notifySubscribers();
+    }
+    return removed;
+  }
+
+  subscribe(listener: () => void): () => void {
+    this.subscribers.add(listener);
+    return () => {
+      this.subscribers.delete(listener);
+    };
+  }
+
+  private notifySubscribers(): void {
+    this.subscribers.forEach((listener) => listener());
+  }
+
+  private rebuildGraph(): void {
+    this.graph = new Graph();
+    this.dataSources.forEach((source) => this.graph.addVertex(source.id));
+    this.widgets.forEach((widget) => {
+      this.graph.addVertex(widget.id);
+      widget.dependencies.forEach((depId) => this.graph.addEdge(widget.id, depId));
+    });
   }
 
   /**

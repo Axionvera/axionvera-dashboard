@@ -66,9 +66,8 @@ export default function DashboardPage() {
                 {widgetsError}
               </div>
             ) : (
-              <DashboardLayoutManager
-                widgetIds={widgetIds}
-                children={({ placements, activeBreakpoint, onReorder, onResize }) => (
+              <DashboardLayoutManager widgetIds={widgetIds}>
+                {({ placements, activeBreakpoint, onReorder, onResize }) => (
                   <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
                     {placements.map((placement) => {
                       const widget = widgetRegistry.getWidget(placement.id);
@@ -119,7 +118,7 @@ export default function DashboardPage() {
                     })}
                   </div>
                 )}
-              />
+              </DashboardLayoutManager>
             )}
           </div>
         </div>
