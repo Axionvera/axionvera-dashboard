@@ -98,7 +98,6 @@ describe("navigation state machine", () => {
       "dashboard",
       "analytics",
       "governance",
-      "monitoring",
       "profile",
       "admin",
     ]);

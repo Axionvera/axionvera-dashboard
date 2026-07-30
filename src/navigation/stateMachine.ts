@@ -20,7 +20,7 @@ export type NavigationEvent =
   | "missingRoute"
   | "logout";
 
-export type FeatureKey = "dashboard" | "analytics" | "governance" | "monitoring" | "profile" | "admin";
+export type FeatureKey = "dashboard" | "analytics" | "governance" | "profile" | "admin";
 
 export interface FeatureGate {
   key: FeatureKey;
@@ -54,7 +54,6 @@ export const DEFAULT_FEATURE_GATES: FeatureGate[] = [
   { key: "dashboard", enabled: true, paths: ["/dashboard"] },
   { key: "analytics", enabled: true, paths: ["/analytics"] },
   { key: "governance", enabled: true, paths: ["/governance", "/governance/*"] },
-  { key: "monitoring", enabled: true, paths: ["/monitoring"] },
   { key: "profile", enabled: true, paths: ["/profile"] },
   { key: "admin", enabled: true, paths: ["/admin", "/admin/*"] },
 ];
