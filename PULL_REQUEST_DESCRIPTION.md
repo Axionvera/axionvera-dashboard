@@ -1,106 +1,84 @@
-# Global Error Boundaries & API Resilience Implementation
-
 ## Summary
-This PR implements a comprehensive error handling and API resilience layer for the Axionvera Dashboard to prevent crashes and provide graceful recovery paths when unexpected errors occur.
 
-## Problem Solved
-Previously, unhandled JavaScript exceptions or failed API calls could cause the entire dashboard to crash to a blank white screen, leaving users with no recovery options.
+Removes dead routes, unused components, orphaned features, stale test scripts, and duplicate files from the codebase. This reduces codebase noise, improves build performance, and lowers maintenance burden.
 
-## Solution Overview
-Implemented a robust resilience layer with the following components:
+**~1,882 lines of dead code removed across 19 files.**
 
-### 🛡️ Error Boundary System
-- **ErrorBoundary Component**: Higher-order React component based on official React documentation
-- **Friendly Fallback UI**: User-friendly error screen with recovery options
-- **Root Application Wrapping**: Error boundary wraps the entire application router
-- **Development Debug Info**: Enhanced error details in development mode
+---
 
-### 🔧 API Resilience Framework
-- **Timeout Protection**: Configurable timeout limits for all API calls (default: 10s)
-- **Automatic Retry Logic**: Intelligent retry mechanism with exponential backoff
-- **Global Error Handling**: Centralized error logging and context
-- **Safe API Wrapper**: Non-throwing API calls with `{ data, error }` return pattern
-- **Debouncing**: Prevents rapid successive API calls
+## Changes
 
-### 🎯 Enhanced SDK Integration
-- **Refactored contractHelpers**: All SDK methods now use resilience patterns
-- **Configurable Options**: Each API call accepts custom timeout and retry settings
-- **Fallback Values**: Optional fallback data when API calls fail
-- **Error Context**: Enhanced error messages with operation context
+### ❌ Dead Page Routes Deleted (5)
+| File | Route | Reason |
+|------|-------|--------|
+| `src/pages/monitoring.tsx` | `/monitoring` | Not linked from sidebar/navbar anywhere |
+| `src/pages/audit.tsx` | `/audit` | Not linked from sidebar/navbar anywhere |
+| `src/pages/schema-demo.tsx` | `/schema-demo` | Dev-only demo page, no route to it |
+| `src/pages/test-500.tsx` | `/test-500` | Test-only page, intentionally throws error |
+| `src/pages/governance/index.tsx` | `/governance` | Duplicate of `src/pages/governance.tsx` (Next.js prioritizes `.tsx` over `index.tsx` in same dir — both resolved to same route, creating confusion) |
 
-### 🎨 User Experience Improvements
-- **Secure Reload Action**: Safe application reload that clears corrupted state
-- **Go Back Option**: Navigation fallback for error recovery
-- **Loading States**: Proper loading indicators during API operations
-- **Error Feedback**: Clear error messaging without technical jargon
+### ❌ Unused Components Deleted (4)
+| File | Reason |
+|------|--------|
+| `src/components/RoleAwareNav.tsx` | Zero imports across the codebase |
+| `src/components/ErrorFallback.tsx` | Zero imports; `ErrorBoundary.tsx` uses inline fallback |
+| `src/components/FallbackStates.tsx` | Zero imports |
+| `src/components/RecoveryUI.tsx` | Zero imports |
 
-## Technical Implementation
+### ❌ Orphaned Features Deleted (2 directories, 3 files)
+| File | Reason |
+|------|--------|
+| `src/features/monitoring/ProtocolHealthDashboard.tsx` | Only consumed by deleted `/monitoring` page |
+| `src/features/recovery/index.ts` | Not imported anywhere |
+| `src/features/recovery/workflows.ts` | Not imported anywhere |
 
-### Files Added
-- `src/components/ErrorBoundary.tsx` - Main error boundary component
-- `src/components/ErrorFallback.tsx` - Reusable fallback UI component  
-- `src/utils/apiResilience.ts` - API resilience utilities and helpers
-- `src/hooks/useApiError.ts` - React hook for component-level error handling
+### ❌ Stale Root Test Scripts Deleted (3)
+| File | Reason |
+|------|--------|
+| `test-navigation.js` | Browser console validation script, not part of test suite |
+| `test-validation.js` | Browser console validation script, not part of test suite |
+| `verify-sidebar.js` | Browser console validation script, not part of test suite |
 
-### Files Modified
-- `src/pages/_app.tsx` - Wrapped application with ErrorBoundary
-- `src/utils/contractHelpers.ts` - Enhanced SDK with resilience patterns
+### ❌ Orphaned Test Deleted (1)
+| File | Reason |
+|------|--------|
+| `tests/components/ProtocolHealthDashboard.test.tsx` | Test for deleted `ProtocolHealthDashboard` component |
 
-### Key Features
-1. **Automatic Error Catching**: Catches all React render errors and unhandled exceptions
-2. **API Timeouts**: Prevents hanging requests with configurable timeouts
-3. **Retry Logic**: Automatic retries for transient failures
-4. **Graceful Degradation**: Fallback values when APIs are unavailable
-5. **User Recovery**: Clear paths for users to recover from errors
-6. **Development Debugging**: Enhanced error details in development mode
+### ✅ Configuration Updates (2 files)
+| File | Change |
+|------|--------|
+| `src/permissions/routes.ts` | Removed `/monitoring` route access config |
+| `src/navigation/stateMachine.ts` | Removed `monitoring` from `FeatureKey` type and `DEFAULT_FEATURE_GATES` |
 
-## Configuration Examples
+### ✅ Test Update (1 file)
+| File | Change |
+|------|--------|
+| `tests/navigation/stateMachine.test.ts` | Updated feature gate assertion to match new gates |
 
-### Basic Usage
-```tsx
-// Error boundary automatically wraps the entire app
-<ErrorBoundary>
-  <App />
-</ErrorBoundary>
-```
+---
 
-### API with Custom Options
-```tsx
-const sdk = createAxionveraVaultSdk();
-const result = await sdk.getBalances(args, {
-  timeout: 5000,
-  retries: 3,
-  fallbackValue: { balance: "0", rewards: "0" }
-});
-```
+## Active Routes Preserved
 
-### Component Error Handling
-```tsx
-const { error, executeWithErrorHandling } = useApiError();
-const result = await executeWithErrorHandling(() => apiCall());
-```
+All active routes remain untouched and fully functional:
 
-## Testing Strategy
-- Error boundary catches and displays errors correctly
-- API resilience handles timeouts and retries
-- Fallback UI renders with proper recovery options
-- Application reload clears error state safely
+| Route | Page | Status |
+|-------|------|--------|
+| `/` | Landing/Home | ✅ Active |
+| `/dashboard` | Vault Dashboard | ✅ Active |
+| `/analytics` | Portfolio Analytics | ✅ Active |
+| `/governance` | Governance | ✅ Active |
+| `/profile` | Profile Settings | ✅ Active |
+| `/diagnostics` | Session Replay | ✅ Active (env-gated) |
+| `/404` | Custom 404 | ✅ Active |
+| `/500` | Custom 500 | ✅ Active |
 
-## Benefits
-✅ **Prevents White Screen Crashes** - No more blank screens for users  
-✅ **Improves User Experience** - Clear error messages and recovery paths  
-✅ **Enhances Reliability** - Automatic retry and timeout protection  
-✅ **Maintains Performance** - Efficient error handling without overhead  
-✅ **Developer Friendly** - Enhanced debugging in development mode  
+---
 
-## Migration Notes
-- No breaking changes to existing API interfaces
-- Backward compatible with current component usage
-- Optional parameters for resilience configuration
-- Graceful fallback for existing implementations
+## Verification
 
-## Future Enhancements
-- Integration with error monitoring services (Sentry, etc.)
-- Network status detection and offline handling
-- Progressive retry strategies
-- User-specific error reporting preferences
+- ✅ No unrelated redesign introduced
+- ✅ Dead files confirmed to have zero imports from active code
+- ✅ Route config no longer references deleted routes
+- ✅ Feature gates consistent with actual routes
+- ✅ Navigation state machine test updated
+
