@@ -1,17 +1,17 @@
 import { useRouter } from "next/router";
-import { useVaultContext } from "@/contexts/VaultContext";
+import { useVault } from "@/hooks/useVault";
 import { useWalletContext } from "@/hooks/useWallet";
-import Sidebar from "@/components/Sidebar";
-import Navbar from "@/components/Navbar";
-import AnalyticsMetrics from "@/components/AnalyticsMetrics";
-import BalanceTrendChart from "@/components/BalanceTrendChart";
-import { StatisticsSkeleton } from "@/components/Skeletons";
+import Sidebar from "@/components/layout/Sidebar";
+import Navbar from "@/components/layout/Navbar";
+import { AnalyticsMetrics, BalanceTrendChart } from "@/features/analytics";
+import { StatisticsSkeleton } from "@/components/ui/Skeletons";
 import { useEffect } from "react";
+import { SectionErrorBoundary } from "@/components/errors/SectionErrorBoundary";
 
 export default function AnalyticsPage() {
   const wallet = useWalletContext();
   const router = useRouter();
-  const { analytics, analyticsLoading: isLoading, analyticsError: error, refreshAnalytics: refresh } = useVaultContext();
+  const { analytics, analyticsLoading: isLoading, analyticsError: error, refreshAnalytics: refresh } = useVault();
 
   useEffect(() => {
     if (!wallet.isConnected && !wallet.isConnecting) {
@@ -57,15 +57,15 @@ export default function AnalyticsPage() {
                 </button>
               </div>
             ) : analytics ? (
-              <>
-                <AnalyticsMetrics
-                  rewardPerformance={analytics.rewardPerformance}
-                  participationMetrics={analytics.participationMetrics}
-                />
-                <div className="mt-8">
-                  <BalanceTrendChart data={analytics.historicalBalances} />
-                </div>
-              </>
+                <SectionErrorBoundary sectionName="Analytics Metrics">
+                  <AnalyticsMetrics
+                    rewardPerformance={analytics.rewardPerformance}
+                    participationMetrics={analytics.participationMetrics}
+                  />
+                  <div className="mt-8">
+                    <BalanceTrendChart data={analytics.historicalBalances} />
+                  </div>
+                </SectionErrorBoundary>
             ) : null}
           </div>
         </div>

@@ -2,19 +2,20 @@ import { Suspense, useEffect, useMemo, useState, useSyncExternalStore } from "re
 import { useRouter } from "next/router";
 import Head from "next/head";
 
-import Navbar from "@/components/Navbar";
-import Sidebar from "@/components/Sidebar";
-import { useVaultContext } from "@/contexts/VaultContext";
+import Navbar from "@/components/layout/Navbar";
+import Sidebar from "@/components/layout/Sidebar";
+import { useVault } from "@/hooks/useVault";
 import { useWalletContext } from "@/hooks/useWallet";
 import { useWidgetLoading } from "@/hooks/useWidgetLoading";
 import { widgetRegistry } from "@/widgets/registry";
 import { RenderBoundary } from "@/rendering";
 import { DashboardLayoutManager, DashboardWidgetCard } from "@/components/layout";
+import { SectionErrorBoundary } from "@/components/errors/SectionErrorBoundary";
 
 export default function DashboardPage() {
   const wallet = useWalletContext();
   const router = useRouter();
-  const vault = useVaultContext();
+  const vault = useVault();
 
   const [mounted, setMounted] = useState(false);
   const [draggedWidgetId, setDraggedWidgetId] = useState<string | null>(null);
@@ -65,9 +66,8 @@ export default function DashboardPage() {
                 {widgetsError}
               </div>
             ) : (
-              <DashboardLayoutManager
-                widgetIds={widgetIds}
-                children={({ placements, activeBreakpoint, onReorder, onResize }) => (
+              <DashboardLayoutManager widgetIds={widgetIds}>
+                {({ placements, activeBreakpoint, onReorder, onResize }) => (
                   <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
                     {placements.map((placement) => {
                       const widget = widgetRegistry.getWidget(placement.id);
@@ -76,17 +76,19 @@ export default function DashboardPage() {
                       const widgetDescription = widget?.metadata?.description;
                       const widgetConfig = widget?.config ?? {};
                       const widgetContent = WidgetComponent ? (
-                        <RenderBoundary name={`widget-${placement.id}`}>
-                          <Suspense
-                            fallback={
-                              <div className="rounded-xl border border-border-primary bg-background-secondary/30 p-4 text-sm text-text-muted">
-                                Loading {widgetTitle}...
-                              </div>
-                            }
-                          >
-                            <WidgetComponent {...(widgetConfig as Record<string, unknown>)} />
-                          </Suspense>
-                        </RenderBoundary>
+                        <SectionErrorBoundary sectionName={widgetTitle}>
+                          <RenderBoundary name={`widget-${placement.id}`}>
+                            <Suspense
+                              fallback={
+                                <div className="rounded-xl border border-border-primary bg-background-secondary/30 p-4 text-sm text-text-muted">
+                                  Loading {widgetTitle}...
+                                </div>
+                              }
+                            >
+                              <WidgetComponent {...(widgetConfig as Record<string, unknown>)} />
+                            </Suspense>
+                          </RenderBoundary>
+                        </SectionErrorBoundary>
                       ) : (
                         <div className="rounded-xl border border-border-primary bg-background-secondary/30 p-4 text-sm text-text-muted">
                           Widget {placement.id} has not been registered yet.
@@ -116,7 +118,7 @@ export default function DashboardPage() {
                     })}
                   </div>
                 )}
-              />
+              </DashboardLayoutManager>
             )}
           </div>
         </div>

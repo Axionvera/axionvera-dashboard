@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from "react";
-import BalanceCard from "@/components/BalanceCard";
+import { BalanceCard } from "@/features/vault";
 
 /**
  * Props comparison function for React.memo.

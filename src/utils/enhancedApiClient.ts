@@ -154,7 +154,14 @@ export class EnhancedApiClient {
 
       // Handle successful responses
       if (response.ok) {
-        const data = await response.json();
+        let data: any = null;
+        if (response.status !== 204) {
+          try {
+            data = await response.json();
+          } catch (e) {
+            // response was not JSON or was empty
+          }
+        }
         return {
           success: true,
           data: data as T,

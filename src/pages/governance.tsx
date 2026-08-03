@@ -2,19 +2,21 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import { useEffect, useState } from "react";
 
-import Navbar from "@/components/Navbar";
-import Sidebar from "@/components/Sidebar";
-import ProposalList from "@/components/governance/ProposalList";
-import ProposalDetail from "@/components/governance/ProposalDetail";
-import GovernanceStats from "@/components/governance/GovernanceStats";
-import CreateProposalModal from "@/components/governance/CreateProposalModal";
+import Navbar from "@/components/layout/Navbar";
+import Sidebar from "@/components/layout/Sidebar";
+import {
+  CreateProposalModal,
+  GovernanceStatsPanel,
+  ProposalDetail,
+  ProposalList,
+} from "@/features/governance";
 import { useWalletContext } from "@/hooks/useWallet";
-import { useGovernanceContext } from "@/contexts/GovernanceContext";
+import { useGovernance } from "@/hooks/useGovernance";
 
 export default function GovernancePage() {
   const wallet = useWalletContext();
   const router = useRouter();
-  const governance = useGovernanceContext();
+  const governance = useGovernance();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
@@ -75,7 +77,7 @@ export default function GovernancePage() {
               </div>
 
               <div className="mb-6">
-                <GovernanceStats stats={governance.stats} isLoading={governance.isLoading} />
+                <GovernanceStatsPanel stats={governance.stats} isLoading={governance.isLoading} />
               </div>
 
               <div className="grid gap-6 lg:grid-cols-5">

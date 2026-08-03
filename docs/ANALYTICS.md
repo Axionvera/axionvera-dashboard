@@ -50,8 +50,11 @@ src/
 │       └── index.ts              # Exports
 └── features/
     └── analytics/
-        ├── AnalyticsDashboard.tsx # Main dashboard
-        └── index.ts               # Feature exports
+        ├── components/
+        │   ├── AnalyticsDashboard.tsx   # Connected-wallet dashboard (hooks, no props)
+        │   ├── AnalyticsReportPanel.tsx # Address-driven report (service layer)
+        │   └── …                        # Metric panels
+        └── index.ts                     # Feature exports
 ```
 
 ---
@@ -61,13 +64,13 @@ src/
 #### Basic Dashboard
 
 ```typescript
-import { AnalyticsDashboard } from "@/features/analytics";
+import { AnalyticsReportPanel } from "@/features/analytics";
 
 function AnalyticsPage() {
   const { address } = useWallet();
 
   return (
-    <AnalyticsDashboard 
+    <AnalyticsReportPanel
       address={address}
       initialPeriod={TimePeriod.MONTH}
     />
@@ -385,7 +388,7 @@ The analytics system integrates seamlessly with existing components:
 const { analytics } = useVaultContext();
 
 // Use in components
-<AnalyticsDashboard address={wallet.address} />
+<AnalyticsReportPanel address={wallet.address} />
 ```
 
 #### RBAC Integration
@@ -445,9 +448,9 @@ describe("calculateVaultPerformance", () => {
 
 #### Integration Tests
 ```typescript
-describe("AnalyticsDashboard", () => {
+describe("AnalyticsReportPanel", () => {
   it("displays performance metrics", async () => {
-    render(<AnalyticsDashboard address={mockAddress} />);
+    render(<AnalyticsReportPanel address={mockAddress} />);
     await waitFor(() => {
       expect(screen.getByText(/Total Return/)).toBeInTheDocument();
     });
@@ -483,7 +486,7 @@ See type definitions in `src/types/analytics.ts` for complete API documentation.
 Key exports:
 - **Types**: `TimePeriod`, `MetricType`, `AnalyticsData`, `TimeSeriesDataPoint`
 - **Services**: `fetchAnalyticsData`, `getBalanceHistory`, `exportAnalyticsData`
-- **Components**: `PerformanceChart`, `FlowChart`, `APYChart`, `AnalyticsDashboard`
+- **Components**: `PerformanceChart`, `FlowChart`, `APYChart`, `AnalyticsDashboard`, `AnalyticsReportPanel`
 - **Utilities**: `calculateStats`, `formatCurrency`, `formatPercentage`
 
 ---

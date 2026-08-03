@@ -17,6 +17,7 @@ A set of reusable UI primitives, design tokens, and patterns used across the Axi
    - [IconButton](#iconbutton)
    - [Input](#input)
    - [Label](#label)
+   - [MetricCard](#metriccard)
    - [Select](#select)
    - [Spinner](#spinner)
    - [Textarea](#textarea)
@@ -67,7 +68,7 @@ cn("base-class", isActive && "active", undefined, "another")
 All components are exported from `src/design-system/index.ts`:
 
 ```ts
-import { Button, Badge, Alert, Spinner, Card, Dialog, Input, Select, Textarea, Label, IconButton } from "@/design-system";
+import { Button, Badge, Alert, Spinner, Card, Dialog, Input, Select, Textarea, Label, IconButton, MetricCard } from "@/design-system";
 ```
 
 ---
@@ -267,6 +268,35 @@ Styled `<label>` with optional required indicator.
 | `error`    | `boolean` | `false` |
 
 The asterisk `*` is `aria-hidden`; screen readers hear "(required)" instead.
+
+---
+
+### MetricCard
+
+Reusable dashboard metric card for repeated stats in analytics, governance, and vault summaries. Use this instead of hand-rolling rounded bordered cards that contain a label, value, optional icon, and helper text.
+
+```tsx
+<MetricCard
+  label="Total Rewards Earned"
+  value={formatAmount(totalRewards)}
+  icon={<RewardsIcon />}
+  description="Average rate: 4%"
+/>
+
+<MetricCard label="Active Proposals" value={3} compact />
+```
+
+**Props**
+
+| Prop          | Type        | Default |
+|---------------|-------------|---------|
+| `label`       | `ReactNode` | required |
+| `value`       | `ReactNode` | required |
+| `icon`        | `ReactNode` | — |
+| `description` | `ReactNode` | — |
+| `compact`     | `boolean`   | `false` |
+
+Prefer `compact` for dense grids such as governance summary rows. Pass `className` only for contextual layout or background adjustments; keep typography and spacing centralized here.
 
 ---
 

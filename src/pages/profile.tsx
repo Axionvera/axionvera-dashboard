@@ -2,14 +2,14 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-import Navbar from "@/components/Navbar";
-import ProfileForm from "@/components/ProfileForm";
-import SecuritySettingsForm from "@/components/SecuritySettingsForm";
-import { UserProfileSkeleton } from "@/components/Skeletons";
+import Navbar from "@/components/layout/Navbar";
+import { ProfileForm, SecuritySettingsForm } from "@/features/profile";
+import { UserProfileSkeleton } from "@/components/ui/Skeletons";
 import { useSidebar } from "@/hooks/useSidebar";
 import { useWalletContext } from "@/hooks/useWallet";
 import { ProfileFormData, SecuritySettingsFormData } from "@/utils/validation";
 import { useEffect } from "react";
+import { SectionErrorBoundary } from "@/components/errors/SectionErrorBoundary";
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<'profile' | 'security'>('profile');
@@ -98,23 +98,25 @@ export default function ProfilePage() {
 
             {/* Tab Content */}
             <div className="space-y-6">
-              {isLoading ? (
-                <UserProfileSkeleton />
-              ) : activeTab === 'profile' ? (
-                <ProfileForm
-                  initialData={{
-                    firstName: 'John',
-                    lastName: 'Doe',
-                    email: 'john.doe@example.com',
-                    bio: 'Passionate about decentralized finance and blockchain technology.',
-                    website: 'https://johndoe.dev',
-                    location: 'San Francisco, CA',
-                  }}
-                  onSubmit={handleProfileSubmit}
-                />
-              ) : (
-                <SecuritySettingsForm onSubmit={handleSecuritySubmit} />
-              )}
+              <SectionErrorBoundary sectionName={`${activeTab} settings`}>
+                {isLoading ? (
+                  <UserProfileSkeleton />
+                ) : activeTab === 'profile' ? (
+                  <ProfileForm
+                    initialData={{
+                      firstName: 'John',
+                      lastName: 'Doe',
+                      email: 'john.doe@example.com',
+                      bio: 'Passionate about decentralized finance and blockchain technology.',
+                      website: 'https://johndoe.dev',
+                      location: 'San Francisco, CA',
+                    }}
+                    onSubmit={handleProfileSubmit}
+                  />
+                ) : (
+                  <SecuritySettingsForm onSubmit={handleSecuritySubmit} />
+                )}
+              </SectionErrorBoundary>
             </div>
           </div>
         </div>

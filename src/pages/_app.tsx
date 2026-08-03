@@ -2,20 +2,20 @@ import type { AppProps } from "next/app";
 import { Toaster } from 'sonner';
 
 import "@/styles/globals.css";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { WalletProvider } from "@/contexts/WalletContext";
 import { RBACProvider } from "@/contexts/RBACContext";
-import { VaultProvider } from "@/contexts/VaultContext";
+import { VaultProvider } from "@/hooks/useVault";
 import { useWalletContext } from "@/hooks/useWallet";
-import ThemeToggle from "@/components/ThemeToggle";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import { inter, jetbrainsMono } from "@/lib/fonts";
 
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { initTelemetry } from "@/utils/telemetry";
 import { emit } from "@/observability/diagnostics";
-import { GovernanceProvider } from "@/contexts/GovernanceContext";
+import { GovernanceProvider } from "@/hooks/useGovernance";
 import { OfflineProvider } from "@/pwa/OfflineProvider";
 import { WorkspaceProvider } from "@/workspaces";
 import { AssetPreloadEngine } from "@/preload";

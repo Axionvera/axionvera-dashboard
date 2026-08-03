@@ -10,9 +10,7 @@ import { useRouter } from "next/router";
 import { useRBAC } from "@/contexts/RBACContext";
 import { UserRole, Permission, RouteAccess } from "@/types/rbac";
 import { getRouteAccess } from "@/permissions/routes";
-import { canAccessRoute } from "@/permissions/rbac";
 import { validateNavigationTransition } from "@/navigation/stateMachine";
-import { canAccessRoute } from "@/permissions/rbac";
 
 interface RouteGuardProps {
   /** Content to render if access is granted */
@@ -133,21 +131,12 @@ export function withRouteGuard<P extends object>(
     fallback?: ReactNode;
   }
 ) {
-  // Hoist the HOC options so they're stable references inside the inner component.
-  const redirectPath = options?.redirectTo ?? "/";
-  const fallback = options?.fallback;
-  const loadingComponent = options?.loadingComponent;
-
   const GuardedComponent = (props: P) => {
     const router = useRouter();
     const { user, isAuthenticated } = useRBAC();
-    const fallback = options?.fallback;
-    const loadingComponent = options?.loadingComponent;
-    const redirectTo = options?.redirectTo ?? "/";
-
-    // Hoist option references for stable closures
     const redirectPath = options?.redirectTo ?? "/";
     const fallback = options?.fallback;
+    const loadingComponent = options?.loadingComponent;
 
     // Get route config from ROUTE_ACCESS_CONFIG
     const routeConfig = getRouteAccess(router.pathname);
@@ -160,9 +149,9 @@ export function withRouteGuard<P extends object>(
 
     useEffect(() => {
       if (!transition.allowed && !fallback) {
-        router.push(transition.redirectTo ?? redirectTo);
+        router.push(transition.redirectTo ?? redirectPath);
       }
-    }, [fallback, redirectTo, router, transition.allowed, transition.redirectTo]);
+    }, [fallback, redirectPath, router, transition.allowed, transition.redirectTo]);
 
     // If no config found, allow access (default behavior)
     if (!routeConfig) {
