@@ -60,6 +60,13 @@ export const ROUTE_ACCESS_CONFIG: RouteAccess[] = [
     permissions: [Permission.MANAGE_PROPOSALS],
   },
 
+  // ── Monitoring ──────────────────────────────────────────────────────────
+  {
+    path: "/monitoring",
+    minRole: UserRole.ADMIN,
+    permissions: [Permission.VIEW_MONITORING],
+  },
+
   // ── Profile ─────────────────────────────────────────────────────────────
   {
     path: "/profile",
