@@ -8,8 +8,14 @@ const wrapper = ({ children }: { children: React.ReactNode }) =>
   React.createElement(
     OfflineProvider,
     null,
-    React.createElement(VaultProvider, { walletAddress: null, children })
+    React.createElement(VaultProvider, { walletAddress: "GTESTWALLETADDRESS", children })
   );
+
+beforeEach(() => {
+  localStorage.clear();
+  sessionStorage.clear();
+  jest.clearAllMocks();
+});
 
 describe("useVault", () => {
   test("deposit updates balance and history", async () => {
