@@ -33,6 +33,8 @@
   },
   "dependencies": {
     "@albedo-link/intent": "^0.13.0",
+    "@axionvera/core": "file:../axionvera-sdk/axionvera-core-2.0.0.tgz",
+    "@axionvera/react": "file:../axionvera-sdk/axionvera-react-2.0.0.tgz",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@stellar/freighter-api": "^1.7.1",
     "lucide-react": "^1.21.0",

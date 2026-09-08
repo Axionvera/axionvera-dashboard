@@ -269,7 +269,7 @@ function DashboardContent({ isConnected }: { isConnected: boolean }) {
                       <span className="text-sm font-semibold text-slate-200">{tx.amount}</span>
                       <StatusPill
                         label={tx.status}
-                        tone={tx.status === "success" || tx.status === "confirmed" ? "success" : tx.status === "pending" ? "warning" : "neutral"}
+                        tone={tx.status === "success" ? "success" : tx.status === "pending" ? "warning" : "neutral"}
                       />
                     </div>
                   </div>
