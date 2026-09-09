@@ -112,7 +112,6 @@ function DashboardContent({ isConnected, publicKey }: { isConnected: boolean; pu
 
   const [depositAmount, setDepositAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
-  const [hasMounted, setHasMounted] = useState(false);
   const [liveState, setLiveState] = useState<LiveVaultState | null>(null);
   const [liveError, setLiveError] = useState<string | null>(null);
 
@@ -120,32 +119,25 @@ function DashboardContent({ isConnected, publicKey }: { isConnected: boolean; pu
     publicKey || process.env.NEXT_PUBLIC_AXIONVERA_TEST_WALLET_ADDRESS || "";
 
   useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hasMounted || !AXIONVERA_VAULT_CONTRACT_ID) return;
+    if (!AXIONVERA_VAULT_CONTRACT_ID) return;
 
     let cancelled = false;
-    const controller = new AbortController();
 
     async function loadLiveState() {
       try {
         setLiveError(null);
         const query = liveUser ? `?user=${encodeURIComponent(liveUser)}` : "";
-        const response = await fetch(`/api/vault/live-state${query}`, {
-          signal: controller.signal,
-        });
+        const response = await fetch(`/api/vault/live-state${query}`);
 
         if (!response.ok) {
-          const payload = await response.json().catch(() => ({} as { error?: string }));
+          const payload = await response.json().catch(() => ({}));
           throw new Error(payload.error || "Failed to load live vault state");
         }
 
         const payload = (await response.json()) as LiveVaultState;
         if (!cancelled) setLiveState(payload);
       } catch (err) {
-        if (!cancelled && !(err instanceof DOMException && err.name === "AbortError")) {
+        if (!cancelled) {
           setLiveError(err instanceof Error ? err.message : "Failed to load live vault state");
         }
       }
@@ -155,12 +147,12 @@ function DashboardContent({ isConnected, publicKey }: { isConnected: boolean; pu
 
     return () => {
       cancelled = true;
-      controller.abort();
     };
-  }, [hasMounted, liveUser]);
+  }, [liveUser]);
 
-  const displayVaultBalance = !hasMounted || isLoading ? "Loading…" : liveState?.totalDeposits ?? balance;
-  const displayRewards = !hasMounted || isLoading ? "Loading…" : liveState?.pendingRewards ?? rewards;
+  const displayVaultBalance = liveState?.totalDeposits ?? balance;
+  const displayRewards = liveState?.pendingRewards ?? rewards;
+
   const latestTransactions = useMemo(() => transactions.slice(0, 6), [transactions]);
 
   async function handleDeposit(e: React.FormEvent<HTMLFormElement>) {
