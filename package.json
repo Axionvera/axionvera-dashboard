@@ -13,9 +13,9 @@
     "generate-theme": "node scripts/generate-theme.js",
     "validate-env": "node scripts/validate-env.js",
     "verify-ci": "node scripts/verify-ci.js",
-    "predev": "npm run generate-theme && npm run validate-env",
+    "predev": "npm run generate-theme && npm run validate-env && npm run generate-env",
     "dev": "next dev",
-    "prebuild": "npm run generate-theme && npm run validate-env -- --production",
+    "prebuild": "npm run generate-theme && npm run validate-env -- --production && npm run generate-env",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -29,7 +29,8 @@
     "test:e2e:debug": "playwright test --debug",
     "playwright:install": "playwright install --with-deps",
     "test:visual": "playwright test --config=playwright.visual.config.ts",
-    "test:visual:update": "playwright test --config=playwright.visual.config.ts --update-snapshots"
+    "test:visual:update": "playwright test --config=playwright.visual.config.ts --update-snapshots",
+    "generate-env": "sh scripts/env.sh"
   },
   "dependencies": {
     "@albedo-link/intent": "^0.13.0",
