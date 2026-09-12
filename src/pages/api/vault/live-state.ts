@@ -1,11 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 
-const execFileAsync = promisify(execFile);
+type AxionveraCoreModule = typeof import("@axionvera/core");
+
+function loadStellarVaultReader(): AxionveraCoreModule["StellarVaultReader"] {
+  const runtimeRequire = eval("require") as NodeRequire;
+  const core = runtimeRequire("@axionvera/core") as AxionveraCoreModule;
+
+  return core.StellarVaultReader;
+}
 
 const CACHE_TTL_MS = 15_000;
-const CLI_TIMEOUT_MS = 30_000;
 
 type LiveVaultState = {
   contractId: string;
@@ -24,41 +28,6 @@ type CachedState = {
 
 const cache = new Map<string, CachedState>();
 
-function cleanCliValue(value: string): string {
-  return value.trim().replace(/^"|"$/g, "");
-}
-
-async function invokeRead(
-  contractId: string,
-  network: string,
-  method: string,
-  args: string[] = [],
-): Promise<string> {
-  const { stdout } = await execFileAsync(
-    "stellar",
-    [
-      "contract",
-      "invoke",
-      "--id",
-      contractId,
-      "--source",
-      process.env.AXIONVERA_DEPLOYER_SOURCE ?? "deployer",
-      "--network",
-      network,
-      "--send",
-      "no",
-      "--",
-      method,
-      ...args,
-    ],
-    {
-      timeout: CLI_TIMEOUT_MS,
-    },
-  );
-
-  return cleanCliValue(stdout);
-}
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<LiveVaultState | { error: string }>,
@@ -66,10 +35,20 @@ export default async function handler(
   try {
     const contractId = process.env.NEXT_PUBLIC_AXIONVERA_VAULT_CONTRACT_ID;
     const network = process.env.NEXT_PUBLIC_STELLAR_NETWORK ?? "testnet";
+    const rpcUrl = (process.env.NEXT_PUBLIC_SOROBAN_RPC_URL ?? "https://soroban-testnet.stellar.org").replace(/^\[|\]$/g, "");
     const user = typeof req.query.user === "string" ? req.query.user : "";
+
+    const sourcePublicKey =
+      user ||
+      process.env.NEXT_PUBLIC_AXIONVERA_TEST_WALLET_ADDRESS ||
+      process.env.AXIONVERA_SOURCE_PUBLIC_KEY;
 
     if (!contractId) {
       return res.status(400).json({ error: "Missing NEXT_PUBLIC_AXIONVERA_VAULT_CONTRACT_ID" });
+    }
+
+    if (!sourcePublicKey) {
+      return res.status(400).json({ error: "Missing source public key for live Soroban reads" });
     }
 
     const cacheKey = `${network}:${contractId}:${user}`;
@@ -82,14 +61,22 @@ export default async function handler(
       });
     }
 
-    const totalDepositsPromise = invokeRead(contractId, network, "total_deposits");
+    const StellarVaultReader = loadStellarVaultReader();
+
+    const reader = new StellarVaultReader({
+      contractId,
+      sourcePublicKey,
+      rpcUrl,
+    });
+
+    const totalDepositsPromise = reader.totalDeposits();
 
     const userBalancePromise = user
-      ? invokeRead(contractId, network, "user_balance", ["--user", user])
+      ? reader.userBalance(user)
       : Promise.resolve(null);
 
     const pendingRewardsPromise = user
-      ? invokeRead(contractId, network, "pending_rewards", ["--user", user])
+      ? reader.pendingRewards(user)
       : Promise.resolve(null);
 
     const [totalDeposits, userBalance, pendingRewards] = await Promise.all([
