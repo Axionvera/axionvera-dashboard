@@ -126,6 +126,7 @@ export default async function handler(
       sourcePublicKey,
       rpcUrl,
       networkPassphrase,
+      timeoutSeconds: 300,
     });
 
     const prepared =
