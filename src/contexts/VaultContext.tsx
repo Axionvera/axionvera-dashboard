@@ -20,6 +20,7 @@ import { notify } from "@/utils/notifications";
 import { useSorobanEvents } from "@/hooks/useSorobanEvents";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import type { SyncAction } from "@/sync/offlineSync";
+import type { WalletId } from "@/wallets";
 import {
   cacheBalances,
   getCachedBalances,
@@ -97,15 +98,27 @@ function isBrowserOffline() {
   return typeof navigator !== "undefined" && navigator.onLine === false;
 }
 
-type VaultProviderProps = { children: ReactNode; walletAddress: string | null; sdk?: AxionveraVaultSdk };
+type VaultProviderProps = {
+  children: ReactNode;
+  walletAddress: string | null;
+  walletType?: WalletId | null;
+  sdk?: AxionveraVaultSdk;
+};
 
-export function VaultProvider({ children, walletAddress, sdk: providedSdk }: VaultProviderProps) {
+export function VaultProvider({
+  children,
+  walletAddress,
+  walletType = null,
+  sdk: providedSdk,
+}: VaultProviderProps) {
   const sdk = useMemo(() => providedSdk ?? createAxionveraVaultSdk(), [providedSdk]);
   const { isOnline: isAppOnline } = useOffline();
   const [state, setState] = useState<VaultState>(INITIAL_STATE);
   const walletRef = useRef(walletAddress);
+  const walletTypeRef = useRef(walletType);
   const isOnlineRef = useRef(true);
   walletRef.current = walletAddress;
+  walletTypeRef.current = walletType;
 
   const refresh = useCallback(async () => {
     if (!walletRef.current) {

@@ -93,6 +93,18 @@ export interface WalletProvider {
   connect(): Promise<{ address: string; network: StellarNetwork }>;
 
   /**
+   * Sign a Stellar transaction XDR with the connected wallet.
+   * Optional because not every registered wallet supports transaction signing.
+   */
+  signTransaction?(
+    transactionXdr: string,
+    options: {
+      networkPassphrase: string;
+      accountToSign: string;
+    },
+  ): Promise<string>;
+
+  /**
    * Revoke the session / clean up any listeners.
    * Must not throw — failures should be swallowed silently.
    */

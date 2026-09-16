@@ -2,7 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { VaultProvider, useVault } from "@/hooks/useVault";
+import { useVault } from "@/hooks/useVault";
 import { useWalletContext } from "@/hooks/useWallet";
 import { shortenAddress } from "@/utils/contractHelpers";
 import { NETWORK, AXIONVERA_VAULT_CONTRACT_ID } from "@/utils/networkConfig";
@@ -544,9 +544,7 @@ export default function HomePage() {
             </div>
           </header>
 
-          <VaultProvider walletAddress={publicKey}>
-            <DashboardContent isConnected={isConnected} publicKey={publicKey} />
-          </VaultProvider>
+          <DashboardContent isConnected={isConnected} publicKey={publicKey} />
         </div>
       </main>
     </>

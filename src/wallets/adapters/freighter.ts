@@ -146,6 +146,47 @@ export class FreighterAdapter implements WalletProvider {
     return { address, network: mapFreighterNetwork(rawNetwork) };
   }
 
+  async signTransaction(
+    transactionXdr: string,
+    options: {
+      networkPassphrase: string;
+      accountToSign: string;
+    },
+  ): Promise<string> {
+    if (typeof window === "undefined") {
+      throw new WalletAdapterError(
+        "NOT_AVAILABLE",
+        "Freighter transaction signing is only available in the browser.",
+      );
+    }
+
+    try {
+      const freighter = await loadFreighter();
+
+      if (!(await freighter.isConnected()) || !(await freighter.isAllowed())) {
+        throw new WalletAdapterError(
+          "NOT_CONNECTED",
+          "Freighter is not connected.",
+        );
+      }
+
+      return await freighter.signTransaction(transactionXdr, {
+        networkPassphrase: options.networkPassphrase,
+        accountToSign: options.accountToSign,
+      });
+    } catch (cause) {
+      if (cause instanceof WalletAdapterError) {
+        throw cause;
+      }
+
+      throw new WalletAdapterError(
+        "UNKNOWN",
+        "Failed to sign transaction with Freighter.",
+        cause,
+      );
+    }
+  }
+
   async disconnect(): Promise<void> {
     // Freighter does not expose a programmatic disconnect API.
     // We simply treat clearing local state as a disconnect.
