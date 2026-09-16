@@ -52,9 +52,13 @@ export default async function handler(
   const network = process.env.NEXT_PUBLIC_STELLAR_NETWORK ?? "testnet";
   const rpcUrl =
     process.env.NEXT_PUBLIC_SOROBAN_RPC_URL ?? "https://soroban-testnet.stellar.org";
-  const sourcePublicKey =
+  const userAddress =
     readQueryString(req.query.user) ??
     process.env.NEXT_PUBLIC_AXIONVERA_TEST_WALLET_ADDRESS;
+
+  const sourcePublicKey =
+    process.env.NEXT_PUBLIC_AXIONVERA_TEST_WALLET_ADDRESS ??
+    userAddress;
 
   if (!contractId) {
     res.status(500).json({
@@ -63,14 +67,21 @@ export default async function handler(
     return;
   }
 
-  if (!sourcePublicKey) {
+  if (!userAddress) {
     res.status(400).json({
       error: "user query param or NEXT_PUBLIC_AXIONVERA_TEST_WALLET_ADDRESS is required",
     });
     return;
   }
 
-  const cacheKey = `${contractId}:${network}:${sourcePublicKey}`;
+  if (!sourcePublicKey) {
+    res.status(400).json({
+      error: "NEXT_PUBLIC_AXIONVERA_TEST_WALLET_ADDRESS is required as read source account",
+    });
+    return;
+  }
+
+  const cacheKey = `${contractId}:${network}:${sourcePublicKey}:${userAddress}`;
   const now = Date.now();
 
   if (cache?.key === cacheKey && cache.expiresAt > now) {
@@ -92,8 +103,8 @@ export default async function handler(
 
     const [totalDeposits, userBalance, pendingRewards] = await Promise.all([
       reader.totalDeposits(),
-      reader.userBalance(sourcePublicKey),
-      reader.pendingRewards(sourcePublicKey),
+      reader.userBalance(userAddress),
+      reader.pendingRewards(userAddress),
     ]);
 
     const value = {
