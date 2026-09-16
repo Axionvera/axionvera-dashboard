@@ -9,6 +9,7 @@ type LiveStateResponse =
       totalDeposits: string;
       userBalance: string;
       pendingRewards: string;
+      claimableRewards: string;
       cached: boolean;
       fetchedAt: string;
     }
@@ -101,11 +102,13 @@ export default async function handler(
       rpcUrl,
     });
 
-    const [totalDeposits, userBalance, pendingRewards] = await Promise.all([
-      reader.totalDeposits(),
-      reader.userBalance(userAddress),
-      reader.pendingRewards(userAddress),
-    ]);
+    const [totalDeposits, userBalance, pendingRewards, claimableRewards] =
+      await Promise.all([
+        reader.totalDeposits(),
+        reader.userBalance(userAddress),
+        reader.pendingRewards(userAddress),
+        reader.claimableRewards(userAddress),
+      ]);
 
     const value = {
       contractId,
@@ -113,6 +116,7 @@ export default async function handler(
       totalDeposits,
       userBalance,
       pendingRewards,
+      claimableRewards,
       cached: false,
       fetchedAt: new Date().toISOString(),
     };
