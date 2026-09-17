@@ -21,6 +21,7 @@ import { useSorobanEvents } from "@/hooks/useSorobanEvents";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import type { SyncAction } from "@/sync/offlineSync";
 import type { WalletId } from "@/wallets";
+import { signWalletTransaction } from "@/services/walletService";
 import {
   cacheBalances,
   getCachedBalances,
@@ -119,6 +120,80 @@ export function VaultProvider({
   const isOnlineRef = useRef(true);
   walletRef.current = walletAddress;
   walletTypeRef.current = walletType;
+
+  const executeVaultWrite = useCallback(async (
+    action: "deposit" | "withdraw" | "claim_rewards",
+    amount?: string,
+  ): Promise<{ hash: string }> => {
+    const walletAddress = walletRef.current;
+    const walletType = walletTypeRef.current;
+
+    if (!walletAddress || !walletType) {
+      throw new Error("Connect a signing wallet before submitting a transaction.");
+    }
+
+    const prepareBody =
+      action === "claim_rewards"
+        ? {
+            action,
+            sourcePublicKey: walletAddress,
+            address: walletAddress,
+          }
+        : {
+            action,
+            sourcePublicKey: walletAddress,
+            amount: Number(amount),
+          };
+
+    const prepareResponse = await fetch("/api/vault/prepare-write", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(prepareBody),
+    });
+
+    const prepared = await prepareResponse.json();
+
+    if (!prepareResponse.ok || !prepared.ok || !prepared.unsignedXdr) {
+      throw new Error(prepared.error ?? "Failed to prepare vault transaction.");
+    }
+
+    const signedXdr = await signWalletTransaction(
+      walletType,
+      prepared.unsignedXdr,
+      {
+        networkPassphrase: prepared.networkPassphrase,
+        accountToSign: prepared.accountToSign,
+      },
+    );
+
+    const submitResponse = await fetch("/api/vault/submit-signed", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        signedXdr,
+        sourcePublicKey: walletAddress,
+        poll: true,
+        pollIntervalMs: 1000,
+        maxPollAttempts: 30,
+      }),
+    });
+
+    const submitted = await submitResponse.json();
+
+    if (
+      !submitResponse.ok ||
+      !submitted.ok ||
+      submitted.status !== "success" ||
+      !submitted.hash
+    ) {
+      throw new Error(
+        submitted.error ??
+          `Vault transaction failed with status: ${submitted.status ?? "unknown"}`,
+      );
+    }
+
+    return { hash: submitted.hash };
+  }, []);
 
   const refresh = useCallback(async () => {
     if (!walletRef.current) {
@@ -280,27 +355,67 @@ export function VaultProvider({
     }
   }, [isOnline, queueAction, refresh]);
 
-  const deposit = useCallback((amountInput: string) =>
-    runAction("deposit", amountInput, (amount) =>
-      sdk.deposit({ walletAddress: walletRef.current!, network: NETWORK, amount })
-    ), [runAction, sdk]);
+  const deposit = useCallback(
+    (amountInput: string) =>
+      runAction("deposit", amountInput, async (amount) => {
+        const { hash } = await executeVaultWrite("deposit", amount);
 
-  const withdraw = useCallback((amountInput: string) =>
-    runAction("withdraw", amountInput,
-      (amount) => sdk.withdraw({ walletAddress: walletRef.current!, network: NETWORK, amount }),
-      (amount) => Number(amount) > Number(state.balance) ? "Withdrawal amount exceeds your available vault balance." : null,
-    ), [runAction, sdk, state.balance]);
+        return {
+          id: hash,
+          type: "deposit",
+          amount,
+          status: "success",
+          createdAt: new Date().toISOString(),
+          hash,
+        };
+      }),
+    [executeVaultWrite, runAction],
+  );
+
+  const withdraw = useCallback(
+    (amountInput: string) =>
+      runAction(
+        "withdraw",
+        amountInput,
+        async (amount) => {
+          const { hash } = await executeVaultWrite("withdraw", amount);
+
+          return {
+            id: hash,
+            type: "withdraw",
+            amount,
+            status: "success",
+            createdAt: new Date().toISOString(),
+            hash,
+          };
+        },
+        (amount) =>
+          Number(amount) > Number(state.balance)
+            ? "Withdrawal amount exceeds your available vault balance."
+            : null,
+      ),
+    [executeVaultWrite, runAction, state.balance],
+  );
 
   const claimRewards = useCallback(async () => {
-    if (!walletRef.current) {
-      setState((s) => ({ ...s, error: "Connect a wallet to claim rewards." }));
+    if (!walletRef.current || !walletTypeRef.current) {
+      setState((s) => ({
+        ...s,
+        error: "Connect a signing wallet to claim rewards.",
+      }));
       return;
     }
+
     setState((s) => ({ ...s, isClaiming: true, error: null }));
+
     try {
-      await sdk.claimRewards({ walletAddress: walletRef.current, network: NETWORK });
+      const { hash } = await executeVaultWrite("claim_rewards");
       await refresh();
-      notify.success("Rewards Claimed", "Successfully claimed your vault rewards.");
+
+      notify.success(
+        "Rewards Claimed",
+        `Transaction hash: ${hash}`,
+      );
     } catch (e) {
       const message = getError(e, "Claim failed.");
       notify.error("Claim Failed", message);
@@ -308,7 +423,7 @@ export function VaultProvider({
     } finally {
       setState((s) => ({ ...s, isClaiming: false }));
     }
-  }, [refresh, sdk]);
+  }, [executeVaultWrite, refresh]);
 
   const value = useMemo<VaultContextType>(() => ({
     ...state,
