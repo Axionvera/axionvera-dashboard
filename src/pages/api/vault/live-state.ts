@@ -57,9 +57,7 @@ export default async function handler(
     readQueryString(req.query.user) ??
     process.env.NEXT_PUBLIC_AXIONVERA_TEST_WALLET_ADDRESS;
 
-  const sourcePublicKey =
-    process.env.NEXT_PUBLIC_AXIONVERA_TEST_WALLET_ADDRESS ??
-    userAddress;
+  const sourcePublicKey = userAddress;
 
   if (!contractId) {
     res.status(500).json({
@@ -77,7 +75,7 @@ export default async function handler(
 
   if (!sourcePublicKey) {
     res.status(400).json({
-      error: "NEXT_PUBLIC_AXIONVERA_TEST_WALLET_ADDRESS is required as read source account",
+      error: "A user address is required as the read source account",
     });
     return;
   }

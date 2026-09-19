@@ -159,7 +159,7 @@ function DashboardContent({ isConnected, publicKey }: { isConnected: boolean; pu
     };
   }, [hasMounted, liveUser]);
 
-  const displayVaultBalance = !hasMounted || isLoading ? "Loading…" : liveState?.totalDeposits ?? balance;
+  const displayVaultBalance = !hasMounted || isLoading ? "Loading…" : liveState?.userBalance ?? balance;
   const displayRewards = !hasMounted || isLoading ? "Loading…" : liveState?.pendingRewards ?? rewards;
   const latestTransactions = useMemo(() => transactions.slice(0, 6), [transactions]);
 

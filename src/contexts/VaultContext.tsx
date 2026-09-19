@@ -209,7 +209,10 @@ export function VaultProvider({
           ...s,
           balance: cachedBalances?.balance ?? "0",
           rewards: cachedBalances?.rewards ?? "0",
-          transactions: cachedTransactions ?? [],
+          transactions:
+            cachedTransactions && cachedTransactions.length > 0
+              ? cachedTransactions
+              : s.transactions,
           isLoading: false,
           error: null,
         }));
@@ -225,8 +228,26 @@ export function VaultProvider({
         sdk.getTransactions({ walletAddress: walletRef.current, network: NETWORK }),
       ]);
       cacheBalances(walletRef.current, balances);
-      cacheTransactions(walletRef.current, transactions);
-      setState((s) => ({ ...s, balance: balances.balance, rewards: balances.rewards, transactions, isLoading: false }));
+      const cachedTransactions = getCachedTransactions(walletRef.current);
+
+      setState((s) => {
+        const nextTransactions =
+          transactions.length > 0
+            ? transactions
+            : s.transactions.length > 0
+              ? s.transactions
+              : cachedTransactions ?? [];
+
+        cacheTransactions(walletRef.current!, nextTransactions);
+
+        return {
+          ...s,
+          balance: balances.balance,
+          rewards: balances.rewards,
+          transactions: nextTransactions,
+          isLoading: false,
+        };
+      });
     } catch (e) {
       const cachedBalances = getCachedBalances(walletRef.current);
       const cachedTransactions = getCachedTransactions(walletRef.current);
@@ -235,7 +256,10 @@ export function VaultProvider({
           ...s,
           balance: cachedBalances?.balance ?? "0",
           rewards: cachedBalances?.rewards ?? "0",
-          transactions: cachedTransactions ?? [],
+          transactions:
+            cachedTransactions && cachedTransactions.length > 0
+              ? cachedTransactions
+              : s.transactions,
           isLoading: false,
           error: null,
         }));
@@ -343,9 +367,62 @@ export function VaultProvider({
     setState((s) => ({ ...updateAction(s, type, { status: "pending", hash: null, error: null, lastAmount: amount }), isSubmitting: true, error: null, transactions: upsert(s.transactions, pending) }));
     try {
       const tx = await execute(amount);
+
+      const completed: VaultTx = {
+        ...pending,
+        id: tx.hash ?? pending.id,
+        status: "success",
+        hash: tx.hash,
+      };
+
+      if (walletRef.current) {
+        const cachedBeforeRefresh =
+          getCachedTransactions(walletRef.current) ?? [];
+
+        const persistedTransactions = upsert(
+          cachedBeforeRefresh.filter(
+            (item) =>
+              item.id !== pending.id &&
+              item.id !== completed.id,
+          ),
+          completed,
+        );
+
+        cacheTransactions(
+          walletRef.current,
+          persistedTransactions,
+        );
+      }
+
+      setState((s) => {
+        const withoutPending = s.transactions.filter(
+          (item) =>
+            item.id !== pending.id &&
+            item.id !== completed.id,
+        );
+
+        const nextTransactions = upsert(
+          withoutPending,
+          completed,
+        );
+
+        return {
+          ...updateAction(s, type, {
+            status: "success",
+            hash: tx.hash ?? null,
+            error: null,
+            lastAmount: amount,
+          }),
+          transactions: nextTransactions,
+        };
+      });
+
       await refresh();
-      setState((s) => updateAction(s, type, { status: "success", hash: tx.hash ?? null, error: null, lastAmount: amount }));
-      notify.success(`${type === "deposit" ? "Deposit" : "Withdrawal"} Confirmed`, `Transaction hash: ${tx.hash ?? "N/A"}`);
+
+      notify.success(
+        `${type === "deposit" ? "Deposit" : "Withdrawal"} Confirmed`,
+        `Transaction hash: ${tx.hash ?? "N/A"}`,
+      );
     } catch (e) {
       const message = getError(e, `${type === "deposit" ? "Deposit" : "Withdraw"} failed.`);
       notify.error(type === "deposit" ? "Deposit Failed" : "Withdrawal Failed", message);
