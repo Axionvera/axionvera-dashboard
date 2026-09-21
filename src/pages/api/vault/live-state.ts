@@ -82,8 +82,9 @@ export default async function handler(
 
   const cacheKey = `${contractId}:${network}:${sourcePublicKey}:${userAddress}`;
   const now = Date.now();
+  const bypassCache = readQueryString(req.query.fresh) === "1";
 
-  if (cache?.key === cacheKey && cache.expiresAt > now) {
+  if (!bypassCache && cache?.key === cacheKey && cache.expiresAt > now) {
     res.status(200).json({
       ...cache.value,
       cached: true,

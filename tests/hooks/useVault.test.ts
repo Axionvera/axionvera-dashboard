@@ -48,9 +48,29 @@ const wrapper = ({ children }: { children: React.ReactNode }) =>
     }),
   );
 
+function liveStateResponse() {
+  return {
+    ok: true,
+    json: async () => ({
+      contractId: "CTESTVAULT",
+      network: "testnet",
+      totalDeposits: "5",
+      userBalance: "5",
+      pendingRewards: "0",
+      claimableRewards: "0",
+      cached: false,
+      fetchedAt: new Date().toISOString(),
+    }),
+  } as Response;
+}
+
 function mockSuccessfulWrite(hash: string) {
   global.fetch = jest.fn(async (input: RequestInfo | URL) => {
     const url = typeof input === "string" ? input : String(input);
+
+    if (url.startsWith("/api/vault/live-state?user=")) {
+      return liveStateResponse();
+    }
 
     if (url === "/api/vault/prepare-write") {
       return {
@@ -85,6 +105,16 @@ beforeEach(() => {
   jest.clearAllMocks();
 
   mockedSignWalletTransaction.mockResolvedValue("SIGNED_XDR");
+
+  global.fetch = jest.fn(async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : String(input);
+
+    if (url.startsWith("/api/vault/live-state?user=")) {
+      return liveStateResponse();
+    }
+
+    throw new Error(`Unexpected fetch request: ${url}`);
+  }) as jest.Mock;
 });
 
 afterEach(() => {
@@ -153,6 +183,10 @@ describe("useVault", () => {
   test("deposit surfaces transaction preparation errors", async () => {
     global.fetch = jest.fn(async (input: RequestInfo | URL) => {
       const url = typeof input === "string" ? input : String(input);
+
+      if (url.startsWith("/api/vault/live-state?user=")) {
+        return liveStateResponse();
+      }
 
       if (url === "/api/vault/prepare-write") {
         return {

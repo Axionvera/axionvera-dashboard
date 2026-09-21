@@ -195,7 +195,7 @@ export function VaultProvider({
     return { hash: submitted.hash };
   }, []);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (forceFresh = false) => {
     if (!walletRef.current) {
       setState((s) => ({ ...s, balance: "0", rewards: "0", transactions: [], error: null }));
       return;
@@ -223,22 +223,43 @@ export function VaultProvider({
 
     setState((s) => ({ ...s, isLoading: true, error: null }));
     try {
-      const [balances, transactions] = await Promise.all([
-        sdk.getBalances({ walletAddress: walletRef.current, network: NETWORK }),
-        sdk.getTransactions({ walletAddress: walletRef.current, network: NETWORK }),
-      ]);
-      cacheBalances(walletRef.current, balances);
-      const cachedTransactions = getCachedTransactions(walletRef.current);
+      const walletAddress = walletRef.current;
+
+      const response = await fetch(
+        `/api/vault/live-state?user=${encodeURIComponent(walletAddress)}${
+          forceFresh ? "&fresh=1" : ""
+        }`,
+      );
+
+      const liveState = (await response.json()) as {
+        userBalance?: string;
+        pendingRewards?: string;
+        error?: string;
+      };
+
+      if (!response.ok || typeof liveState.userBalance !== "string") {
+        throw new Error(
+          liveState.error ?? "Failed to load live vault balance.",
+        );
+      }
+
+      const balances = {
+        balance: liveState.userBalance,
+        rewards: liveState.pendingRewards ?? "0",
+      };
+
+      cacheBalances(walletAddress, balances);
+
+      const cachedTransactions =
+        getCachedTransactions(walletAddress);
 
       setState((s) => {
         const nextTransactions =
-          transactions.length > 0
-            ? transactions
-            : s.transactions.length > 0
-              ? s.transactions
-              : cachedTransactions ?? [];
+          s.transactions.length > 0
+            ? s.transactions
+            : cachedTransactions ?? [];
 
-        cacheTransactions(walletRef.current!, nextTransactions);
+        cacheTransactions(walletAddress, nextTransactions);
 
         return {
           ...s,
@@ -270,7 +291,7 @@ export function VaultProvider({
         setState((s) => ({ ...s, isLoading: false, error: message }));
       }
     }
-  }, [isAppOnline, sdk]);
+  }, [isAppOnline]);
 
   const refreshAnalytics = useCallback(async () => {
     if (!walletRef.current) {
@@ -417,7 +438,7 @@ export function VaultProvider({
         };
       });
 
-      await refresh();
+      await refresh(true);
 
       notify.success(
         `${type === "deposit" ? "Deposit" : "Withdrawal"} Confirmed`,
