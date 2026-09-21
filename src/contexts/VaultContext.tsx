@@ -20,6 +20,8 @@ import { notify } from "@/utils/notifications";
 import { useSorobanEvents } from "@/hooks/useSorobanEvents";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import type { SyncAction } from "@/sync/offlineSync";
+import type { WalletId } from "@/wallets";
+import { signWalletTransaction } from "@/services/walletService";
 import {
   cacheBalances,
   getCachedBalances,
@@ -97,17 +99,103 @@ function isBrowserOffline() {
   return typeof navigator !== "undefined" && navigator.onLine === false;
 }
 
-type VaultProviderProps = { children: ReactNode; walletAddress: string | null; sdk?: AxionveraVaultSdk };
+type VaultProviderProps = {
+  children: ReactNode;
+  walletAddress: string | null;
+  walletType?: WalletId | null;
+  sdk?: AxionveraVaultSdk;
+};
 
-export function VaultProvider({ children, walletAddress, sdk: providedSdk }: VaultProviderProps) {
+export function VaultProvider({
+  children,
+  walletAddress,
+  walletType = null,
+  sdk: providedSdk,
+}: VaultProviderProps) {
   const sdk = useMemo(() => providedSdk ?? createAxionveraVaultSdk(), [providedSdk]);
   const { isOnline: isAppOnline } = useOffline();
   const [state, setState] = useState<VaultState>(INITIAL_STATE);
   const walletRef = useRef(walletAddress);
+  const walletTypeRef = useRef(walletType);
   const isOnlineRef = useRef(true);
   walletRef.current = walletAddress;
+  walletTypeRef.current = walletType;
 
-  const refresh = useCallback(async () => {
+  const executeVaultWrite = useCallback(async (
+    action: "deposit" | "withdraw" | "claim_rewards",
+    amount?: string,
+  ): Promise<{ hash: string }> => {
+    const walletAddress = walletRef.current;
+    const walletType = walletTypeRef.current;
+
+    if (!walletAddress || !walletType) {
+      throw new Error("Connect a signing wallet before submitting a transaction.");
+    }
+
+    const prepareBody =
+      action === "claim_rewards"
+        ? {
+            action,
+            sourcePublicKey: walletAddress,
+            address: walletAddress,
+          }
+        : {
+            action,
+            sourcePublicKey: walletAddress,
+            amount: Number(amount),
+          };
+
+    const prepareResponse = await fetch("/api/vault/prepare-write", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(prepareBody),
+    });
+
+    const prepared = await prepareResponse.json();
+
+    if (!prepareResponse.ok || !prepared.ok || !prepared.unsignedXdr) {
+      throw new Error(prepared.error ?? "Failed to prepare vault transaction.");
+    }
+
+    const signedXdr = await signWalletTransaction(
+      walletType,
+      prepared.unsignedXdr,
+      {
+        networkPassphrase: prepared.networkPassphrase,
+        accountToSign: prepared.accountToSign,
+      },
+    );
+
+    const submitResponse = await fetch("/api/vault/submit-signed", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        signedXdr,
+        sourcePublicKey: walletAddress,
+        poll: true,
+        pollIntervalMs: 1000,
+        maxPollAttempts: 30,
+      }),
+    });
+
+    const submitted = await submitResponse.json();
+
+    if (
+      !submitResponse.ok ||
+      !submitted.ok ||
+      submitted.status !== "success" ||
+      !submitted.hash
+    ) {
+      throw new Error(
+        submitted.error ??
+          `Vault transaction failed with status: ${submitted.status ?? "unknown"}`,
+      );
+    }
+
+    return { hash: submitted.hash };
+  }, []);
+
+  const refresh = useCallback(async (forceFresh = false) => {
     if (!walletRef.current) {
       setState((s) => ({ ...s, balance: "0", rewards: "0", transactions: [], error: null }));
       return;
@@ -121,7 +209,10 @@ export function VaultProvider({ children, walletAddress, sdk: providedSdk }: Vau
           ...s,
           balance: cachedBalances?.balance ?? "0",
           rewards: cachedBalances?.rewards ?? "0",
-          transactions: cachedTransactions ?? [],
+          transactions:
+            cachedTransactions && cachedTransactions.length > 0
+              ? cachedTransactions
+              : s.transactions,
           isLoading: false,
           error: null,
         }));
@@ -132,13 +223,60 @@ export function VaultProvider({ children, walletAddress, sdk: providedSdk }: Vau
 
     setState((s) => ({ ...s, isLoading: true, error: null }));
     try {
-      const [balances, transactions] = await Promise.all([
-        sdk.getBalances({ walletAddress: walletRef.current, network: NETWORK }),
-        sdk.getTransactions({ walletAddress: walletRef.current, network: NETWORK }),
-      ]);
-      cacheBalances(walletRef.current, balances);
-      cacheTransactions(walletRef.current, transactions);
-      setState((s) => ({ ...s, balance: balances.balance, rewards: balances.rewards, transactions, isLoading: false }));
+      const walletAddress = walletRef.current;
+
+      const response = await fetch(
+        `/api/vault/live-state?user=${encodeURIComponent(walletAddress)}${
+          forceFresh ? "&fresh=1" : ""
+        }`,
+      );
+
+      const liveState = (await response.json()) as {
+        userBalance?: string;
+        pendingRewards?: string;
+        claimableRewards?: string;
+        error?: string;
+      };
+
+      if (!response.ok || typeof liveState.userBalance !== "string") {
+        throw new Error(
+          liveState.error ?? "Failed to load live vault balance.",
+        );
+      }
+
+      const balances = {
+        balance: liveState.userBalance,
+        rewards: liveState.claimableRewards ?? "0",
+      };
+
+      cacheBalances(walletAddress, balances);
+
+      const transactions = await sdk.getTransactions({
+        walletAddress,
+        network: NETWORK,
+      });
+
+      const cachedTransactions =
+        getCachedTransactions(walletAddress);
+
+      setState((s) => {
+        const nextTransactions =
+          transactions.length > 0
+            ? transactions
+            : s.transactions.length > 0
+              ? s.transactions
+              : cachedTransactions ?? [];
+
+        cacheTransactions(walletAddress, nextTransactions);
+
+        return {
+          ...s,
+          balance: balances.balance,
+          rewards: balances.rewards,
+          transactions: nextTransactions,
+          isLoading: false,
+        };
+      });
     } catch (e) {
       const cachedBalances = getCachedBalances(walletRef.current);
       const cachedTransactions = getCachedTransactions(walletRef.current);
@@ -147,7 +285,10 @@ export function VaultProvider({ children, walletAddress, sdk: providedSdk }: Vau
           ...s,
           balance: cachedBalances?.balance ?? "0",
           rewards: cachedBalances?.rewards ?? "0",
-          transactions: cachedTransactions ?? [],
+          transactions:
+            cachedTransactions && cachedTransactions.length > 0
+              ? cachedTransactions
+              : s.transactions,
           isLoading: false,
           error: null,
         }));
@@ -158,7 +299,7 @@ export function VaultProvider({ children, walletAddress, sdk: providedSdk }: Vau
         setState((s) => ({ ...s, isLoading: false, error: message }));
       }
     }
-  }, [isAppOnline, sdk]);
+  }, [isAppOnline]);
 
   const refreshAnalytics = useCallback(async () => {
     if (!walletRef.current) {
@@ -255,9 +396,62 @@ export function VaultProvider({ children, walletAddress, sdk: providedSdk }: Vau
     setState((s) => ({ ...updateAction(s, type, { status: "pending", hash: null, error: null, lastAmount: amount }), isSubmitting: true, error: null, transactions: upsert(s.transactions, pending) }));
     try {
       const tx = await execute(amount);
-      await refresh();
-      setState((s) => updateAction(s, type, { status: "success", hash: tx.hash ?? null, error: null, lastAmount: amount }));
-      notify.success(`${type === "deposit" ? "Deposit" : "Withdrawal"} Confirmed`, `Transaction hash: ${tx.hash ?? "N/A"}`);
+
+      const completed: VaultTx = {
+        ...pending,
+        id: tx.hash ?? pending.id,
+        status: "success",
+        hash: tx.hash,
+      };
+
+      if (walletRef.current) {
+        const cachedBeforeRefresh =
+          getCachedTransactions(walletRef.current) ?? [];
+
+        const persistedTransactions = upsert(
+          cachedBeforeRefresh.filter(
+            (item) =>
+              item.id !== pending.id &&
+              item.id !== completed.id,
+          ),
+          completed,
+        );
+
+        cacheTransactions(
+          walletRef.current,
+          persistedTransactions,
+        );
+      }
+
+      setState((s) => {
+        const withoutPending = s.transactions.filter(
+          (item) =>
+            item.id !== pending.id &&
+            item.id !== completed.id,
+        );
+
+        const nextTransactions = upsert(
+          withoutPending,
+          completed,
+        );
+
+        return {
+          ...updateAction(s, type, {
+            status: "success",
+            hash: tx.hash ?? null,
+            error: null,
+            lastAmount: amount,
+          }),
+          transactions: nextTransactions,
+        };
+      });
+
+      await refresh(true);
+
+      notify.success(
+        `${type === "deposit" ? "Deposit" : "Withdrawal"} Confirmed`,
+        `Transaction hash: ${tx.hash ?? "N/A"}`,
+      );
     } catch (e) {
       const message = getError(e, `${type === "deposit" ? "Deposit" : "Withdraw"} failed.`);
       notify.error(type === "deposit" ? "Deposit Failed" : "Withdrawal Failed", message);
@@ -267,27 +461,68 @@ export function VaultProvider({ children, walletAddress, sdk: providedSdk }: Vau
     }
   }, [isOnline, queueAction, refresh]);
 
-  const deposit = useCallback((amountInput: string) =>
-    runAction("deposit", amountInput, (amount) =>
-      sdk.deposit({ walletAddress: walletRef.current!, network: NETWORK, amount })
-    ), [runAction, sdk]);
+  const deposit = useCallback(
+    (amountInput: string) =>
+      runAction("deposit", amountInput, async (amount) => {
+        const { hash } = await executeVaultWrite("deposit", amount);
 
-  const withdraw = useCallback((amountInput: string) =>
-    runAction("withdraw", amountInput,
-      (amount) => sdk.withdraw({ walletAddress: walletRef.current!, network: NETWORK, amount }),
-      (amount) => Number(amount) > Number(state.balance) ? "Withdrawal amount exceeds your available vault balance." : null,
-    ), [runAction, sdk, state.balance]);
+        return {
+          id: hash,
+          type: "deposit",
+          amount,
+          status: "success",
+          createdAt: new Date().toISOString(),
+          hash,
+        };
+      }),
+    [executeVaultWrite, runAction],
+  );
+
+  const withdraw = useCallback(
+    (amountInput: string) =>
+      runAction(
+        "withdraw",
+        amountInput,
+        async (amount) => {
+          const { hash } = await executeVaultWrite("withdraw", amount);
+
+          return {
+            id: hash,
+            type: "withdraw",
+            amount,
+            status: "success",
+            createdAt: new Date().toISOString(),
+            hash,
+          };
+        },
+        (amount) =>
+          Number(amount) > Number(state.balance)
+            ? "Withdrawal amount exceeds your available vault balance."
+            : null,
+      ),
+    [executeVaultWrite, runAction, state.balance],
+  );
 
   const claimRewards = useCallback(async () => {
-    if (!walletRef.current) {
-      setState((s) => ({ ...s, error: "Connect a wallet to claim rewards." }));
+    if (!walletRef.current || !walletTypeRef.current) {
+      setState((s) => ({
+        ...s,
+        error: "Connect a signing wallet to claim rewards.",
+      }));
       return;
     }
+
     setState((s) => ({ ...s, isClaiming: true, error: null }));
+
     try {
-      await sdk.claimRewards({ walletAddress: walletRef.current, network: NETWORK });
-      await refresh();
-      notify.success("Rewards Claimed", "Successfully claimed your vault rewards.");
+      const { hash } = await executeVaultWrite("claim_rewards");
+
+      await refresh(true);
+
+      notify.success(
+        "Rewards Claimed",
+        `Transaction hash: ${hash}`,
+      );
     } catch (e) {
       const message = getError(e, "Claim failed.");
       notify.error("Claim Failed", message);
@@ -295,7 +530,7 @@ export function VaultProvider({ children, walletAddress, sdk: providedSdk }: Vau
     } finally {
       setState((s) => ({ ...s, isClaiming: false }));
     }
-  }, [refresh, sdk]);
+  }, [executeVaultWrite, refresh]);
 
   const value = useMemo<VaultContextType>(() => ({
     ...state,

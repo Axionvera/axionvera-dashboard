@@ -53,18 +53,14 @@ function readAction(body: Record<string, unknown>): PrepareWriteAction | undefin
   return undefined;
 }
 
-function readAmount(body: Record<string, unknown>): string | number | undefined {
-  const value = body.amount;
+function readAmount(body: Record<string, unknown>): string | number {
+  const amount = body.amount;
 
-  if (typeof value === "string" && value.trim()) {
-    return value.trim();
+  if (typeof amount !== "string" && typeof amount !== "number") {
+    throw new Error("amount is required and must be a string or number");
   }
 
-  if (typeof value === "number") {
-    return value;
-  }
-
-  return undefined;
+  return amount;
 }
 
 function serialiseArg(value: unknown): unknown {

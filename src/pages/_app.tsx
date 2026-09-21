@@ -92,7 +92,7 @@ function ProvidersInner({ Component, pageProps }: Pick<AppProps, "Component" | "
   const wallet = useWalletContext();
   return (
     <GovernanceProvider walletAddress={wallet.publicKey}>
-      <VaultProvider walletAddress={wallet.publicKey}>
+      <VaultProvider walletAddress={wallet.publicKey} walletType={wallet.walletType}>
         <Component {...pageProps} />
       </VaultProvider>
     </GovernanceProvider>

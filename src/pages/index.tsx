@@ -2,7 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { VaultProvider, useVault } from "@/hooks/useVault";
+import { useVault } from "@/hooks/useVault";
 import { useWalletContext } from "@/hooks/useWallet";
 import { shortenAddress } from "@/utils/contractHelpers";
 import { NETWORK, AXIONVERA_VAULT_CONTRACT_ID } from "@/utils/networkConfig";
@@ -12,6 +12,7 @@ type LiveVaultState = {
   totalDeposits: string;
   userBalance: string | null;
   pendingRewards: string | null;
+  claimableRewards: string | null;
 };
 
 
@@ -159,8 +160,8 @@ function DashboardContent({ isConnected, publicKey }: { isConnected: boolean; pu
     };
   }, [hasMounted, liveUser]);
 
-  const displayVaultBalance = !hasMounted || isLoading ? "Loading…" : liveState?.totalDeposits ?? balance;
-  const displayRewards = !hasMounted || isLoading ? "Loading…" : liveState?.pendingRewards ?? rewards;
+  const displayVaultBalance = !hasMounted || isLoading ? "Loading…" : liveState?.userBalance ?? balance;
+  const displayRewards = !hasMounted || isLoading ? "Loading…" : rewards;
   const latestTransactions = useMemo(() => transactions.slice(0, 6), [transactions]);
 
   async function handleDeposit(e: React.FormEvent<HTMLFormElement>) {
@@ -544,9 +545,7 @@ export default function HomePage() {
             </div>
           </header>
 
-          <VaultProvider walletAddress={publicKey}>
-            <DashboardContent isConnected={isConnected} publicKey={publicKey} />
-          </VaultProvider>
+          <DashboardContent isConnected={isConnected} publicKey={publicKey} />
         </div>
       </main>
     </>

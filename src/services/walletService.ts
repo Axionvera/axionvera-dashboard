@@ -168,3 +168,38 @@ export async function pollSession(id: WalletId): Promise<WalletSession | null> {
     return null;
   }
 }
+
+/**
+ * Sign a prepared Stellar transaction using a registered wallet adapter.
+ */
+export async function signWalletTransaction(
+  id: WalletId,
+  transactionXdr: string,
+  options: {
+    networkPassphrase: string;
+    accountToSign: string;
+  },
+): Promise<string> {
+  const adapter = getAdapter(id);
+
+  if (!adapter.meta.capabilities.signTransaction || !adapter.signTransaction) {
+    throw new WalletAdapterError(
+      "NOT_AVAILABLE",
+      `${adapter.meta.label} does not support transaction signing.`,
+    );
+  }
+
+  try {
+    return await adapter.signTransaction(transactionXdr, options);
+  } catch (error) {
+    if (error instanceof WalletAdapterError) {
+      throw error;
+    }
+
+    throw new WalletAdapterError(
+      "UNKNOWN",
+      `Failed to sign transaction with ${adapter.meta.label}.`,
+      error,
+    );
+  }
+}

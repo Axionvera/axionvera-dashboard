@@ -131,6 +131,7 @@ function walletTag(walletAddress: string) {
   return `wallet:${walletAddress}`;
 }
 
+
 export function createAxionveraVaultSdk(): AxionveraVaultSdk {
   // Base implementations without resilience
   const baseSdk = {
@@ -148,14 +149,32 @@ export function createAxionveraVaultSdk(): AxionveraVaultSdk {
     },
     async getTransactions({ walletAddress, network }: { walletAddress: string; network: StellarNetwork }) {
       const key = `transactions:${network}:${walletAddress}`;
+
       return cache.getOrFetch(
         key,
         async () => {
-          await sleep(150);
-          const vault = loadVault(walletAddress, network);
-          return vault.txs;
+          const response = await fetch(
+            `/api/vault/transactions?user=${encodeURIComponent(walletAddress)}`,
+          );
+
+          const body = (await response.json()) as {
+            transactions?: VaultTx[];
+            error?: string;
+          };
+
+          if (!response.ok) {
+            throw new Error(
+              body.error ?? "Failed to load transaction history",
+            );
+          }
+
+          return body.transactions ?? [];
         },
-        { ttl: CACHE_TTL.transactions, swr: true, tags: [walletTag(walletAddress)] },
+        {
+          ttl: CACHE_TTL.transactions,
+          swr: true,
+          tags: [walletTag(walletAddress)],
+        },
       );
     },
     async deposit({ walletAddress, network, amount }: { walletAddress: string; network: StellarNetwork; amount: string }) {
