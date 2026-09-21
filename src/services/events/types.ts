@@ -37,6 +37,8 @@ export interface ActivityEvent {
   ledger: number;
   /** ISO timestamp the ledger closed (best-effort). */
   timestamp: string;
+  /** Hash of the Stellar transaction that emitted the event. */
+  txHash?: string;
   /** Decoded event topics. */
   topics: string[];
   /** Decoded event value payload. */

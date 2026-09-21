@@ -251,14 +251,21 @@ export function VaultProvider({
 
       cacheBalances(walletAddress, balances);
 
+      const transactions = await sdk.getTransactions({
+        walletAddress,
+        network: NETWORK,
+      });
+
       const cachedTransactions =
         getCachedTransactions(walletAddress);
 
       setState((s) => {
         const nextTransactions =
-          s.transactions.length > 0
-            ? s.transactions
-            : cachedTransactions ?? [];
+          transactions.length > 0
+            ? transactions
+            : s.transactions.length > 0
+              ? s.transactions
+              : cachedTransactions ?? [];
 
         cacheTransactions(walletAddress, nextTransactions);
 

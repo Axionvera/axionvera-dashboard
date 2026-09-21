@@ -47,6 +47,7 @@ export function toActivityEvent(parsed: ParsedSorobanEvent): ActivityEvent {
     contractId: parsed.contractId,
     ledger: parsed.ledger,
     timestamp: parsed.ledgerClosedAt,
+    txHash: parsed.txHash,
     topics: parsed.topics,
     value: parsed.value,
   };

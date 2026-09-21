@@ -79,3 +79,37 @@ export function decodeSorobanSymbol(scVal: any): string {
     return '';
   }
 }
+
+/**
+ * Decodes a raw Soroban RPC ScVal.
+ *
+ * Soroban RPC returns event topics and values as base64-encoded XDR strings.
+ * If the input is not valid XDR, the original value is returned unchanged.
+ */
+export function decodeSorobanScVal(scVal: any): unknown {
+  if (scVal === null || scVal === undefined) {
+    return null;
+  }
+
+  try {
+    if (typeof scVal === 'string') {
+      try {
+        const parsed = xdr.ScVal.fromXDR(scVal, 'base64');
+        return scValToNative(parsed);
+      } catch {
+        return scVal;
+      }
+    }
+
+    if (
+      typeof scVal === 'object' &&
+      typeof scVal.switch === 'function'
+    ) {
+      return scValToNative(scVal);
+    }
+
+    return scVal;
+  } catch {
+    return scVal;
+  }
+}
