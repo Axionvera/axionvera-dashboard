@@ -234,6 +234,7 @@ export function VaultProvider({
       const liveState = (await response.json()) as {
         userBalance?: string;
         pendingRewards?: string;
+        claimableRewards?: string;
         error?: string;
       };
 
@@ -245,7 +246,7 @@ export function VaultProvider({
 
       const balances = {
         balance: liveState.userBalance,
-        rewards: liveState.pendingRewards ?? "0",
+        rewards: liveState.claimableRewards ?? "0",
       };
 
       cacheBalances(walletAddress, balances);
@@ -508,7 +509,8 @@ export function VaultProvider({
 
     try {
       const { hash } = await executeVaultWrite("claim_rewards");
-      await refresh();
+
+      await refresh(true);
 
       notify.success(
         "Rewards Claimed",

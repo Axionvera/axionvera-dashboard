@@ -12,6 +12,7 @@ type LiveVaultState = {
   totalDeposits: string;
   userBalance: string | null;
   pendingRewards: string | null;
+  claimableRewards: string | null;
 };
 
 
@@ -160,7 +161,7 @@ function DashboardContent({ isConnected, publicKey }: { isConnected: boolean; pu
   }, [hasMounted, liveUser]);
 
   const displayVaultBalance = !hasMounted || isLoading ? "Loading…" : liveState?.userBalance ?? balance;
-  const displayRewards = !hasMounted || isLoading ? "Loading…" : liveState?.pendingRewards ?? rewards;
+  const displayRewards = !hasMounted || isLoading ? "Loading…" : rewards;
   const latestTransactions = useMemo(() => transactions.slice(0, 6), [transactions]);
 
   async function handleDeposit(e: React.FormEvent<HTMLFormElement>) {
